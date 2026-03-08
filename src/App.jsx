@@ -4,7 +4,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 
 // ── Supabase ──────────────────────────────────────────────────
 const SUPABASE_URL = "https://tghjsquavgavtymsyknb.supabase.co";
-const SUPABASE_KEY = "sb_publishable_MLzLJGAuFRiCFsR1gFASpw_XQupJybh";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRnaGpzcXVhdmdhdnR5bXN5a25iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5OTM5MTEsImV4cCI6MjA4ODU2OTkxMX0.7y5zxa3LJam6utP5OLjEdTYTQ5RjJ6lRRQWkm1aWO5g";
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // ── Initial Data ─────────────────────────────────────────────
