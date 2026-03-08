@@ -445,7 +445,7 @@ export default function App() {
       {/* Header */}
       <div style={{ background: "#1e3a5f", padding: "14px 24px", display: "flex", alignItems: "center", gap: 16, boxShadow: "0 2px 8px rgba(0,0,0,0.2)" }}>
         <div>
-          <div style={{ color: "#fff", fontWeight: 800, fontSize: 18, letterSpacing: 0.5 }}>たかひろ CRM</div>
+          <div style={{ color: "#fff", fontWeight: 800, fontSize: 18, letterSpacing: 0.5 }}>UCHIWA_CRM</div>
           <div style={{ color: "#93c5fd", fontSize: 11, marginTop: 1 }}>月収100万円達成ダッシュボード</div>
         </div>
         <div style={{ marginLeft: "auto", color: "#93c5fd", fontSize: 12 }}>{new Date().toLocaleDateString("ja-JP", { year: "numeric", month: "long", day: "numeric", weekday: "short" })}</div>
