@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { createClient } from "@supabase/supabase-js";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { SeekerManagement, JobPostingManagement } from "./SeekerJobManager";
 
 // ── Supabase ──────────────────────────────────────────────────
 const SUPABASE_URL = "https://tghjsquavgavtymsyknb.supabase.co";
@@ -398,7 +399,7 @@ function KpiPanel({ kpi, setData }) {
         </Section>
       ))}
       <div style={{ background: "#f8fafc", borderRadius: 10, padding: 12, marginTop: 8, fontSize: 12, color: "#94a3b8", textAlign: "center" }}>
-        💡 実績・目標の数字をクリックするどできます
+        💡 実績・目標の数字をクリックするな'��集できます
       </div>
     </div>
   );
@@ -408,6 +409,8 @@ function KpiPanel({ kpi, setData }) {
 const TABS = [
   { id: "dashboard", label: "📊 ダッシュボード" },
   { id: "kimero", label: "👔 キメロコスメ" },
+  { id: "seekers", label: "👤 求職者管理" },
+  { id: "jobs", label: "📋 求人案件" },
   { id: "smile", label: "🍱 スマイル&ナリッシュ" },
   { id: "huppy", label: "🎵 フーピー" },
   { id: "tasks", label: "🔥 TODAY" },
@@ -572,7 +575,7 @@ function Kimero({ data, setData }) {
       {tab === "seekers" && (
         <Section title="求職者データベース" color="#2563eb">
           <Table
-            headers={["氏名", "スキルー経験", "ステータス", "希望雇用形態", "メモ"]}
+            headers={["氏名", "スキル・経験", "ステータス", "希望雇用形態", "メモ"]}
             rows={data.kimero.seekers.map(s => [
               <span style={{ fontWeight: 600 }}>{s.name}</span>,
               s.skill,
@@ -769,6 +772,8 @@ export default function App() {
   const tabContent = {
     dashboard: <Dashboard data={data} />,
     kimero: <Kimero data={data} setData={setData} />,
+    seekers: <SeekerManagement />,
+    jobs: <JobPostingManagement />,
     smile: <Smile data={data} setData={setData} />,
     huppy: <Huppy data={data} />,
     tasks: <Today data={data} setData={setData} />,
