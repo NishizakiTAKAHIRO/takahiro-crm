@@ -399,7 +399,7 @@ function KpiPanel({ kpi, setData }) {
         </Section>
       ))}
       <div style={{ background: "#f8fafc", borderRadius: 10, padding: 12, marginTop: 8, fontSize: 12, color: "#94a3b8", textAlign: "center" }}>
-        💡 実績・目標の数字をクリックするな'��集できます
+        💡 実績・目標の数字をクリックすると編集できます
       </div>
     </div>
   );
@@ -409,8 +409,6 @@ function KpiPanel({ kpi, setData }) {
 const TABS = [
   { id: "dashboard", label: "📊 ダッシュボード" },
   { id: "kimero", label: "👔 キメロコスメ" },
-  { id: "seekers", label: "👤 求職者管理" },
-  { id: "jobs", label: "📋 求人案件" },
   { id: "smile", label: "🍱 スマイル&ナリッシュ" },
   { id: "huppy", label: "🎵 フーピー" },
   { id: "tasks", label: "🔥 TODAY" },
@@ -535,9 +533,9 @@ function Kimero({ data, setData }) {
         ))}
       </div>
       <div style={{ display: "flex", gap: 8, marginBottom: 20, flexWrap: "wrap" }}>
-        {["kpi", "contacts", "seekers", "revenue"].map(t => (
+        {["kpi", "contacts", "seekers", "jobs", "revenue"].map(t => (
           <button key={t} onClick={() => setTab(t)} style={{ padding: "6px 16px", borderRadius: 20, border: "none", cursor: "pointer", fontWeight: 600, fontSize: 12, background: tab === t ? "#2563eb" : "#f1f5f9", color: tab === t ? "#fff" : "#475569" }}>
-            {t === "kpi" ? "🎯 KPI管理" : t === "contacts" ? "🏢 企業コンタクト" : t === "seekers" ? "👤 求職者" : "📈 売上推移"}
+            {t === "kpi" ? "🎯 KPI管理" : t === "contacts" ? "🏢 企業コンタクト" : t === "seekers" ? "👤 求職者管理" : t === "jobs" ? "📋 求人案件" : "📈 売上推移"}
           </button>
         ))}
       </div>
@@ -572,20 +570,8 @@ function Kimero({ data, setData }) {
           />
         </Section>
       )}
-      {tab === "seekers" && (
-        <Section title="求職者データベース" color="#2563eb">
-          <Table
-            headers={["氏名", "スキル・経験", "ステータス", "希望雇用形態", "メモ"]}
-            rows={data.kimero.seekers.map(s => [
-              <span style={{ fontWeight: 600 }}>{s.name}</span>,
-              s.skill,
-              <Badge label={s.status} color={STATUS_COLOR[s.status]} />,
-              s.desired,
-              s.note,
-            ])}
-          />
-        </Section>
-      )}
+      {tab === "seekers" && <SeekerManagement />}
+      {tab === "jobs" && <JobPostingManagement />}
       {tab === "revenue" && (
         <Section title="売上目標 vs 実績" color="#2563eb">
           <ResponsiveContainer width="100%" height={220}>
@@ -772,8 +758,6 @@ export default function App() {
   const tabContent = {
     dashboard: <Dashboard data={data} />,
     kimero: <Kimero data={data} setData={setData} />,
-    seekers: <SeekerManagement />,
-    jobs: <JobPostingManagement />,
     smile: <Smile data={data} setData={setData} />,
     huppy: <Huppy data={data} />,
     tasks: <Today data={data} setData={setData} />,
