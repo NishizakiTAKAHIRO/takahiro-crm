@@ -14,11 +14,11 @@ const INIT = {
     contacts: [
       { id: 1, company: "株式会社サンプルA", person: "田中部長", type: "人材派遣", status: "商談中", date: "2026-03-06", note: "3名派遣希望" },
       { id: 2, company: "合同会社サンプルB", person: "鈴木社長", type: "職業紹介", status: "提案済", date: "2026-03-07", note: "営業職1名紹介希望" },
-      { id: 3, company: "株式会社サンプリC", person: "佐藤課長", type: "業務委託", status: "初回コンタクト", date: "2026-03-08", note: "システム開発案件" },
+      { id: 3, company: "株式会社サンプルC", person: "佐藤課長", type: "業務委託", status: "初回コンタクト", date: "2026-03-08", note: "システム開発案件" },
     ],
     seekers: [
       { id: 1, name: "山田一郎", skill: "営業・販売", status: "活動中", desired: "正社員", note: "経験5年" },
-      { id: 2, name: "伊藤花子", skill: "事務・管理", status: "マッチc��グ中", desired: "派遣", note: "PC操作得意" },
+      { id: 2, name: "伊藤花子", skill: "事務・管理", status: "マッチング中", desired: "派遣", note: "PC操作得意" },
     ],
     monthlyRevenue: [
       { month: "3月", target: 300000, actual: 0 },
@@ -32,7 +32,7 @@ const INIT = {
       { id: 3, name: "提案・送客数", target: 15, actual: 2, unit: "件", period: "月次", category: "RA営業", icon: "📤" },
       { id: 4, name: "求職者登録数", target: 10, actual: 2, unit: "人", period: "月次", category: "CA", icon: "👤" },
       { id: 5, name: "求職者面談数", target: 15, actual: 0, unit: "件", period: "月次", category: "CA", icon: "🤝" },
-      { id: 6, name: "マッチc��グ成立数", target: 5, actual: 0, unit: "件", period: "月次", category: "成果", icon: "✅" },
+      { id: 6, name: "マッチング成立数", target: 5, actual: 0, unit: "件", period: "月次", category: "成果", icon: "✅" },
       { id: 7, name: "成約・内定数", target: 3, actual: 0, unit: "件", period: "月次", category: "成果", icon: "🎯" },
       { id: 8, name: "月次売上", target: 300000, actual: 0, unit: "円", period: "月次", category: "売上", icon: "💰" },
     ],
@@ -203,7 +203,7 @@ function ShareView() {
           <div style={{ background: "#f1f5f9", borderRadius: 10, height: 14, margin: "16px 0 8px", overflow: "hidden" }}>
             <div style={{ width: `${overallPct}%`, height: "100%", background: overallPct >= 80 ? "#22c55e" : overallPct >= 50 ? "#f59e0b" : "#ef4444", borderRadius: 10, transition: "width 0.6s" }} />
           </div>
-          <div style={{ fontSize: 12, color: "#94a3b8" }}>{kpi.length}項目はKPIを(��跡中</div>
+          <div style={{ fontSize: 12, color: "#94a3b8" }}>{kpi.length}項目のKPIを追跡中</div>
         </div>
 
         {/* カテゴリ別サマリー */}
@@ -230,7 +230,7 @@ function ShareView() {
               {kpi.filter(k => k.category === cat).map(k => {
                 const pct = k.target > 0 ? Math.min(100, Math.round((k.actual / k.target) * 100)) : 0;
                 const color = pct >= 100 ? "#22c55e" : pct >= 60 ? "#f59e0b" : "#ef4444";
-                const isMoney = k.unit === "円";
+                const isMoney = s.unit === "円";
                 return (
                   <div key={k.id} style={{ background: "#fff", borderRadius: 12, padding: 16, boxShadow: "0 1px 6px rgba(0,0,0,0.08)", border: `1px solid ${pct >= 100 ? "#bbf7d0" : "#e2e8f0"}` }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
@@ -326,7 +326,7 @@ function KpiPanel({ kpi, setData }) {
           const avgPct = Math.round(items.reduce((s, k) => s + Math.min(100, k.target > 0 ? (k.actual / k.target) * 100 : 0), 0) / items.length);
           return (
             <Card key={cat} title={`${cat} 達成率`} value={`${avgPct}%`}
-              sub={`${items.length}KPI`} color={CAT_COLOR[cat] || "#64748b"} icon:{
+              sub={`${items.length}KPI`} color={CAT_COLOR[cat] || "#64748b"} icon={
                 cat === "RA営業" ? "🏢" : cat === "CA" ? "👤" : cat === "成果" ? "🎯" : "💰"
               } />
           );
@@ -723,17 +723,16 @@ function loadLocalData() {
 }
 
 export default function App() {
-  // シェアビュー判定
-  const isShare = new URLSearchParams(window.location.search).get("view") === "share";
-  if (isShare) return <ShareView />;
-
   const [tab, setTab] = useState("dashboard");
   const [data, setData] = useState(loadLocalData);
   const [syncStatus, setSyncStatus] = useState("idle"); // idle | syncing | ok | error
   const [ready, setReady] = useState(false);
 
-  // 初回マウント: Supabaseから全データをロード
+  const isShare = new URLSearchParams(window.location.search).get("view") === "share";
+
+  // 初回マウント: Supabaseから全データをロード（シェアビューはスキップ）
   useEffect(() => {
+    if (isShare) { setReady(true); return; }
     (async () => {
       const { data: row } = await supabase
         .from("app_snapshot").select("data").eq("id", 1).single();
@@ -742,15 +741,15 @@ export default function App() {
     })();
   }, []);
 
-  // localStorage 保存
+  // localStorage 保存（シェアビューはスキップ）
   useEffect(() => {
-    if (!ready) return;
+    if (!ready || isShare) return;
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch (e) {}
   }, [data, ready]);
 
-  // Supabase 全データ同期（全セクション）
+  // Supabase 全データ同期（シェアビューはスキップ）
   useEffect(() => {
-    if (!ready) return;
+    if (!ready || isShare) return;
     let cancelled = false;
     (async () => {
       setSyncStatus("syncing");
@@ -762,6 +761,9 @@ export default function App() {
     })();
     return () => { cancelled = true; };
   }, [data, ready]);
+
+  // シェアビュー判定（Hooksの後）
+  if (isShare) return <ShareView />;
 
   const tabContent = {
     dashboard: <Dashboard data={data} />,
