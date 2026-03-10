@@ -922,6 +922,61 @@ function Today({ data, setData }) {
   );
 }
 
+// ── LOGIN ────────────────────────────────────────────────────
+function LoginScreen({ onLogin }) {
+  const [user, setUser] = useState("");
+  const [pass, setPass] = useState("");
+  const [err, setErr] = useState("");
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (user === "sej.nishizaki@gmail.com" && pass === "Sb098098") {
+      sessionStorage.setItem("crm_auth", "1");
+      onLogin();
+    } else {
+      setErr("ユーザー名またはパスワードが違います");
+    }
+  };
+  return (
+    <div style={{ minHeight: "100vh", background: "#1e3a5f", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <div style={{ background: "#fff", borderRadius: 12, padding: "48px 40px", width: 360, boxShadow: "0 8px 32px rgba(0,0,0,0.3)" }}>
+        <div style={{ textAlign: "center", marginBottom: 32 }}>
+          <div style={{ fontSize: 28, fontWeight: 800, color: "#1e3a5f" }}>UCHIWA_CRM</div>
+          <div style={{ fontSize: 13, color: "#64748b", marginTop: 4 }}>月収100万円達成ダッシュボード</div>
+        </div>
+        <form onSubmit={handleSubmit}>
+          <div style={{ marginBottom: 16 }}>
+            <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "#374151", marginBottom: 6 }}>メールアドレス</label>
+            <input
+              type="text"
+              value={user}
+              onChange={e => setUser(e.target.value)}
+              style={{ width: "100%", padding: "10px 12px", border: "1px solid #d1d5db", borderRadius: 8, fontSize: 14, boxSizing: "border-box" }}
+              placeholder="メールアドレスを入力"
+            />
+          </div>
+          <div style={{ marginBottom: 24 }}>
+            <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "#374151", marginBottom: 6 }}>パスワード</label>
+            <input
+              type="password"
+              value={pass}
+              onChange={e => setPass(e.target.value)}
+              style={{ width: "100%", padding: "10px 12px", border: "1px solid #d1d5db", borderRadius: 8, fontSize: 14, boxSizing: "border-box" }}
+              placeholder="パスワードを入力"
+            />
+          </div>
+          {err && <div style={{ color: "#ef4444", fontSize: 13, marginBottom: 16, textAlign: "center" }}>{err}</div>}
+          <button
+            type="submit"
+            style={{ width: "100%", padding: "12px", background: "#1e3a5f", color: "#fff", border: "none", borderRadius: 8, fontSize: 15, fontWeight: 700, cursor: "pointer" }}
+          >
+            ログイン
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+}
+
 // ── APP ────────────────────────────────────────────────────
 const STORAGE_KEY = "uchiwa_crm_data";
 
@@ -938,6 +993,7 @@ export default function App() {
   const [data, setData] = useState(loadLocalData);
   const [syncStatus, setSyncStatus] = useState("idle"); // idle | syncing | ok | error
   const [ready, setReady] = useState(false);
+  const [authed, setAuthed] = useState(() => sessionStorage.getItem("crm_auth") === "1");
 
   const isShare = new URLSearchParams(window.location.search).get("view") === "share";
 
@@ -975,6 +1031,7 @@ export default function App() {
 
   // シェアビュー判定（Hooksの後）
   if (isShare) return <ShareView />;
+  if (!authed) return <LoginScreen onLogin={() => setAuthed(true)} />;
 
   const tabContent = {
     dashboard: <Dashboard data={data} />,
