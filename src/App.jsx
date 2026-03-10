@@ -16,7 +16,7 @@ const INIT = {
       { id: 2, company: "合同会社サンプルB", person: "鈴木社長", contact: "", type: "職業紹介", prefecture: "大阪府", city: "大阪市北区", status: "提案済", jobStatus: "確認中", date: "2026-03-07", nextAction: "", note: "営業職1名紹介希望" },
       { id: 3, company: "株式会社サンプルC", person: "佐藤課長", contact: "090-0000-1111", type: "業務委託", prefecture: "東京都", city: "新宿区", status: "初回コンタクト", jobStatus: "確認中", date: "2026-03-08", nextAction: "", note: "システム開発案件" },
     ],
-    seekers: 
+    seekers: [
       { id: 1, name: "山田一郎", skill: "営業・販売", status: "活動中", desired: "正社員", note: "経験5年" },
       { id: 2, name: "伊藤花子", skill: "事務・管理", status: "マッチング中", desired: "派遣", note: "PC操作得意" },
     ],
