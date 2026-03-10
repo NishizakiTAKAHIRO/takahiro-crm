@@ -146,6 +146,7 @@ function ShareView() {
   const [snap, setSnap] = useState(null);
   const [loading, setLoading] = useState(true);
   const [lastUpdated, setLastUpdated] = useState(null);
+  const [realContacts, setRealContacts] = useState([]);
 
   async function fetchData() {
     const { data, error } = await supabase
@@ -160,9 +161,19 @@ function ShareView() {
     setLoading(false);
   }
 
+  async function fetchContacts() {
+    const { data: rows } = await supabase
+      .from("contacts")
+      .select("company_name, person, contact_info, type, status, contact_date")
+      .order("contact_date", { ascending: false })
+      .limit(50);
+    if (rows) setRealContacts(rows);
+  }
+
   useEffect(() => {
     fetchData();
-    const timer = setInterval(fetchData, 5 * 60 * 1000);
+    fetchContacts();
+    const timer = setInterval(() => { fetchData(); fetchContacts(); }, 5 * 60 * 1000);
     return () => clearInterval(timer);
   }, []);
 
@@ -177,7 +188,8 @@ function ShareView() {
   if (!snap || !snap.kimero?.kpi || snap.kimero.kpi.length === 0) {
     return (
       <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100vh", fontFamily: "'Hiragino Sans', Arial, sans-serif", color: "#64748b", flexDirection: "column", gap: 12 }}>
-        <div style={{ fontSize: 40 }}>📊</div>
+        <div style={{ fontSize: 40 }}>�
+</div>
         <div>データ準備中です。しばらくお待ちください。</div>
       </div>
     );
@@ -207,7 +219,7 @@ function ShareView() {
 
       <div style={{ maxWidth: 900, margin: "0 auto", padding: "24px 16px" }}>
 
-        {/* 全$��達成率 */}
+        {/* 全体達成率 */}
         <div style={{ background: "#fff", borderRadius: 14, padding: 24, marginBottom: 24, boxShadow: "0 1px 6px rgba(0,0,0,0.08)", textAlign: "center" }}>
           <div style={{ fontSize: 13, color: "#64748b", fontWeight: 600, marginBottom: 8 }}>今月の総合達成率</div>
           <div style={{ fontSize: 52, fontWeight: 900, color: overallPct >= 80 ? "#22c55e" : overallPct >= 50 ? "#f59e0b" : "#ef4444", lineHeight: 1 }}>
@@ -281,17 +293,17 @@ function ShareView() {
           </Section>
         )}
 
-        {/* 企業コンタオト */}
-        {contacts.length > 0 && (
+        {/* 企業コンタクト */}
+        {realContacts.length > 0 && (
           <Section title="🏢 企業コンタクト" color="#2563eb">
             <Table
-              headers={["会社名", "担当者", "種別", "ステータス", "日付"]}
-              rows={contacts.map(c => [
-                <span style={{ fontWeight: 600 }}>{c.company}</span>,
-                c.person,
-                <Badge label={c.type} color="#2563eb" />,
+              headers={["会社名", "担当者", "連絡先", "ステータス", "日付"]}
+              rows={realContacts.map(c => [
+                <span style={{ fontWeight: 600 }}>{c.company_name}</span>,
+                c.person || "—",
+                c.contact_info || "—",
                 <Badge label={c.status} color={STATUS_COLOR[c.status]} />,
-                c.date,
+                c.contact_date || "—",
               ])}
             />
           </Section>
@@ -385,7 +397,7 @@ function KpiPanel({ kpi, setData }) {
                     <div style={{ fontSize: 28, fontWeight: 900, color, opacity: 0.15 }}>/</div>
                     <div style={{ textAlign: "right" }}>
                       <div style={{ fontSize: 10, color: "#94a3b8", marginBottom: 2 }}>目標</div>
-                      {editing?.id === k.id && editing?.field === "target" ? (
+                     {editing?.id === k.id && editing?.field === "target" ? (
                         <div style={{ display: "flex", gap: 4 }}>
                           <input type="number" value={editVal} onChange={e => setEditVal(e.target.value)}
                             onKeyDown={e => { if (e.key === "Enter") saveEdit(); if (e.key === "Escape") setEditing(null); }}
@@ -394,7 +406,7 @@ function KpiPanel({ kpi, setData }) {
                         </div>
                       ) : (
                         <div onClick={() => startEdit(k.id, "target", k.target)}
-                          style={{ fontSize: 16, fontWeight: 700, color: "#64748b", cursor: "pointer" }} title="クリックして目標を編集">
+                          style={{ fontSize: 16, fontWeight: 700, color: "#64748b", cursor: "pointer" }} title="クリックして瓮標を編集">
                           {isMoneyKPI ? `¥${k.target.toLocaleString()}` : `${k.target}${k.unit}`}
                           <span style={{ fontSize: 11, color: "#cbd5e1", marginLeft: 4 }}>✏️</span>
                         </div>
@@ -412,72 +424,39 @@ function KpiPanel({ kpi, setData }) {
         </Section>
       ))}
       <div style={{ background: "#f8fafc", borderRadius: 10, padding: 12, marginTop: 8, fontSize: 12, color: "#94a3b8", textAlign: "center" }}>
-        💡 実績・目標の数字をクリックするど㷨集できます
+        💡 殟績ほ悪橣の数字をクリックすると編集できます
       </div>
     </div>
   );
 }
 
-// ── COMPANY LIST ────────────────────────────────────────────
-const CONTACT_STATUS_OPTIONS = ["未アプローチ", "アプローチ済", "商談中", "成約", "見送り"];
-const JOB_STATUS_OPTIONS = ["要確認", "求人あり", "求人なし", "確認済"];
-const CONTACT_STATUS_COLOR = {
-  "未アプローチ": "#94a3b8", "アプローチ済": "#60a5fa", "商談中": "#f59e0b", "成約": "#22c55e", "見送り": "#ef4444",
-};
-
-function CompanyList({ onAddContact }) {
-  const [companies, setCompanies] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
-  const [filterIndustry, setFilterIndustry] = useState("");
-  const [filterContact, setFilterContact] = useState("");
-  const [page, setPage] = useState(0);
-  const [editingId, setEditingId] = useState(null);
-  const [editRow, setEditRow] = useState({});
-  const [saving, setSaving] = useState(false);
-  const [industries, setIndustries] = useState([]);
-  const [bulkRegistering, setBulkRegistering] = useState(false);
-  const [bulkResult, setBulkResult] = useState(null);
-  const PAGE_SIZE = 50;
-
-  useEffect(() => {
-    (async () => {
-      setLoading(true);
-      const { data, error } = await supabase
-        .from("companies")
-        .select("*")
-        .order("id", { ascending: true });
-      if (!error && data) {
-        setCompanies(data);
-        const unique = [...new Set(data.map(c => c.industry_major).filter(Boolean))].sort();
-        setIndustries(unique);
-      }
-      setLoading(false);
-    })();
-  }, []);
-
-  const filtered = companies.filter(c => {
-    const matchSearch = !search || c.name.includes(search) || (c.address || "").includes(search);
-    const matchIndustry = !filterIndustry || c.industry_major === filterIndustry;
-    const matchContact = !filterContact || c.contact_status === filterContact;
-    return matchSearch && matchIndustry && matchContact;
-  });
-
-  const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
-  const pageData = filtered.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
-
-  const startEdit = (c) => {
-    setEditingId(c.id);
-    setEditRow({ contact_status: c.contact_status, notes: c.notes || "", job_status: c.job_status });
-  };
-
-  const cancelEdit = () => { setEditingId(null); setEditRow({}); };
-
-  const bulkRegister = async () => {
-    if (!window.confirm(`企業リストの全${companies.length}社を企業コンタクトに一括登録しますか？\n（既に登録済みの会社はスキップされます）`)) return;
-    setBulkRegistering(true);
-    setBulkResult(null);
-    const { data: existing } = await supabase.from("contacts").select("company_id");
+// ── COMPANY LIST ┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
+const CONTACT_STATUS_OPTIONS = ["未アプキーチ", "アプローチ鮈", "商談中", "成約", "見送り"];
+const JOB_STATUS_OPTIONS = ["覉碶��", "求人あり", "求人あを", "碚蚍欉t�)����Ё
+=9Q
+Q}MQQUM}
+=1=H���(����r��
+��_�����耈��ф͈������
+��_������ �耈����ՙ������V���ⴈ耈�����������"C���耈��Ɍ�Ք������/��
+(�耈������Ј�)��()�չ�ѥ���
+������1��С쁽���
+��х�Ё����(������Ёm��������̰�͕�
+��������t���͕Mхє�mt��(������Ёm���������͕�1������t���͕Mхє���Ք��(������Ёm͕�ɍ���͕�M��ɍ�t���͕Mхє�����(������Ёm���ѕ�%������䰁͕���ѕ�%�������t���͕Mхє�����(������Ёm���ѕ�
+��х�а�͕���ѕ�
+��х��t���͕Mхє�����(������Ёm������͕�A���t���͕Mхє����(������Ёm���ѥ��%���͕���ѥ��%�t���͕Mхє��ձ���(������Ёm����I�ܰ�͕����I��t���͕Mхє�����(������Ёmͅ٥����͕�M�٥��t���͕Mхє����͔��(������Ёm������ɥ�̰�͕�%�����ɥ��t���͕Mхє�mt��(������Ёm�ձ�I����ѕɥ����͕�	ձ�I����ѕɥ��t���͕Mхє����͔��(������Ёm�ձ�I��ձа�͕�	ձ�I��ձ�t���͕Mхє��ձ���(������ЁA}M%i�����((���͕����Р�������(�������幌��������(������͕�1���������Ք��(����������Ё쁑�ф����ɽȁ��݅�Ё������͔(����������ɽ�����������̈�(���������͕���Р����(����������ɑ�Ƞ������쁅͍���������Ք����(�������������ɽȀ�����ф���(��������͕�
+�������̡��ф��(������������Ёչ��Ք��l�����܁M�С��ф��������������������}����Ȥ����ѕȡ	��������t�ͽ�Р��(��������͕�%�����ɥ�̡չ��Ք��(�������(������͕�1����������͔��(���������(�����mt��((������Ё���ѕɕ��􁍽������̹���ѕȡ������(��������Ё��э�M��ɍ���͕�ɍ����������������Ց�̡͕�ɍ������������ɕ�́�����������Ց�̡͕�ɍ���(��������Ё��э�%�������􀅙��ѕ�%��������������������}����Ȁ��􁙥�ѕ�%��������(��������Ё��э�
+��х�Ѐ􀅙��ѕ�
+��х�Ё��������х��}�х��̀��􁙥�ѕ�
+��х���(����ɕ��ɸ���э�M��ɍ�������э�%������䀘����э�
+��х���(�����((������Ёѽх�A���̀�5�Ѡ���������ѕɕ������Ѡ���A}M%i��(������Ё�����ф�􁙥�ѕɕ��ͱ�����������A}M%i����������Ĥ���A}M%i��((������Ё�х����Ѐ􀡌������(����͕���ѥ��%��������(����͕����I�ܡ쁍��х��}�х���职����х��}�х��̰���ѕ�职���ѕ́����������}�х���职����}�х��́���(����((������Ё��������Ѐ􀠤�����͕���ѥ��%���ձ���͕����I�ܡ������((������Ё�ձ�I����ѕȀ��幌��������(���������ݥ���ܹ�����ɴ����������
+�#�����퍽������̹����ѡ�����
+K������
+ώώ
+��
+��#�����.��f�2ˎ_���g�/��}q���#�^����f�2˚�#������k������
+�
+���_�W�
+3���g��%����ɕ��ɸ�(����͕�	ձ�I����ѕɥ�����Ք��(����͕�	ձ�I��ձС�ձ���(��������Ё쁑�ф聕��ѥ�����݅�Ё������upabase.from("contacts").select("company_id");
     const existingIds = new Set((existing || []).map(c => c.company_id).filter(Boolean));
     const today = new Date().toISOString().split("T")[0];
     const toInsert = companies.filter(c => !existingIds.has(c.id)).map(c => {
@@ -668,7 +647,7 @@ function CompanyList({ onAddContact }) {
 // ── TABS ────────────────────────────────────────────────────
 const TABS = [
   { id: "dashboard", label: "📊 ダッシュボード" },
-  { id: "kimero", label: "👔 キメロ#��スメ" },
+  { id: "kimero", label: "👔 キメロコスメ" },
   { id: "smile", label: "🍱 スマイル&ナリッシュ" },
   { id: "huppy", label: "🎵 フーピー" },
   { id: "tasks", label: "🔥 TODAY" },
@@ -686,7 +665,7 @@ function Dashboard({ data }) {
   );
   const bizData = [
     { name: "フーピー", 売上: huppyCurrent.total, 個人報酬: huppyCurrent.personal },
-    { name: "キメロ", 売上: smileMonthly, 個人報酬: 0 },
+    { name: "スマイル", 売上: smileMonthly, 個人報酬: 0 },
     { name: "キメロ", 売上: 0, 個人報酬: 0 },
   ];
   const goalData = [
@@ -1252,7 +1231,7 @@ export default function App() {
     return () => { cancelled = true; };
   }, [data, ready]);
 
-  // シケアビュー判定（Hooksの後）
+  // シェアビュー判定（Hooksの後）
   if (isShare) return <ShareView />;
   if (!authed) return <LoginScreen onLogin={() => setAuthed(true)} />;
 
