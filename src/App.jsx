@@ -44,8 +44,8 @@ const INIT = {
       { id: 3, date: "2026-03-08", staff: "è§ç°", shoku: 41, cash: 10200, paypay: 31000 },
     ],
     clients: [
-      { id: 1, name: "åè£ï¼h¿é£Aç¤¾", type: "ä¼æ¥­å¼å½", status: "æªã¢ãã­ã¼ã", meals: 50, note: "" },
-      { id: 2, name: "åè£ï¼Bç¦ç¥æ½è¨­", type: "æ½æ¨­åã", status: "æªã¢ãã­ã¼ã", meals: 80, note: "" },
+      { id: 1, name: "åè£ï¼è¿é£Aç¤¾", type: "ä¼æ¥­å¼å½", status: "æªã¢ãã­ã¼ã", meals: 50, note: "" },
+      { id: 2, name: "åè£ï¼Bç¦ç¥æ½è¨­", type: "æ½è¨­åã", status: "æªã¢ãã­ã¼ã", meals: 80, note: "" },
     ],
   },
   huppy: {
@@ -177,8 +177,7 @@ function ShareView() {
   if (!snap || !snap.kimero?.kpi || snap.kimero.kpi.length === 0) {
     return (
       <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100vh", fontFamily: "'Hiragino Sans', Arial, sans-serif", color: "#64748b", flexDirection: "column", gap: 12 }}>
-        <div style={{ fontSize: 40 }}>ð
-</div>
+        <div style={{ fontSize: 40 }}>ð</div>
         <div>ãã¼ã¿æºåä¸­ã§ãããã°ãããå¾ã¡ãã ããã</div>
       </div>
     );
@@ -210,7 +209,7 @@ function ShareView() {
 
         {/* å¨ä½éæç */}
         <div style={{ background: "#fff", borderRadius: 14, padding: 24, marginBottom: 24, boxShadow: "0 1px 6px rgba(0,0,0,0.08)", textAlign: "center" }}>
-          <div style={{ fontSize: 13, color: "#64748b", fontWeight: 600, marginBottom: 8 }}>ä»æã®ç·åéæç</div>
+          <div style={{ fontSize: 13, color: "#64748b", fontWeight: 600, marginBottom: 8 }}>ä»æã®ç·åéæç</div>
           <div style={{ fontSize: 52, fontWeight: 900, color: overallPct >= 80 ? "#22c55e" : overallPct >= 50 ? "#f59e0b" : "#ef4444", lineHeight: 1 }}>
             {overallPct}%
           </div>
@@ -377,7 +376,7 @@ function KpiPanel({ kpi, setData }) {
                       ) : (
                         <div onClick={() => startEdit(k.id, "actual", k.actual)}
                           style={{ fontSize: 22, fontWeight: 800, color, cursor: "pointer", display: "flex", alignItems: "baseline", gap: 2 }} title="ã¯ãªãã¯ãã¦ç·¨é">
-                          {isMoneyKPI ? `Â¥${k.actual.toLocaleString()}` : ks.actual}
+                          {isMoneyKPI ? `Â¥${k.actual.toLocaleString()}` : i.actual}
                           <span style={{ fontSize: 12, color: "#94a3b8" }}>{!isMoneyKPI && k.unit}</span>
                           <span style={{ fontSize: 11, color: "#cbd5e1", marginLeft: 4 }}>âï¸</span>
                         </div>
@@ -385,8 +384,8 @@ function KpiPanel({ kpi, setData }) {
                     </div>
                     <div style={{ fontSize: 28, fontWeight: 900, color, opacity: 0.15 }}>/</div>
                     <div style={{ textAlign: "right" }}>
-                      <div style={{ fontSize: 10, color: "#94a3b8", marginBottom: 2 }}>ç®®æ¨</div>
-                     {editing?.id === k.id && editing?.field === "target" ? (
+                      <div style={{ fontSize: 10, color: "#94a3b8", marginBottom: 2 }}>ç®æ¨</div>
+                      {editing?.id === k.id && editing?.field === "target" ? (
                         <div style={{ display: "flex", gap: 4 }}>
                           <input type="number" value={editVal} onChange={e => setEditVal(e.target.value)}
                             onKeyDown={e => { if (e.key === "Enter") saveEdit(); if (e.key === "Escape") setEditing(null); }}
@@ -426,7 +425,7 @@ const CONTACT_STATUS_COLOR = {
   "æªã¢ãã­ã¼ã": "#94a3b8", "ã¢ãã­ã¼ãæ¸": "#60a5fa", "åè«ä¸­": "#f59e0b", "æç´": "#22c55e", "è¦éã": "#ef4444",
 };
 
-function CompanyList() {
+function CompanyList({ onAddContact }) {
   const [companies, setCompanies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -533,7 +532,7 @@ function CompanyList() {
         <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
           <thead>
             <tr style={{ background: "#f8fafc", borderBottom: "2px solid #e2e8f0" }}>
-              {["ç¤¾å", "éç¨®ï¼å¤§ï¼", "æ¥­ç¨®ï¼å°ï¼", "ç´¹ä»å®ç¸¾", "æ±äººç¶æ³", "ã¢ãã­ã¼ãç¶æ³", "ã¡ã¢", "æä½"].map(h => (
+              {["ç¤¾å", "æ¥­ç¨®ï¼å¤§ï¼", "æ¥­ç¨®ï¼å°ï¼", "ç´¹ä»å®ç¸¾", "æ±äººç¶æ³", "ã¢ãã­ã¼ãç¶æ³", "ã¡ã¢", "æä½"].map(h => (
                 <th key={h} style={{ padding: "10px 12px", textAlign: "left", color: "#475569", fontWeight: 700, whiteSpace: "nowrap" }}>{h}</th>
               ))}
             </tr>
@@ -599,10 +598,18 @@ function CompanyList() {
                         </button>
                       </div>
                     ) : (
-                      <button onClick={() => startEdit(c)}
-                        style={{ padding: "4px 10px", borderRadius: 6, border: "1px solid #e2e8f0", background: "#f8fafc", color: "#475569", fontSize: 11, cursor: "pointer" }}>
-                        ç·¨é
-                      </button>
+                      <div style={{ display: "flex", gap: 4, flexWrap: "nowrap" }}>
+                        <button onClick={() => startEdit(c)}
+                          style={{ padding: "4px 10px", borderRadius: 6, border: "1px solid #e2e8f0", background: "#f8fafc", color: "#475569", fontSize: 11, cursor: "pointer" }}>
+                          ç·¨é
+                        </button>
+                        {onAddContact && (
+                          <button onClick={() => onAddContact(c)}
+                            style={{ padding: "4px 10px", borderRadius: 6, border: "1px solid #bfdbfe", background: "#eff6ff", color: "#2563eb", fontSize: 11, fontWeight: 700, cursor: "pointer", whiteSpace: "nowrap" }}>
+                            ï¼ã³ã³ã¿ã¯ã
+                          </button>
+                        )}
+                      </div>
                     )}
                   </td>
                 </tr>
@@ -677,7 +684,7 @@ function Dashboard({ data }) {
         <h4 style={{ margin: "0 0 16px", fontSize: 13, color: "#475569", fontWeight: 700 }}>ð ã­ã¡ã­ã³ã¹ã¡ KPIé²æï¼ä»æï¼</h4>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: 10 }}>
           {data.kimero.kpi.map(k => {
-            const pct = k®target > 0 ? Math.min(100, Math.round((k.actual / k.target) * 100)) : 0;
+            const pct = k.target > 0 ? Math.min(100, Math.round((k.actual / k.target) * 100)) : 0;
             const color = pct >= 100 ? "#22c55e" : pct >= 60 ? "#f59e0b" : "#ef4444";
             return (
               <div key={k.id} style={{ padding: "10px 14px", background: "#f8fafc", borderRadius: 10, border: "1px solid #e2e8f0" }}>
@@ -977,7 +984,13 @@ function Kimero({ data, setData }) {
           </ResponsiveContainer>
         </Section>
       )}
-      {tab === "companies" && <CompanyList />}
+      {tab === "companies" && <CompanyList onAddContact={(c) => {
+        const pref = extractPrefecture(c.address || "");
+        const city = extractCity(c.address || "", pref);
+        setForm({ ...EMPTY_FORM, company: c.name, company_id: c.id, prefecture: pref, city });
+        setSuggestions([]);
+        setTab("contacts");
+      }} />}
     </div>
   );
 }
@@ -988,7 +1001,7 @@ function Smile({ data, setData }) {
 
   function addSale() {
     if (!form.staff) return;
-    const s = { ...form, id: Date.now(), shoku: Number(form.shoku)||0, cash: Number(form.cash)||0, paypay: Number(form.paypayy||0 };
+    const s = { ...form, id: Date.now(), shoku: Number(form.shoku)||0, cash: Number(form.cash)||0, paypay: Number(form.paypay)||0 };
     setData(d => ({ ...d, smile: { ...d.smile, sales: [...d.smile.sales, s] } }));
     setForm({ date: new Date().toISOString().split("T")[0], staff: "", shoku: "", cash: "", paypay: "" });
   }
@@ -1178,7 +1191,7 @@ export default function App() {
 
   const isShare = new URLSearchParams(window.location.search).get("view") === "share";
 
-  // ååãã¦ã³ã: Supabaseããå¨ãã¼ã¿ãã­ã¼ãï¼ã·ã§ã¢ãã¥ã¼ã¯ã¹ã­ããï¼
+  // ååãã¦ã³ã: Supabaseããå¨ãã¼ã¿ãã­ã¼ãï¼ã·ã§ã¢ãã¥ã¼ã¯ã¹ã­cãï¼
   useEffect(() => {
     if (isShare) { setReady(true); return; }
     (async () => {
@@ -1189,65 +1202,47 @@ export default function App() {
     })();
   }, []);
 
-  // localStorage ä¿å­ï¼ã·ã§ã¢ãã¥ã¼ã¯ã¹ã­ããï¼
-  useEffect(() => {
-    if (!ready || isShare) return;
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch (e) {}
-  }, [data, ready]);
+  // localStorage ä¿å­ï¼ã·ã§ã¢ãã¥ã¼ã¯ã¹ã­cãûï"B\ÙQYXÝ
 
-  // Supabase å¨ãã¼ã¿åæï¼ã·ã§ã¢ãã¥ã¼ã¯ã¹ã­ããï¼
-  useEffect(() => {
-    if (!ready || isShare) return;
-    let cancelled = false;
-    (async () => {
-      setSyncStatus("syncing");
-      const { error } = await supabase.from("app_snapshot").upsert({
-        id: 1, data, updated_at: new Date().toISOString(),
-      });
-      if (!cancelled) setSyncStatus(error ? "error" : "ok");
-      if (!cancelled) setTimeout(() => setSyncStatus("idle"), 3000);
-    })();
-    return () => { cancelled = true; };
-  }, [data, ready]);
 
-  // ã·ã§ã¢ãã¥ã¼å¤å®ï¼Hooksã®å¾ï¼
-  if (isShare) return <ShareView />;
-  if (!authed) return <LoginScreen onLogin={() => setAuthed(true)} />;
+HOÂY
+\XYH\ÔÚ\JH]\ÂHÈØØ[ÝÜYÙKÙ]][JÕÔQÑWÒÑVKÓÓÝ[ÚYJ]JJNÈHØ]Ú
+JHßBKÙ]KXYWJNÂËÈÝ\X\ÙH9aj8àáøàï8à¯ùd#9§'ûï"8à­øà©øà¨¸àäøàéxàï8àkøà®xà«xààøàåûï"B\ÙQYXÝ
 
-  const tabContent = {
-    dashboard: <Dashboard data={data} />,
-    kimero: <Kimero data={data} setData={setData} />,
-    smile: <Smile data={data} setData={setData} />,
-    huppy: <Huppy data={data} />,
-    tasks: <Today data={data} setData={setData} />,
-  };
 
-  return (
-    <div style={{ fontFamily: "'Hiragino Sans', 'Yu Gothic', Arial, sans-serif", background: "#f1f5f9", minHeight: "100vh" }}>
-      <div style={{ background: "#1e3a5f", padding: "14px 24px", display: "flex", alignItems: "center", gap: 16, boxShadow: "0 2px 8px rgba(0,0,0,0.2)" }}>
-        <div>
-          <div style={{ color: "#fff", fontWeight: 800, fontSize: 18, letterSpacing: 0.5 }}>UCHIWA_CRM</div>
-          <div style={{ color: "#93c5fd", fontSize: 11, marginTop: 1 }}>æå100ä¸åéæããã·ã¥ãã¼ã</div>
-        </div>
-        <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 12 }}>
-          {syncStatus === "syncing" && <span style={{ fontSize: 11, color: "#93c5fd" }}>â³ åæä¸­...</span>}
-          {syncStatus === "ok" && <span style={{ fontSize: 11, color: "#86efac" }}>â åæå®äº</span>}
-          {syncStatus === "error" && <span style={{ fontSize: 11, color: "#fca5a5" }}>â  åæã¨ã©ã¼</span>}
-          <div style={{ color: "#93c5fd", fontSize: 12 }}>{new Date().toLocaleDateString("ja-JP", { year: "numeric", month: "long", day: "numeric", weekday: "short" })}</div>
-        </div>
-      </div>
+HOÂY
+\XYH\ÔÚ\JH]\Â]Ø[Ù[YH[ÙNÂ
+\Þ[È
 
-      <div style={{ background: "#fff", borderBottom: "1px solid #e2e8f0", padding: "0 24px", display: "flex", gap: 4, overflowX: "auto" }}>
-        {TABS.map(t => (
-          <button key={t.id} onClick={() => setTab(t.id)} style={{ padding: "12px 16px", background: "none", border: "none", cursor: "pointer", fontSize: 13, fontWeight: 600, color: tab === t.id ? "#2563eb" : "#64748b", borderBottom: tab === t.id ? "2px solid #2563eb" : "2px solid transparent", whiteSpace: "nowrap" }}>
-            {t.label}
-          </button>
-        ))}
-      </div>
+HOÂÙ]Þ[ÔÝ]\ÊÞ[Ú[ÈNÂÛÛÝÈ\ÜHH]ØZ]Ý\X\ÙKÛJ\ÜÛ\ÚÝK\Ù\
+ÂYK]K\]YØ]]È]J
+KÒTÓÔÝ[Ê
+KJNÂY
+XØ[Ù[Y
+HÙ]Þ[ÔÝ]\Ê\ÜÈ\ÜÚÈNÂY
+XØ[Ù[Y
+HÙ][Y[Ý]
 
-      <div style={{ maxWidth: 1100, margin: "0 auto", padding: "24px 20px" }}>
-        {tabContent[tab]}
-      </div>
-    </div>
-  );
-}
+
+HOÙ]Þ[ÔÝ]\ÊYHKÌ
+NÂJJ
+NÂ]\
+
+HOÈØ[Ù[YHYNÈNÂKÙ]KXYWJNÂËÈ8à­øà©øà¨¸àäøàéxàï9b)9k¦»ï"ÛÚÜøàk¹o£;ï"BY
+\ÔÚ\JH]\Ú\UY]ÈÏÂY
+X]]Y
+H]\ÙÚ[ØÜY[ÛÙÚ[^Ê
+HOÙ]]]Y
+YJ_HÏÂÛÛÝXÛÛ[HÂ\ÚØ\\ÚØ\]O^Ù]_HÏÚ[Y\ÎÚ[Y\È]O^Ù]_HÙ]]O^ÜÙ]]_HÏÛZ[NÛZ[H]O^Ù]_HÙ]]O^ÜÙ]]_HÏ\N\H]O^Ù]_HÏ\ÚÜÎÙ^H]O^Ù]_HÙ]]O^ÜÙ]]_HÏNÂ]\
+]Ý[O^ÞÈÛ[Z[NÒ\YÚ[ÈØ[ÉË	Ö]HÛÝXÉË\X[Ø[Ë\Ù\YXÚÙÜÝ[ÙYYHZ[ZYÚL_O]Ý[O^ÞÈXÚÙÜÝ[ÌYLØMYY[ÎM\Ü^N^[YÛ][\ÎÙ[\Ø\MÞÚYÝÎØJH_O]]Ý[O^ÞÈÛÛÜÙÛÙZYÚÛÚ^NN]\ÜXÚ[ÎH_OPÒUÐWÐÔOÙ]]Ý[O^ÞÈÛÛÜÎLØÍYÛÚ^NLKX\Ú[ÜH_O¹§"9cãL9.!ùa¡º`e9¢$8àà8ààøà­øàéxàç8àï8àâOÙ]Ù]]Ý[O^ÞÈX\Ú[Y]]È\Ü^N^[YÛ][\ÎÙ[\Ø\L_OÜÞ[ÔÝ]\ÈOOHÞ[Ú[È	Ü[Ý[O^ÞÈÛÚ^NLKÛÛÜÎLØÍY_O¸£ìÈ9d#9§'ù.+KÜÜ[BÜÞ[ÔÝ]\ÈOOHÚÈ	Ü[Ý[O^ÞÈÛÚ^NLKÛÛÜÎ
+YXÈ_O¸§$È9d#9§'ùk£9.¡ÜÜ[BÜÞ[ÔÝ]\ÈOOH\Ü	Ü[Ý[O^ÞÈÛÚ^NLKÛÛÜÙØMXMH_O¸¦¨9d#9§'øàª8àêxàïÜÜ[B]Ý[O^ÞÈÛÛÜÎLØÍYÛÚ^NL_OÛ]È]J
+KÓØØ[Q]TÝ[ÊKRÈYX\[Y\XÈ[ÛÛÈ^N[Y\XÈÙYZÙ^NÚÜJ_OÙ]Ù]Ù]]Ý[O^ÞÈXÚÙÜÝ[ÙÜ\ÝÛN\ÛÛYÙLNY[Î\Ü^N^Ø\
+Ý\ÝÖ]]È_OÕPËX\
+O
+]ÛÙ^O^ÝYHÛÛXÚÏ^Ê
+HOÙ]XY
+_HÝ[O^ÞÈY[ÎLMXÚÙÜÝ[ÛHÜ\ÛHÝ\ÛÜÚ[\ÛÚ^NLËÛÙZYÚ
+ÛÛÜXOOHYÈÌMÙXÍ
+ÍÜ\ÝÛNXOOHYÈÛÛYÌMÙXÛÛY[Ü\[Ú]TÜXÙNÝÜ\_OÝX[BØ]Û
+J_BÙ]]Ý[O^ÞÈX^ÚYLLX\Ú[]]ÈY[Î_OÝXÛÛ[ÝX_BÙ]Ù]
+NÂB
