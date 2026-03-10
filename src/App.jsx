@@ -622,7 +622,6 @@ const TABS = [
   { id: "smile", label: "🍱 スマイル&ナリッシュ" },
   { id: "huppy", label: "🎵 フーピー" },
   { id: "tasks", label: "🔥 TODAY" },
-  { id: "companies", label: "🏢 企業リスト" },
 ];
 
 // ── DASHBOARD ──────────────────────────────────────────────
@@ -744,9 +743,9 @@ function Kimero({ data, setData }) {
         ))}
       </div>
       <div style={{ display: "flex", gap: 8, marginBottom: 20, flexWrap: "wrap" }}>
-        {["kpi", "contacts", "seekers", "jobs", "revenue"].map(t => (
+        {["kpi", "contacts", "seekers", "jobs", "revenue", "companies"].map(t => (
           <button key={t} onClick={() => setTab(t)} style={{ padding: "6px 16px", borderRadius: 20, border: "none", cursor: "pointer", fontWeight: 600, fontSize: 12, background: tab === t ? "#2563eb" : "#f1f5f9", color: tab === t ? "#fff" : "#475569" }}>
-            {t === "kpi" ? "🎯 KPI管理" : t === "contacts" ? "🏢 企業コンタクト" : t === "seekers" ? "👤 求職者管理" : t === "jobs" ? "📋 求人案件" : "📈 売上推移"}
+            {t === "kpi" ? "🎯 KPI管理" : t === "contacts" ? "🏢 企業コンタクト" : t === "seekers" ? "👤 求職者管理" : t === "jobs" ? "📋 求人案件" : t === "revenue" ? "📈 売上推移" : "🏢 企業リスト"}
           </button>
         ))}
       </div>
@@ -797,6 +796,7 @@ function Kimero({ data, setData }) {
           </ResponsiveContainer>
         </Section>
       )}
+      {tab === "companies" && <CompanyList />}
     </div>
   );
 }
@@ -1039,7 +1039,6 @@ export default function App() {
     smile: <Smile data={data} setData={setData} />,
     huppy: <Huppy data={data} />,
     tasks: <Today data={data} setData={setData} />,
-    companies: <CompanyList />,
   };
 
   return (
