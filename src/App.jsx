@@ -12,9 +12,9 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 const INIT = {
   kimero: {
     contacts: [
-      { id: 1, company: "株式会社サンプルA", person: "田中部長", type: "人材派遣", status: "商談中", date: "2026-03-06", note: "3名派遣希望" },
-      { id: 2, company: "合同会社サンプルB", person: "鈴木社長", type: "職業紹介", status: "提案済", date: "2026-03-07", note: "営業職1名紹介希望" },
-      { id: 3, company: "株式会社サンプルC", person: "佐藤課長", type: "業務委託", status: "初回コンタクト", date: "2026-03-08", note: "システム開発案件" },
+      { id: 1, company: "株式会社サンプルA", person: "田中部長", contact: "03-1234-5678", type: "人材派遣", prefecture: "東京都", city: "渋谷区", status: "商談中", jobStatus: "求人あり", date: "2026-03-06", nextAction: "2026-03-15", note: "3名派遣希望" },
+      { id: 2, company: "合同会社サンプルB", person: "鈴木社長", contact: "", type: "職業紹介", prefecture: "大阪府", city: "大阪市北区", status: "提案済", jobStatus: "確認中", date: "2026-03-07", nextAction: "", note: "営業職1名紹介希望" },
+      { id: 3, company: "株式会社サンプルC", person: "佐藤課長", contact: "090-0000-1111", type: "業務委託", prefecture: "東京都", city: "新宿区", status: "初回コンタクト", jobStatus: "確認中", date: "2026-03-08", nextAction: "", note: "システム開発案件" },
     ],
     seekers: [
       { id: 1, name: "山田一郎", skill: "営業・販売", status: "活動中", desired: "正社員", note: "経験5年" },
@@ -75,6 +75,19 @@ const STATUS_COLOR = {
 };
 const BIZ_COLOR = { キメロ: "#2563eb", スマイル: "#16a34a", フーピー: "#9333ea", 個人: "#f59e0b" };
 const CAT_COLOR = { "RA営業": "#2563eb", "CA": "#9333ea", "成果": "#22c55e", "売上": "#f59e0b" };
+const JOB_STATUS_COLOR = { "求人あり": "#16a34a", "求人なし": "#94a3b8", "確認中": "#f59e0b" };
+const PREFECTURES = ["北海道","青森県","岩手県","宮城県","秋田県","山形県","福島県","茨城県","栃木県","群馬県","埼玉県","千葉県","東京都","神奈川県","新潟県","富山県","石川県","福井県","山梨県","長野県","岐阜県","静岡県","愛知県","三重県","滋賀県","京都府","大阪府","兵庫県","奈良県","和歌山県","鳥取県","島根県","岡山県","広島県","山口県","徳島県","香川県","愛媛県","高知県","福岡県","佐賀県","長崎県","熊本県","大分県","宮崎県","鹿児島県","沖縄県"];
+function extractPrefecture(addr) {
+  if (!addr) return "";
+  for (const p of PREFECTURES) { if (addr.startsWith(p)) return p; }
+  return "";
+}
+function extractCity(addr, pref) {
+  if (!addr || !pref) return "";
+  const rest = addr.slice(pref.length);
+  const m = rest.match(/^([^\d０-９a-zA-Ａ-Ｚ]+(?:市|区|町|村))/);
+  return m ? m[1] : rest.split(/[\d０-９]/)[0] || "";
+}
 
 function Badge({ label, color }) {
   return (
@@ -722,18 +735,66 @@ function Dashboard({ data }) {
 // ── KIMERO ─────────────────────────────────────────────────
 function Kimero({ data, setData }) {
   const [tab, setTab] = useState("kpi");
-  const [form, setForm] = useState({ company: "", person: "", type: "人材派遣", status: "初回コンタクト", date: new Date().toISOString().split("T")[0], note: "" });
+  const EMPTY_FORM = { company: "", person: "", contact: "", type: "人材派遣", prefecture: "", city: "", status: "初回コンタクト", jobStatus: "確認中", date: new Date().toISOString().split("T")[0], nextAction: "", note: "" };
+  const [form, setForm] = useState(EMPTY_FORM);
+  const [suggestions, setSuggestions] = useState([]);
+  const [allCompanies, setAllCompanies] = useState([]);
+  const [filterPref, setFilterPref] = useState("");
+  const [filterType, setFilterType] = useState("");
+  const [filterStatus, setFilterStatus] = useState("");
+  const [filterJob, setFilterJob] = useState("");
+  const [search, setSearch] = useState("");
+
+  useEffect(() => {
+    supabase.from("companies").select("name, address").order("id", { ascending: true }).then(({ data: rows }) => {
+      if (rows) setAllCompanies(rows);
+    });
+  }, []);
+
+  function handleCompanyInput(val) {
+    setForm(f => ({ ...f, company: val }));
+    if (val.length >= 1) {
+      setSuggestions(allCompanies.filter(c => c.name.includes(val)).slice(0, 8));
+    } else {
+      setSuggestions([]);
+    }
+  }
+
+  function selectCompany(c) {
+    const pref = extractPrefecture(c.address || "");
+    const city = extractCity(c.address || "", pref);
+    setForm(f => ({ ...f, company: c.name, prefecture: pref, city }));
+    setSuggestions([]);
+  }
 
   function addContact() {
     if (!form.company) return;
-    const newC = { ...form, id: Date.now() };
-    setData(d => ({ ...d, kimero: { ...d.kimero, contacts: [...d.kimero.contacts, newC] } }));
-    setForm({ company: "", person: "", type: "人材派遣", status: "初回コンタクト", date: new Date().toISOString().split("T")[0], note: "" });
+    setData(d => ({ ...d, kimero: { ...d.kimero, contacts: [...d.kimero.contacts, { ...form, id: Date.now() }] } }));
+    setForm(EMPTY_FORM);
+    setSuggestions([]);
   }
 
   const statusCount = ["初回コンタクト","提案済","商談中","契約済"].map(s => ({
     status: s, count: data.kimero.contacts.filter(c => c.status === s).length
   }));
+
+  const usedPrefs = [...new Set(data.kimero.contacts.map(c => c.prefecture).filter(Boolean))].sort();
+
+  const today = new Date().toISOString().split("T")[0];
+  const filtered = data.kimero.contacts.filter(c => {
+    const ms = !search || c.company.includes(search) || (c.person||"").includes(search) || (c.contact||"").includes(search);
+    return ms && (!filterPref || c.prefecture === filterPref) && (!filterType || c.type === filterType) && (!filterStatus || c.status === filterStatus) && (!filterJob || c.jobStatus === filterJob);
+  });
+  const sorted = [...filtered].sort((a, b) => {
+    if (a.nextAction && b.nextAction) return a.nextAction.localeCompare(b.nextAction);
+    if (a.nextAction) return -1;
+    if (b.nextAction) return 1;
+    return (b.date || "").localeCompare(a.date || "");
+  });
+
+  const inp = (extra) => ({ padding: "6px 10px", borderRadius: 6, border: "1px solid #e2e8f0", fontSize: 13, ...extra });
+  const sel = { padding: "6px 10px", borderRadius: 6, border: "1px solid #e2e8f0", fontSize: 13 };
+  const lbl = { fontSize: 11, color: "#64748b", marginBottom: 4 };
 
   return (
     <div>
@@ -743,7 +804,7 @@ function Kimero({ data, setData }) {
         ))}
       </div>
       <div style={{ display: "flex", gap: 8, marginBottom: 20, flexWrap: "wrap" }}>
-        {["kpi", "contacts", "seekers", "jobs", "revenue", "companies"].map(t => (
+        {["kpi","contacts","seekers","jobs","revenue","companies"].map(t => (
           <button key={t} onClick={() => setTab(t)} style={{ padding: "6px 16px", borderRadius: 20, border: "none", cursor: "pointer", fontWeight: 600, fontSize: 12, background: tab === t ? "#2563eb" : "#f1f5f9", color: tab === t ? "#fff" : "#475569" }}>
             {t === "kpi" ? "🎯 KPI管理" : t === "contacts" ? "🏢 企業コンタクト" : t === "seekers" ? "👤 求職者管理" : t === "jobs" ? "📋 求人案件" : t === "revenue" ? "📈 売上推移" : "🏢 企業リスト"}
           </button>
@@ -752,32 +813,109 @@ function Kimero({ data, setData }) {
       {tab === "kpi" && <KpiPanel kpi={data.kimero.kpi} setData={setData} />}
       {tab === "contacts" && (
         <Section title="企業コンタクト管理" color="#2563eb">
-          <div style={{ background: "#f8fafc", borderRadius: 10, padding: 16, marginBottom: 16, display: "flex", flexWrap: "wrap", gap: 8, alignItems: "flex-end" }}>
-            <div><div style={{ fontSize: 11, color: "#64748b", marginBottom: 4 }}>会社名 *</div><input value={form.company} onChange={e => setForm(f=>({...f,company:e.target.value}))} placeholder="株式会社〇〇" style={{ padding: "6px 10px", borderRadius: 6, border: "1px solid #e2e8f0", fontSize: 13, width: 160 }} /></div>
-            <div><div style={{ fontSize: 11, color: "#64748b", marginBottom: 4 }}>担当者名</div><input value={form.person} onChange={e => setForm(f=>({...f,person:e.target.value}))} placeholder="田中部長" style={{ padding: "6px 10px", borderRadius: 6, border: "1px solid #e2e8f0", fontSize: 13, width: 120 }} /></div>
-            <div><div style={{ fontSize: 11, color: "#64748b", marginBottom: 4 }}>種別</div>
-              <select value={form.type} onChange={e => setForm(f=>({...f,type:e.target.value}))} style={{ padding: "6px 10px", borderRadius: 6, border: "1px solid #e2e8f0", fontSize: 13 }}>
-                {["人材派遣","職業紹介","業務委託","BPO"].map(t => <option key={t}>{t}</option>)}
-              </select></div>
-            <div><div style={{ fontSize: 11, color: "#64748b", marginBottom: 4 }}>ステータス</div>
-              <select value={form.status} onChange={e => setForm(f=>({...f,status:e.target.value}))} style={{ padding: "6px 10px", borderRadius: 6, border: "1px solid #e2e8f0", fontSize: 13 }}>
-                {["初回コンタクト","提案済","商談中","契約済","失注"].map(s => <option key={s}>{s}</option>)}
-              </select></div>
-            <div><div style={{ fontSize: 11, color: "#64748b", marginBottom: 4 }}>日付</div><input type="date" value={form.date} onChange={e => setForm(f=>({...f,date:e.target.value}))} style={{ padding: "6px 10px", borderRadius: 6, border: "1px solid #e2e8f0", fontSize: 13 }} /></div>
-            <div><div style={{ fontSize: 11, color: "#64748b", marginBottom: 4 }}>メモ</div><input value={form.note} onChange={e => setForm(f=>({...f,note:e.target.value}))} placeholder="備考" style={{ padding: "6px 10px", borderRadius: 6, border: "1px solid #e2e8f0", fontSize: 13, width: 140 }} /></div>
-            <button onClick={addContact} style={{ padding: "7px 20px", background: "#2563eb", color: "#fff", border: "none", borderRadius: 8, fontWeight: 700, cursor: "pointer", fontSize: 13 }}>追加</button>
+          <div style={{ background: "#f8fafc", borderRadius: 10, padding: 16, marginBottom: 16 }}>
+            <div style={{ fontSize: 12, fontWeight: 700, color: "#2563eb", marginBottom: 10 }}>＋ 新規コンタクト追加</div>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 8, alignItems: "flex-end" }}>
+              <div style={{ position: "relative" }}>
+                <div style={lbl}>会社名 * <span style={{ color: "#93c5fd", fontSize: 10 }}>← 企業リストから候補表示</span></div>
+                <input value={form.company} onChange={e => handleCompanyInput(e.target.value)} onBlur={() => setTimeout(() => setSuggestions([]), 150)} placeholder="会社名を入力..." style={inp({ width: 200 })} />
+                {suggestions.length > 0 && (
+                  <div style={{ position: "absolute", top: "100%", left: 0, minWidth: 240, background: "#fff", border: "1px solid #bfdbfe", borderRadius: 8, zIndex: 200, boxShadow: "0 4px 16px rgba(37,99,235,0.12)", maxHeight: 220, overflowY: "auto" }}>
+                    {suggestions.map((c, i) => (
+                      <div key={i} onMouseDown={() => selectCompany(c)} style={{ padding: "8px 12px", cursor: "pointer", fontSize: 13, borderBottom: "1px solid #f1f5f9", display: "flex", flexDirection: "column" }}>
+                        <span style={{ fontWeight: 600, color: "#1e3a5f" }}>{c.name}</span>
+                        {c.address && <span style={{ fontSize: 11, color: "#94a3b8" }}>{c.address.slice(0, 20)}</span>}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+              <div><div style={lbl}>担当者名</div><input value={form.person} onChange={e => setForm(f=>({...f,person:e.target.value}))} placeholder="田中部長" style={inp({ width: 110 })} /></div>
+              <div><div style={lbl}>連絡先</div><input value={form.contact} onChange={e => setForm(f=>({...f,contact:e.target.value}))} placeholder="03-xxxx-xxxx" style={inp({ width: 140 })} /></div>
+              <div><div style={lbl}>種別</div>
+                <select value={form.type} onChange={e => setForm(f=>({...f,type:e.target.value}))} style={sel}>
+                  {["人材派遣","職業紹介","業務委託","BPO"].map(t => <option key={t}>{t}</option>)}
+                </select></div>
+              <div><div style={lbl}>都道府県 <span style={{ color: "#93c5fd", fontSize: 10 }}>自動入力</span></div>
+                <input value={form.prefecture} onChange={e => setForm(f=>({...f,prefecture:e.target.value}))} placeholder="東京都" style={inp({ width: 90 })} /></div>
+              <div><div style={lbl}>市区町村</div><input value={form.city} onChange={e => setForm(f=>({...f,city:e.target.value}))} placeholder="渋谷区" style={inp({ width: 100 })} /></div>
+              <div><div style={lbl}>ステータス</div>
+                <select value={form.status} onChange={e => setForm(f=>({...f,status:e.target.value}))} style={sel}>
+                  {["初回コンタクト","提案済","商談中","契約済","失注"].map(s => <option key={s}>{s}</option>)}
+                </select></div>
+              <div><div style={lbl}>求人状況</div>
+                <select value={form.jobStatus} onChange={e => setForm(f=>({...f,jobStatus:e.target.value}))} style={sel}>
+                  {["確認中","求人あり","求人なし"].map(s => <option key={s}>{s}</option>)}
+                </select></div>
+              <div><div style={lbl}>日付</div><input type="date" value={form.date} onChange={e => setForm(f=>({...f,date:e.target.value}))} style={inp({})} /></div>
+              <div><div style={lbl}>次回アクション日 🔔</div><input type="date" value={form.nextAction} onChange={e => setForm(f=>({...f,nextAction:e.target.value}))} style={inp({})} /></div>
+              <div><div style={lbl}>メモ</div><input value={form.note} onChange={e => setForm(f=>({...f,note:e.target.value}))} placeholder="備考" style={inp({ width: 150 })} /></div>
+              <button onClick={addContact} style={{ padding: "7px 22px", background: "#2563eb", color: "#fff", border: "none", borderRadius: 8, fontWeight: 700, cursor: "pointer", fontSize: 13 }}>追加</button>
+            </div>
           </div>
-          <Table
-            headers={["会社名", "担当者", "種別", "ステータス", "日付", "メモ"]}
-            rows={data.kimero.contacts.map(c => [
-              <span style={{ fontWeight: 600 }}>{c.company}</span>,
-              c.person,
-              <Badge label={c.type} color="#2563eb" />,
-              <Badge label={c.status} color={STATUS_COLOR[c.status]} />,
-              c.date,
-              c.note,
-            ])}
-          />
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center", marginBottom: 12, padding: "10px 14px", background: "#eff6ff", borderRadius: 8, border: "1px solid #bfdbfe" }}>
+            <span style={{ fontSize: 12, fontWeight: 700, color: "#2563eb" }}>🔍 絞り込み</span>
+            <input value={search} onChange={e => setSearch(e.target.value)} placeholder="会社名・担当者・連絡先" style={{ padding: "5px 10px", borderRadius: 6, border: "1px solid #bfdbfe", fontSize: 12, width: 170 }} />
+            <select value={filterPref} onChange={e => setFilterPref(e.target.value)} style={{ padding: "5px 10px", borderRadius: 6, border: "1px solid #bfdbfe", fontSize: 12 }}>
+              <option value="">都道府県 全て</option>
+              {usedPrefs.map(p => <option key={p} value={p}>{p}</option>)}
+            </select>
+            <select value={filterType} onChange={e => setFilterType(e.target.value)} style={{ padding: "5px 10px", borderRadius: 6, border: "1px solid #bfdbfe", fontSize: 12 }}>
+              <option value="">種別 全て</option>
+              {["人材派遣","職業紹介","業務委託","BPO"].map(t => <option key={t}>{t}</option>)}
+            </select>
+            <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)} style={{ padding: "5px 10px", borderRadius: 6, border: "1px solid #bfdbfe", fontSize: 12 }}>
+              <option value="">ステータス 全て</option>
+              {["初回コンタクト","提案済","商談中","契約済","失注"].map(s => <option key={s}>{s}</option>)}
+            </select>
+            <select value={filterJob} onChange={e => setFilterJob(e.target.value)} style={{ padding: "5px 10px", borderRadius: 6, border: "1px solid #bfdbfe", fontSize: 12 }}>
+              <option value="">求人状況 全て</option>
+              {["確認中","求人あり","求人なし"].map(s => <option key={s}>{s}</option>)}
+            </select>
+            {(search||filterPref||filterType||filterStatus||filterJob) && (
+              <button onClick={() => { setSearch(""); setFilterPref(""); setFilterType(""); setFilterStatus(""); setFilterJob(""); }} style={{ padding: "5px 10px", borderRadius: 6, border: "1px solid #fca5a5", background: "#fff7f7", color: "#ef4444", fontSize: 12, cursor: "pointer", fontWeight: 600 }}>✕ リセット</button>
+            )}
+            <span style={{ marginLeft: "auto", fontSize: 12, color: "#64748b", fontWeight: 600 }}>{sorted.length}件</span>
+          </div>
+          <div style={{ overflowX: "auto" }}>
+            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+              <thead>
+                <tr style={{ background: "#f1f5f9" }}>
+                  {["会社名","担当者","連絡先","種別","都道府県","市区町村","ステータス","求人状況","日付","次回AK 🔔","メモ"].map(h => (
+                    <th key={h} style={{ padding: "8px 10px", textAlign: "left", fontSize: 11, fontWeight: 700, color: "#64748b", borderBottom: "2px solid #e2e8f0", whiteSpace: "nowrap" }}>{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {sorted.map((c, i) => {
+                  const isUrgent = c.nextAction && c.nextAction <= today;
+                  const isSoon = c.nextAction && c.nextAction > today && c.nextAction <= new Date(Date.now() + 3*86400000).toISOString().split("T")[0];
+                  return (
+                    <tr key={c.id} style={{ background: i % 2 === 0 ? "#fff" : "#f8fafc", borderBottom: "1px solid #f1f5f9" }}>
+                      <td style={{ padding: "8px 10px", fontWeight: 700, color: "#1e3a5f", whiteSpace: "nowrap" }}>{c.company}</td>
+                      <td style={{ padding: "8px 10px", color: "#475569" }}>{c.person || "—"}</td>
+                      <td style={{ padding: "8px 10px", color: "#475569", fontSize: 12 }}>{c.contact || "—"}</td>
+                      <td style={{ padding: "8px 10px" }}><Badge label={c.type || "—"} color="#2563eb" /></td>
+                      <td style={{ padding: "8px 10px", color: "#475569", fontSize: 12 }}>{c.prefecture || "—"}</td>
+                      <td style={{ padding: "8px 10px", color: "#475569", fontSize: 12 }}>{c.city || "—"}</td>
+                      <td style={{ padding: "8px 10px" }}><Badge label={c.status} color={STATUS_COLOR[c.status] || "#94a3b8"} /></td>
+                      <td style={{ padding: "8px 10px" }}>{c.jobStatus ? <Badge label={c.jobStatus} color={JOB_STATUS_COLOR[c.jobStatus] || "#94a3b8"} /> : "—"}</td>
+                      <td style={{ padding: "8px 10px", color: "#64748b", fontSize: 12, whiteSpace: "nowrap" }}>{c.date || "—"}</td>
+                      <td style={{ padding: "8px 10px", whiteSpace: "nowrap" }}>
+                        {c.nextAction
+                          ? <span style={{ color: isUrgent ? "#ef4444" : isSoon ? "#f59e0b" : "#2563eb", fontWeight: isUrgent || isSoon ? 700 : 400, fontSize: 12 }}>{isUrgent ? "🔴 " : isSoon ? "🟡 " : ""}{c.nextAction}</span>
+                          : <span style={{ color: "#cbd5e1" }}>—</span>}
+                      </td>
+                      <td style={{ padding: "8px 10px", color: "#64748b", fontSize: 12, maxWidth: 160, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.note || "—"}</td>
+                    </tr>
+                  );
+                })}
+                {sorted.length === 0 && (
+                  <tr><td colSpan={11} style={{ padding: 24, textAlign: "center", color: "#94a3b8" }}>該当するコンタクトがありません</td></tr>
+                )}
+              </tbody>
+            </table>
+          </div>
         </Section>
       )}
       {tab === "seekers" && <SeekerManagement />}
