@@ -405,6 +405,216 @@ function KpiPanel({ kpi, setData }) {
   );
 }
 
+// ── COMPANY LIST ────────────────────────────────────────────
+const CONTACT_STATUS_OPTIONS = ["未アプローチ", "アプローチ済", "商談中", "成約", "見送り"];
+const JOB_STATUS_OPTIONS = ["要確認", "求人あり", "求人なし", "確認済"];
+const CONTACT_STATUS_COLOR = {
+  "未アプローチ": "#94a3b8", "アプローチ済": "#60a5fa", "商談中": "#f59e0b", "成約": "#22c55e", "見送り": "#ef4444",
+};
+
+function CompanyList() {
+  const [companies, setCompanies] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const [filterIndustry, setFilterIndustry] = useState("");
+  const [filterContact, setFilterContact] = useState("");
+  const [page, setPage] = useState(0);
+  const [editingId, setEditingId] = useState(null);
+  const [editRow, setEditRow] = useState({});
+  const [saving, setSaving] = useState(false);
+  const [industries, setIndustries] = useState([]);
+  const PAGE_SIZE = 50;
+
+  useEffect(() => {
+    (async () => {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from("companies")
+        .select("*")
+        .order("id", { ascending: true });
+      if (!error && data) {
+        setCompanies(data);
+        const unique = [...new Set(data.map(c => c.industry_major).filter(Boolean))].sort();
+        setIndustries(unique);
+      }
+      setLoading(false);
+    })();
+  }, []);
+
+  const filtered = companies.filter(c => {
+    const matchSearch = !search || c.name.includes(search) || (c.address || "").includes(search);
+    const matchIndustry = !filterIndustry || c.industry_major === filterIndustry;
+    const matchContact = !filterContact || c.contact_status === filterContact;
+    return matchSearch && matchIndustry && matchContact;
+  });
+
+  const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
+  const pageData = filtered.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
+
+  const startEdit = (c) => {
+    setEditingId(c.id);
+    setEditRow({ contact_status: c.contact_status, notes: c.notes || "", job_status: c.job_status });
+  };
+
+  const cancelEdit = () => { setEditingId(null); setEditRow({}); };
+
+  const saveEdit = async (id) => {
+    setSaving(true);
+    const { error } = await supabase.from("companies").update({
+      contact_status: editRow.contact_status,
+      job_status: editRow.job_status,
+      notes: editRow.notes,
+    }).eq("id", id);
+    if (!error) {
+      setCompanies(prev => prev.map(c => c.id === id ? { ...c, ...editRow } : c));
+      setEditingId(null);
+      setEditRow({});
+    }
+    setSaving(false);
+  };
+
+  if (loading) return <div style={{ textAlign: "center", padding: 60, color: "#64748b" }}>⏳ 読み込み中...</div>;
+
+  return (
+    <div>
+      <div style={{ display: "flex", gap: 12, marginBottom: 20, flexWrap: "wrap", alignItems: "center" }}>
+        <div style={{ fontWeight: 800, fontSize: 18, color: "#1e3a5f" }}>🏢 企業リスト</div>
+        <div style={{ background: "#dbeafe", color: "#1d4ed8", borderRadius: 12, padding: "3px 12px", fontSize: 12, fontWeight: 700 }}>
+          {filtered.length}件 / 全{companies.length}件
+        </div>
+      </div>
+
+      <div style={{ display: "flex", gap: 10, marginBottom: 16, flexWrap: "wrap" }}>
+        <input
+          value={search}
+          onChange={e => { setSearch(e.target.value); setPage(0); }}
+          placeholder="🔍 社名・住所で検索..."
+          style={{ padding: "8px 14px", borderRadius: 8, border: "1px solid #e2e8f0", fontSize: 13, width: 220, outline: "none" }}
+        />
+        <select
+          value={filterIndustry}
+          onChange={e => { setFilterIndustry(e.target.value); setPage(0); }}
+          style={{ padding: "8px 12px", borderRadius: 8, border: "1px solid #e2e8f0", fontSize: 13, color: "#475569", background: "#fff" }}
+        >
+          <option value="">業種（全て）</option>
+          {industries.map(i => <option key={i} value={i}>{i}</option>)}
+        </select>
+        <select
+          value={filterContact}
+          onChange={e => { setFilterContact(e.target.value); setPage(0); }}
+          style={{ padding: "8px 12px", borderRadius: 8, border: "1px solid #e2e8f0", fontSize: 13, color: "#475569", background: "#fff" }}
+        >
+          <option value="">アプローチ状況（全て）</option>
+          {CONTACT_STATUS_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
+        </select>
+        {(search || filterIndustry || filterContact) && (
+          <button onClick={() => { setSearch(""); setFilterIndustry(""); setFilterContact(""); setPage(0); }}
+            style={{ padding: "8px 14px", borderRadius: 8, border: "1px solid #fca5a5", background: "#fef2f2", color: "#ef4444", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>
+            ✕ クリア
+          </button>
+        )}
+      </div>
+
+      <div style={{ background: "#fff", borderRadius: 12, boxShadow: "0 1px 6px rgba(0,0,0,0.08)", overflow: "auto" }}>
+        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
+          <thead>
+            <tr style={{ background: "#f8fafc", borderBottom: "2px solid #e2e8f0" }}>
+              {["社名", "業種（大）", "業種（小）", "紹介実績", "求人状況", "アプローチ状況", "メモ", "操作"].map(h => (
+                <th key={h} style={{ padding: "10px 12px", textAlign: "left", color: "#475569", fontWeight: 700, whiteSpace: "nowrap" }}>{h}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {pageData.map((c, i) => {
+              const isEditing = editingId === c.id;
+              return (
+                <tr key={c.id} style={{ borderBottom: "1px solid #f1f5f9", background: i % 2 === 0 ? "#fff" : "#fafbfc" }}>
+                  <td style={{ padding: "9px 12px", fontWeight: 600, color: "#1e293b", maxWidth: 180 }}>
+                    {c.name}
+                    {c.website && (
+                      <a href={c.website} target="_blank" rel="noreferrer" style={{ marginLeft: 6, fontSize: 10, color: "#60a5fa" }}>🔗</a>
+                    )}
+                    {c.phone && <div style={{ fontSize: 10, color: "#94a3b8", marginTop: 2 }}>{c.phone}</div>}
+                  </td>
+                  <td style={{ padding: "9px 12px", color: "#475569", whiteSpace: "nowrap" }}>{c.industry_major || "—"}</td>
+                  <td style={{ padding: "9px 12px", color: "#64748b", whiteSpace: "nowrap" }}>{c.industry_minor || "—"}</td>
+                  <td style={{ padding: "9px 12px", textAlign: "center" }}>
+                    {c.referral_record === "○" ? <span style={{ color: "#22c55e", fontWeight: 700 }}>○</span> : <span style={{ color: "#cbd5e1" }}>—</span>}
+                  </td>
+                  <td style={{ padding: "9px 12px" }}>
+                    {isEditing ? (
+                      <select value={editRow.job_status} onChange={e => setEditRow(r => ({ ...r, job_status: e.target.value }))}
+                        style={{ padding: "4px 8px", borderRadius: 6, border: "1px solid #cbd5e1", fontSize: 12 }}>
+                        {JOB_STATUS_OPTIONS.map(o => <option key={o} value={o}>{o}</option>)}
+                      </select>
+                    ) : (
+                      <span style={{ fontSize: 11, color: "#475569" }}>{c.job_status || "要確認"}</span>
+                    )}
+                  </td>
+                  <td style={{ padding: "9px 12px" }}>
+                    {isEditing ? (
+                      <select value={editRow.contact_status} onChange={e => setEditRow(r => ({ ...r, contact_status: e.target.value }))}
+                        style={{ padding: "4px 8px", borderRadius: 6, border: "1px solid #cbd5e1", fontSize: 12 }}>
+                        {CONTACT_STATUS_OPTIONS.map(o => <option key={o} value={o}>{o}</option>)}
+                      </select>
+                    ) : (
+                      <span style={{ background: CONTACT_STATUS_COLOR[c.contact_status] || "#94a3b8", color: "#fff", borderRadius: 10, padding: "2px 8px", fontSize: 11, fontWeight: 600, whiteSpace: "nowrap" }}>
+                        {c.contact_status || "未アプローチ"}
+                      </span>
+                    )}
+                  </td>
+                  <td style={{ padding: "9px 12px", maxWidth: 200 }}>
+                    {isEditing ? (
+                      <input value={editRow.notes} onChange={e => setEditRow(r => ({ ...r, notes: e.target.value }))}
+                        style={{ width: "100%", padding: "4px 8px", borderRadius: 6, border: "1px solid #cbd5e1", fontSize: 12 }}
+                        placeholder="メモを入力..." />
+                    ) : (
+                      <span style={{ color: "#64748b", fontSize: 11 }}>{c.notes || ""}</span>
+                    )}
+                  </td>
+                  <td style={{ padding: "9px 12px", whiteSpace: "nowrap" }}>
+                    {isEditing ? (
+                      <div style={{ display: "flex", gap: 4 }}>
+                        <button onClick={() => saveEdit(c.id)} disabled={saving}
+                          style={{ padding: "4px 10px", borderRadius: 6, border: "none", background: "#2563eb", color: "#fff", fontSize: 11, fontWeight: 700, cursor: "pointer" }}>
+                          {saving ? "…" : "保存"}
+                        </button>
+                        <button onClick={cancelEdit}
+                          style={{ padding: "4px 10px", borderRadius: 6, border: "1px solid #e2e8f0", background: "#fff", color: "#64748b", fontSize: 11, cursor: "pointer" }}>
+                          ✕
+                        </button>
+                      </div>
+                    ) : (
+                      <button onClick={() => startEdit(c)}
+                        style={{ padding: "4px 10px", borderRadius: 6, border: "1px solid #e2e8f0", background: "#f8fafc", color: "#475569", fontSize: 11, cursor: "pointer" }}>
+                        編集
+                      </button>
+                    )}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+
+      {totalPages > 1 && (
+        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 8, marginTop: 16 }}>
+          <button onClick={() => setPage(0)} disabled={page === 0}
+            style={{ padding: "6px 12px", borderRadius: 8, border: "1px solid #e2e8f0", background: page === 0 ? "#f1f5f9" : "#fff", color: page === 0 ? "#cbd5e1" : "#475569", cursor: page === 0 ? "default" : "pointer", fontSize: 12 }}>«</button>
+          <button onClick={() => setPage(p => Math.max(0, p - 1))} disabled={page === 0}
+            style={{ padding: "6px 12px", borderRadius: 8, border: "1px solid #e2e8f0", background: page === 0 ? "#f1f5f9" : "#fff", color: page === 0 ? "#cbd5e1" : "#475569", cursor: page === 0 ? "default" : "pointer", fontSize: 12 }}>‹</button>
+          <span style={{ fontSize: 13, color: "#475569", fontWeight: 600 }}>{page + 1} / {totalPages}ページ</span>
+          <button onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))} disabled={page >= totalPages - 1}
+            style={{ padding: "6px 12px", borderRadius: 8, border: "1px solid #e2e8f0", background: page >= totalPages - 1 ? "#f1f5f9" : "#fff", color: page >= totalPages - 1 ? "#cbd5e1" : "#475569", cursor: page >= totalPages - 1 ? "default" : "pointer", fontSize: 12 }}>›</button>
+          <button onClick={() => setPage(totalPages - 1)} disabled={page >= totalPages - 1}
+            style={{ padding: "6px 12px", borderRadius: 8, border: "1px solid #e2e8f0", background: page >= totalPages - 1 ? "#f1f5f9" : "#fff", color: page >= totalPages - 1 ? "#cbd5e1" : "#475569", cursor: page >= totalPages - 1 ? "default" : "pointer", fontSize: 12 }}>»</button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── TABS ────────────────────────────────────────────────────
 const TABS = [
   { id: "dashboard", label: "📊 ダッシュボード" },
@@ -412,6 +622,7 @@ const TABS = [
   { id: "smile", label: "🍱 スマイル&ナリッシュ" },
   { id: "huppy", label: "🎵 フーピー" },
   { id: "tasks", label: "🔥 TODAY" },
+  { id: "companies", label: "🏢 企業リスト" },
 ];
 
 // ── DASHBOARD ──────────────────────────────────────────────
@@ -771,6 +982,7 @@ export default function App() {
     smile: <Smile data={data} setData={setData} />,
     huppy: <Huppy data={data} />,
     tasks: <Today data={data} setData={setData} />,
+    companies: <CompanyList />,
   };
 
   return (
