@@ -799,6 +799,8 @@ function Kimero({ data, setData }) {
   const [editingContactId, setEditingContactId] = useState(null);
   const [editContactRow, setEditContactRow] = useState({});
   const [savingContact, setSavingContact] = useState(false);
+  const [pageSize, setPageSize] = useState(25);
+  const [contactPage, setContactPage] = useState(0);
 
   useEffect(() => {
     supabase.from("companies").select("id, name, address").order("id", { ascending: true }).then(({ data: rows }) => {
@@ -923,6 +925,10 @@ function Kimero({ data, setData }) {
     return (b.contact_date || b.created_at || "").localeCompare(a.contact_date || a.created_at || "");
   });
 
+  const totalPages = Math.ceil(sorted.length / pageSize);
+  const safeContactPage = Math.min(contactPage, Math.max(0, totalPages - 1));
+  const pagedContacts = sorted.slice(safeContactPage * pageSize, (safeContactPage + 1) * pageSize);
+
   const inp = (extra) => ({ padding: "6px 10px", borderRadius: 6, border: "1px solid #e2e8f0", fontSize: 13, ...extra });
   const sel = { padding: "6px 10px", borderRadius: 6, border: "1px solid #e2e8f0", fontSize: 13 };
   const lbl = { fontSize: 11, color: "#64748b", marginBottom: 4 };
@@ -1009,7 +1015,13 @@ function Kimero({ data, setData }) {
             {(search||filterPref||filterType||filterStatus||filterJob) && (
               <button onClick={() => { setSearch(""); setFilterPref(""); setFilterType(""); setFilterStatus(""); setFilterJob(""); }} style={{ padding: "5px 10px", borderRadius: 6, border: "1px solid #fca5a5", background: "#fff7f7", color: "#ef4444", fontSize: 12, cursor: "pointer", fontWeight: 600 }}>✕ リセット</button>
             )}
-            <span style={{ marginLeft: "auto", fontSize: 12, color: "#64748b", fontWeight: 600 }}>{sorted.length}件</span>
+            <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 6 }}>
+              <span style={{ fontSize: 11, color: "#94a3b8" }}>表示件数:</span>
+              {[10, 25, 50, 100].map(n => (
+                <button key={n} onClick={() => { setPageSize(n); setContactPage(0); }} style={{ padding: "3px 9px", borderRadius: 6, border: "1px solid", fontSize: 11, fontWeight: 700, cursor: "pointer", background: pageSize === n ? "#2563eb" : "#fff", color: pageSize === n ? "#fff" : "#475569", borderColor: pageSize === n ? "#2563eb" : "#cbd5e1" }}>{n}</button>
+              ))}
+              <span style={{ marginLeft: 4, fontSize: 12, color: "#64748b", fontWeight: 600 }}>{sorted.length}件</span>
+            </div>
           </div>
           {/* ── コンタクト一覧テーブル ── */}
           {loadingContacts ? (
@@ -1025,7 +1037,7 @@ function Kimero({ data, setData }) {
                 </tr>
               </thead>
               <tbody>
-                {sorted.map((c, i) => {
+                {pagedContacts.map((c, i) => {
                   const isUrgent = c.next_action && c.next_action <= today;
                   const isSoon = c.next_action && c.next_action > today && c.next_action <= new Date(Date.now() + 3*86400000).toISOString().split("T")[0];
                   const isEditing = editingContactId === c.id;
@@ -1100,11 +1112,35 @@ function Kimero({ data, setData }) {
                   );
                 })}
                                 {sorted.length === 0 && (
-                  <tr><td colSpan={11} style={{ padding: 24, textAlign: "center", color: "#94a3b8" }}>該当するコンタクトがありません</td></tr>
+                  <tr><td colSpan={12} style={{ padding: 24, textAlign: "center", color: "#94a3b8" }}>該当するコンタクトがありません</td></tr>
                 )}
               </tbody>
             </table>
           </div>
+          )}
+          {/* ── ページネーション ── */}
+          {totalPages > 1 && (
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 16, flexWrap: "wrap", gap: 8 }}>
+              <span style={{ fontSize: 12, color: "#64748b" }}>
+                {safeContactPage * pageSize + 1}〜{Math.min((safeContactPage + 1) * pageSize, sorted.length)} 件 / 全 {sorted.length} 件
+              </span>
+              <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
+                <button onClick={() => setContactPage(0)} disabled={safeContactPage === 0} style={{ padding: "4px 8px", borderRadius: 6, border: "1px solid #e2e8f0", background: safeContactPage === 0 ? "#f1f5f9" : "#fff", color: safeContactPage === 0 ? "#cbd5e1" : "#475569", fontSize: 12, cursor: safeContactPage === 0 ? "default" : "pointer" }}>«</button>
+                <button onClick={() => setContactPage(p => Math.max(0, p - 1))} disabled={safeContactPage === 0} style={{ padding: "4px 10px", borderRadius: 6, border: "1px solid #e2e8f0", background: safeContactPage === 0 ? "#f1f5f9" : "#fff", color: safeContactPage === 0 ? "#cbd5e1" : "#475569", fontSize: 12, cursor: safeContactPage === 0 ? "default" : "pointer" }}>‹ 前へ</button>
+                {Array.from({ length: Math.min(totalPages, 7) }, (_, j) => {
+                  let p;
+                  if (totalPages <= 7) p = j;
+                  else if (safeContactPage < 4) p = j;
+                  else if (safeContactPage > totalPages - 5) p = totalPages - 7 + j;
+                  else p = safeContactPage - 3 + j;
+                  return (
+                    <button key={p} onClick={() => setContactPage(p)} style={{ padding: "4px 10px", borderRadius: 6, border: "1px solid", fontSize: 12, fontWeight: 700, cursor: "pointer", background: safeContactPage === p ? "#2563eb" : "#fff", color: safeContactPage === p ? "#fff" : "#475569", borderColor: safeContactPage === p ? "#2563eb" : "#e2e8f0" }}>{p + 1}</button>
+                  );
+                })}
+                <button onClick={() => setContactPage(p => Math.min(totalPages - 1, p + 1))} disabled={safeContactPage === totalPages - 1} style={{ padding: "4px 10px", borderRadius: 6, border: "1px solid #e2e8f0", background: safeContactPage === totalPages - 1 ? "#f1f5f9" : "#fff", color: safeContactPage === totalPages - 1 ? "#cbd5e1" : "#475569", fontSize: 12, cursor: safeContactPage === totalPages - 1 ? "default" : "pointer" }}>次へ ›</button>
+                <button onClick={() => setContactPage(totalPages - 1)} disabled={safeContactPage === totalPages - 1} style={{ padding: "4px 8px", borderRadius: 6, border: "1px solid #e2e8f0", background: safeContactPage === totalPages - 1 ? "#f1f5f9" : "#fff", color: safeContactPage === totalPages - 1 ? "#cbd5e1" : "#475569", fontSize: 12, cursor: safeContactPage === totalPages - 1 ? "default" : "pointer" }}>»</button>
+              </div>
+            </div>
           )}
         </Section>
       )}
