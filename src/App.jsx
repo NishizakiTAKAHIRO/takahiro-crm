@@ -796,6 +796,9 @@ function Kimero({ data, setData }) {
   const [filterStatus, setFilterStatus] = useState("");
   const [filterJob, setFilterJob] = useState("");
   const [search, setSearch] = useState("");
+  const [editingContactId, setEditingContactId] = useState(null);
+  const [editContactRow, setEditContactRow] = useState({});
+  const [savingContact, setSavingContact] = useState(false);
 
   useEffect(() => {
     supabase.from("companies").select("id, name, address").order("id", { ascending: true }).then(({ data: rows }) => {
@@ -855,6 +858,51 @@ function Kimero({ data, setData }) {
     setSaving(false);
     setForm(EMPTY_FORM);
     setSuggestions([]);
+  }
+
+  function startEditContact(c) {
+    setEditingContactId(c.id);
+    setEditContactRow({
+      company_name: c.company_name || "",
+      person: c.person || "",
+      contact_info: c.contact_info || "",
+      type: c.type || "人材派遣",
+      prefecture: c.prefecture || "",
+      city: c.city || "",
+      status: c.status || "初回コンタクト",
+      job_status: c.job_status || "確認中",
+      contact_date: c.contact_date || "",
+      next_action: c.next_action || "",
+      notes: c.notes || "",
+    });
+  }
+
+  function cancelEditContact() {
+    setEditingContactId(null);
+    setEditContactRow({});
+  }
+
+  async function saveEditContact(id) {
+    setSavingContact(true);
+    const { error } = await supabase.from("contacts").update({
+      company_name: editContactRow.company_name,
+      person: editContactRow.person || null,
+      contact_info: editContactRow.contact_info || null,
+      type: editContactRow.type,
+      prefecture: editContactRow.prefecture || null,
+      city: editContactRow.city || null,
+      status: editContactRow.status,
+      job_status: editContactRow.job_status || null,
+      contact_date: editContactRow.contact_date || null,
+      next_action: editContactRow.next_action || null,
+      notes: editContactRow.notes || null,
+    }).eq("id", id);
+    if (!error) {
+      setContacts(prev => prev.map(c => c.id === id ? { ...c, ...editContactRow } : c));
+      setEditingContactId(null);
+      setEditContactRow({});
+    }
+    setSavingContact(false);
   }
 
   const statusCount = ["初回コンタクト","提案済","商談中","契約済"].map(s => ({
@@ -971,7 +1019,7 @@ function Kimero({ data, setData }) {
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
               <thead>
                 <tr style={{ background: "#f1f5f9" }}>
-                  {["会社名","担当者","連絡先","種別","都道府県","市区町村","ステータス","求人状況","日付","次回AK 🔔","メモ"].map(h => (
+                  {["会社名","担当者","連絡先","種別","都道府県","市区町村","ステータス","求人状況","日付","次回AK 🔔","メモ","操作"].map(h => (
                     <th key={h} style={{ padding: "8px 10px", textAlign: "left", fontSize: 11, fontWeight: 700, color: "#64748b", borderBottom: "2px solid #e2e8f0", whiteSpace: "nowrap" }}>{h}</th>
                   ))}
                 </tr>
@@ -980,27 +1028,78 @@ function Kimero({ data, setData }) {
                 {sorted.map((c, i) => {
                   const isUrgent = c.next_action && c.next_action <= today;
                   const isSoon = c.next_action && c.next_action > today && c.next_action <= new Date(Date.now() + 3*86400000).toISOString().split("T")[0];
+                  const isEditing = editingContactId === c.id;
+                  const eInp = { padding: "4px 6px", borderRadius: 5, border: "1px solid #93c5fd", fontSize: 12, background: "#fff", width: "100%" };
+                  const eSel = { padding: "4px 6px", borderRadius: 5, border: "1px solid #93c5fd", fontSize: 12, background: "#fff" };
                   return (
-                    <tr key={c.id} style={{ background: i % 2 === 0 ? "#fff" : "#f8fafc", borderBottom: "1px solid #f1f5f9" }}>
-                      <td style={{ padding: "8px 10px", fontWeight: 700, color: "#1e3a5f", whiteSpace: "nowrap" }}>{c.company_name}</td>
-                      <td style={{ padding: "8px 10px", color: "#475569" }}>{c.person || "—"}</td>
-                      <td style={{ padding: "8px 10px", color: "#475569", fontSize: 12 }}>{c.contact_info || "—"}</td>
-                      <td style={{ padding: "8px 10px" }}><Badge label={c.type || "—"} color="#2563eb" /></td>
-                      <td style={{ padding: "8px 10px", color: "#475569", fontSize: 12 }}>{c.prefecture || "—"}</td>
-                      <td style={{ padding: "8px 10px", color: "#475569", fontSize: 12 }}>{c.city || "—"}</td>
-                      <td style={{ padding: "8px 10px" }}><Badge label={c.status} color={STATUS_COLOR[c.status] || "#94a3b8"} /></td>
-                      <td style={{ padding: "8px 10px" }}>{c.job_status ? <Badge label={c.job_status} color={JOB_STATUS_COLOR[c.job_status] || "#94a3b8"} /> : "—"}</td>
-                      <td style={{ padding: "8px 10px", color: "#64748b", fontSize: 12, whiteSpace: "nowrap" }}>{c.contact_date || "—"}</td>
-                      <td style={{ padding: "8px 10px", whiteSpace: "nowrap" }}>
-                        {c.next_action
-                          ? <span style={{ color: isUrgent ? "#ef4444" : isSoon ? "#f59e0b" : "#2563eb", fontWeight: isUrgent || isSoon ? 700 : 400, fontSize: 12 }}>{isUrgent ? "🔴 " : isSoon ? "🟡 " : ""}{c.next_action}</span>
-                          : <span style={{ color: "#cbd5e1" }}>—</span>}
+                    <tr key={c.id} style={{ background: isEditing ? "#eff6ff" : i % 2 === 0 ? "#fff" : "#f8fafc", borderBottom: "1px solid #f1f5f9" }}>
+                      <td style={{ padding: "8px 10px", fontWeight: 700, color: "#1e3a5f", whiteSpace: "nowrap", minWidth: 120 }}>
+                        {isEditing ? <input value={editContactRow.company_name} onChange={e => setEditContactRow(r => ({ ...r, company_name: e.target.value }))} style={eInp} /> : c.company_name}
                       </td>
-                      <td style={{ padding: "8px 10px", color: "#64748b", fontSize: 12, maxWidth: 160, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.notes || "—"}</td>
+                      <td style={{ padding: "8px 10px", color: "#475569", minWidth: 80 }}>
+                        {isEditing ? <input value={editContactRow.person} onChange={e => setEditContactRow(r => ({ ...r, person: e.target.value }))} placeholder="担当者名" style={eInp} /> : (c.person || "—")}
+                      </td>
+                      <td style={{ padding: "8px 10px", color: "#475569", fontSize: 12, minWidth: 110 }}>
+                        {isEditing ? <input value={editContactRow.contact_info} onChange={e => setEditContactRow(r => ({ ...r, contact_info: e.target.value }))} placeholder="電話番号" style={eInp} /> : (c.contact_info || "—")}
+                      </td>
+                      <td style={{ padding: "8px 10px", minWidth: 90 }}>
+                        {isEditing ? (
+                          <select value={editContactRow.type} onChange={e => setEditContactRow(r => ({ ...r, type: e.target.value }))} style={eSel}>
+                            {["人材派遣","職業紹介","業務委託","BPO"].map(t => <option key={t}>{t}</option>)}
+                          </select>
+                        ) : <Badge label={c.type || "—"} color="#2563eb" />}
+                      </td>
+                      <td style={{ padding: "8px 10px", color: "#475569", fontSize: 12, minWidth: 80 }}>
+                        {isEditing ? <input value={editContactRow.prefecture} onChange={e => setEditContactRow(r => ({ ...r, prefecture: e.target.value }))} placeholder="東京都" style={{ ...eInp, width: 70 }} /> : (c.prefecture || "—")}
+                      </td>
+                      <td style={{ padding: "8px 10px", color: "#475569", fontSize: 12, minWidth: 80 }}>
+                        {isEditing ? <input value={editContactRow.city} onChange={e => setEditContactRow(r => ({ ...r, city: e.target.value }))} placeholder="渋谷区" style={{ ...eInp, width: 80 }} /> : (c.city || "—")}
+                      </td>
+                      <td style={{ padding: "8px 10px", minWidth: 100 }}>
+                        {isEditing ? (
+                          <select value={editContactRow.status} onChange={e => setEditContactRow(r => ({ ...r, status: e.target.value }))} style={eSel}>
+                            {["初回コンタクト","提案済","商談中","契約済","失注"].map(s => <option key={s}>{s}</option>)}
+                          </select>
+                        ) : <Badge label={c.status} color={STATUS_COLOR[c.status] || "#94a3b8"} />}
+                      </td>
+                      <td style={{ padding: "8px 10px", minWidth: 80 }}>
+                        {isEditing ? (
+                          <select value={editContactRow.job_status} onChange={e => setEditContactRow(r => ({ ...r, job_status: e.target.value }))} style={eSel}>
+                            {["確認中","求人あり","求人なし"].map(s => <option key={s}>{s}</option>)}
+                          </select>
+                        ) : (c.job_status ? <Badge label={c.job_status} color={JOB_STATUS_COLOR[c.job_status] || "#94a3b8"} /> : "—")}
+                      </td>
+                      <td style={{ padding: "8px 10px", color: "#64748b", fontSize: 12, whiteSpace: "nowrap", minWidth: 100 }}>
+                        {isEditing ? <input type="date" value={editContactRow.contact_date} onChange={e => setEditContactRow(r => ({ ...r, contact_date: e.target.value }))} style={eInp} /> : (c.contact_date || "—")}
+                      </td>
+                      <td style={{ padding: "8px 10px", whiteSpace: "nowrap", minWidth: 100 }}>
+                        {isEditing ? <input type="date" value={editContactRow.next_action} onChange={e => setEditContactRow(r => ({ ...r, next_action: e.target.value }))} style={eInp} /> : (
+                          c.next_action
+                            ? <span style={{ color: isUrgent ? "#ef4444" : isSoon ? "#f59e0b" : "#2563eb", fontWeight: isUrgent || isSoon ? 700 : 400, fontSize: 12 }}>{isUrgent ? "🔴 " : isSoon ? "🟡 " : ""}{c.next_action}</span>
+                            : <span style={{ color: "#cbd5e1" }}>—</span>
+                        )}
+                      </td>
+                      <td style={{ padding: "8px 10px", color: "#64748b", fontSize: 12, minWidth: 120 }}>
+                        {isEditing ? <input value={editContactRow.notes} onChange={e => setEditContactRow(r => ({ ...r, notes: e.target.value }))} placeholder="メモ" style={{ ...eInp, width: 120 }} /> : (
+                          <span style={{ display: "block", maxWidth: 160, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.notes || "—"}</span>
+                        )}
+                      </td>
+                      <td style={{ padding: "8px 10px", whiteSpace: "nowrap" }}>
+                        {isEditing ? (
+                          <div style={{ display: "flex", gap: 4 }}>
+                            <button onClick={() => saveEditContact(c.id)} disabled={savingContact} style={{ padding: "4px 10px", background: savingContact ? "#93c5fd" : "#2563eb", color: "#fff", border: "none", borderRadius: 6, fontSize: 11, fontWeight: 700, cursor: savingContact ? "not-allowed" : "pointer" }}>
+                              {savingContact ? "保存中" : "💾 保存"}
+                            </button>
+                            <button onClick={cancelEditContact} style={{ padding: "4px 8px", background: "#f1f5f9", color: "#64748b", border: "none", borderRadius: 6, fontSize: 11, cursor: "pointer" }}>✕</button>
+                          </div>
+                        ) : (
+                          <button onClick={() => startEditContact(c)} style={{ padding: "4px 10px", background: "#f1f5f9", color: "#2563eb", border: "1px solid #bfdbfe", borderRadius: 6, fontSize: 11, fontWeight: 700, cursor: "pointer" }}>✏️ 編集</button>
+                        )}
+                      </td>
                     </tr>
                   );
                 })}
-                {sorted.length === 0 && (
+                                {sorted.length === 0 && (
                   <tr><td colSpan={11} style={{ padding: 24, textAlign: "center", color: "#94a3b8" }}>該当するコンタクトがありません</td></tr>
                 )}
               </tbody>
