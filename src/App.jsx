@@ -1620,41 +1620,254 @@ function Smile({ data, setData }) {
   );
 }
 
-// ── HUPPY ──────────────────────────────────────────────────
+// ── HUPPY ──────────────────────────────────────────────────────────
 function Huppy({ data }) {
-  const latest = data.huppy.revenue[data.huppy.revenue.length - 1];
+  const [hTab, setHTab] = useState("summary");
+  const [liveRecs, setLiveRecs] = useState([]);
+  const [sales, setSales] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [showAddLive, setShowAddLive] = useState(false);
+  const [showAddSale, setShowAddSale] = useState(false);
+  const [editLive, setEditLive] = useState(null);
+  const curMonth = new Date().toISOString().slice(0, 7);
+  const blankLive = { creator_name: "", tiktok_username: "", year_month: curMonth, diamonds: "", live_count: "", live_hours: "", reward_yen: "", notes: "" };
+  const blankSale = { channel: "tiktok_shop", product_name: "", amount: "", quantity: "1", sale_date: new Date().toISOString().split("T")[0], notes: "" };
+  const [nLive, setNLive] = useState(blankLive);
+  const [nSale, setNSale] = useState(blankSale);
+
+  useEffect(() => { fetchHData(); }, []);
+
+  async function fetchHData() {
+    setLoading(true);
+    const [{ data: lr }, { data: sl }] = await Promise.all([
+      supabase.from("foopy_live_records").select("*").order("year_month", { ascending: false }),
+      supabase.from("foopy_sales").select("*").order("sale_date", { ascending: false })
+    ]);
+    if (lr) setLiveRecs(lr);
+    if (sl) setSales(sl);
+    setLoading(false);
+  }
+
+  async function saveLive() {
+    const rec = { ...nLive, diamonds: parseInt(nLive.diamonds)||0, live_count: parseInt(nLive.live_count)||0, live_hours: parseFloat(nLive.live_hours)||0, reward_yen: parseInt(nLive.reward_yen)||0 };
+    if (editLive) {
+      await supabase.from("foopy_live_records").update(rec).eq("id", editLive.id);
+      setEditLive(null);
+    } else {
+      await supabase.from("foopy_live_records").insert(rec);
+    }
+    setShowAddLive(false); setNLive(blankLive); fetchHData();
+  }
+
+  async function deleteLive(id) {
+    if (!window.confirm("削除しますか？")) return;
+    await supabase.from("foopy_live_records").delete().eq("id", id);
+    fetchHData();
+  }
+
+  async function saveSale() {
+    await supabase.from("foopy_sales").insert({ ...nSale, amount: parseInt(nSale.amount)||0, quantity: parseInt(nSale.quantity)||1 });
+    setShowAddSale(false); setNSale(blankSale); fetchHData();
+  }
+
+  async function deleteSale(id) {
+    if (!window.confirm("削除しますか？")) return;
+    await supabase.from("foopy_sales").delete().eq("id", id);
+    fetchHData();
+  }
+
+  const thisMonthLive = liveRecs.filter(r => r.year_month === curMonth);
+  const liveReward = thisMonthLive.reduce((s, r) => s + (r.reward_yen || 0), 0);
+  const liveDiamonds = thisMonthLive.reduce((s, r) => s + (r.diamonds || 0), 0);
+  const tktMonthly = sales.filter(s => s.channel === "tiktok_shop" && (s.sale_date||"").startsWith(curMonth)).reduce((s, r) => s + (r.amount||0), 0);
+  const ecMonthly = sales.filter(s => s.channel !== "tiktok_shop" && (s.sale_date||"").startsWith(curMonth)).reduce((s, r) => s + (r.amount||0), 0);
+  const totalMonthly = liveReward + tktMonthly + ecMonthly;
+
+  const CHANNELS = { tiktok_shop: "TikTokショップ", base: "BASE", shopify: "Shopify", stores: "STORES", rakuten: "楽天", amazon: "Amazon", other: "その他" };
+  const CHAN_COLOR = { tiktok_shop: "#ff2d55", base: "#e07a5f", shopify: "#96bf48", stores: "#00b4d8", rakuten: "#bf0000", amazon: "#ff9900", other: "#9333ea" };
+
+  const allMonths = [...new Set([...liveRecs.map(r => r.year_month), ...sales.map(s => (s.sale_date||"").slice(0,7))].filter(Boolean))].sort();
+  const monthlyChart = allMonths.map(m => ({
+    month: m.slice(5) + "月",
+    LIVE: liveRecs.filter(r => r.year_month === m).reduce((s, r) => s + (r.reward_yen||0), 0),
+    TikTok: sales.filter(s => s.channel === "tiktok_shop" && (s.sale_date||"").startsWith(m)).reduce((s, r) => s + (r.amount||0), 0),
+    EC: sales.filter(s => s.channel !== "tiktok_shop" && (s.sale_date||"").startsWith(m)).reduce((s, r) => s + (r.amount||0), 0),
+  }));
+
+  const inp = { padding: "6px 10px", border: "1px solid #e2e8f0", borderRadius: 6, fontSize: 13, width: "100%", boxSizing: "border-box" };
+  const hBtn = (color, active) => ({ padding: "6px 14px", background: active ? color : "#f1f5f9", color: active ? "#fff" : "#64748b", border: "none", borderRadius: 20, cursor: "pointer", fontWeight: 600, fontSize: 13 });
+  const actBtn = (color) => ({ padding: "7px 16px", background: color, color: "#fff", border: "none", borderRadius: 6, cursor: "pointer", fontSize: 13, fontWeight: 600 });
+
   return (
     <div>
       <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 20 }}>
-        <Card title="今月売上" value={`¥${(latest.total/10000).toFixed(0)}万`} color="#9333ea" icon="🎵" />
-        <Card title="個人報酬" value={`¥${(latest.personal/10000).toFixed(0)}万`} sub="目標：40〜50万円" color="#9333ea" icon="💰" />
-        <Card title="報酬率" value={`${Math.round(latest.personal/latest.total*100)}%`} sub="目標：40%+" color="#f59e0b" icon="📊" />
-        <Card title="パートナー交渉中" value={`${data.huppy.partners.filter(p=>p.status==="交渉中").length}件`} color="#9333ea" icon="🤝" />
+        <Card title="今月合計売上" value={"¥" + (totalMonthly/10000).toFixed(1) + "万"} color="#9333ea" icon="🎵" />
+        <Card title="🎁 LIVEギフト報酬" value={"¥" + (liveReward/10000).toFixed(1) + "万"} sub={liveDiamonds.toLocaleString() + "💎"} color="#a855f7" icon="💎" />
+        <Card title="🛒 TikTokショップ" value={"¥" + (tktMonthly/10000).toFixed(1) + "万"} color="#ff2d55" icon="🛒" />
+        <Card title="📦 ECサイト" value={"¥" + (ecMonthly/10000).toFixed(1) + "万"} color="#f59e0b" icon="📦" />
       </div>
-      <Section title="月次推移" color="#9333ea">
-        <ResponsiveContainer width="100%" height={200}>
-          <BarChart data={data.huppy.revenue}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-            <XAxis dataKey="month" />
-            <YAxis tickFormatter={v => `${(v/10000).toFixed(0)}万`} />
-            <Tooltip formatter={v => `¥${v.toLocaleString()}`} />
-            <Bar dataKey="total" fill="#e9d5ff" radius={[4,4,0,0]} name="売上" />
-            <Bar dataKey="personal" fill="#9333ea" radius={[4,4,0,0]} name="個人報酬" />
-          </BarChart>
-        </ResponsiveContainer>
-      </Section>
-      <Section title="パートナー・案件管理" color="#9333ea">
-        <Table
-          headers={["パートナー名", "種別", "ステータス", "想定金額", "メモ"]}
-          rows={data.huppy.partners.map(p => [
-            <span style={{ fontWeight: 600 }}>{p.name}</span>,
-            p.type,
-            <Badge label={p.status} color={STATUS_COLOR[p.status]} />,
-            p.value,
-            p.note,
-          ])}
-        />
-      </Section>
+
+      <div style={{ display: "flex", gap: 6, marginBottom: 16, flexWrap: "wrap" }}>
+        {[["summary","📊 サマリー"],["live","🎁 LIVEギフト"],["tkt","🛒 TikTokショップ"],["ec","📦 ECサイト"],["partner","🤝 パートナー"]].map(([id, label]) => (
+          <button key={id} onClick={() => setHTab(id)} style={hBtn("#9333ea", hTab===id)}>{label}</button>
+        ))}
+      </div>
+
+      {hTab === "summary" && (
+        <Section title="月次推移（売上内訳）" color="#9333ea">
+          {monthlyChart.length > 0 ? (
+            <ResponsiveContainer width="100%" height={220}>
+              <BarChart data={monthlyChart}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                <XAxis dataKey="month" />
+                <YAxis tickFormatter={v => (v/10000).toFixed(0) + "万"} />
+                <Tooltip formatter={v => "¥" + v.toLocaleString()} />
+                <Bar dataKey="LIVE" fill="#a855f7" radius={[0,0,0,0]} name="LIVEギフト" stackId="a" />
+                <Bar dataKey="TikTok" fill="#ff2d55" radius={[0,0,0,0]} name="TikTokショップ" stackId="a" />
+                <Bar dataKey="EC" fill="#f59e0b" radius={[4,4,0,0]} name="ECサイト" stackId="a" />
+              </BarChart>
+            </ResponsiveContainer>
+          ) : (
+            <div style={{ textAlign: "center", color: "#94a3b8", padding: 40 }}>データを入力すると月次グラフが表示されます</div>
+          )}
+        </Section>
+      )}
+
+      {hTab === "live" && (
+        <Section title="🎁 LIVEギフト売上管理" color="#a855f7">
+          <div style={{ marginBottom: 12 }}>
+            <button onClick={() => { setEditLive(null); setNLive(blankLive); setShowAddLive(true); }} style={actBtn("#a855f7")}>+ クリエイター追加</button>
+          </div>
+          {showAddLive && (
+            <div style={{ background: "#faf5ff", border: "1px solid #d8b4fe", borderRadius: 10, padding: 16, marginBottom: 16 }}>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 10 }}>
+                <div><div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>クリエイター名 *</div><input style={inp} value={nLive.creator_name} onChange={e => setNLive(p => ({...p, creator_name: e.target.value}))} placeholder="例：みい" /></div>
+                <div><div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>TikTok ID</div><input style={inp} value={nLive.tiktok_username} onChange={e => setNLive(p => ({...p, tiktok_username: e.target.value}))} placeholder="@username" /></div>
+                <div><div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>年月 *</div><input style={inp} type="month" value={nLive.year_month} onChange={e => setNLive(p => ({...p, year_month: e.target.value}))} /></div>
+                <div><div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>ダイヤモンド数</div><input style={inp} type="number" value={nLive.diamonds} onChange={e => setNLive(p => ({...p, diamonds: e.target.value}))} placeholder="0" /></div>
+                <div><div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>LIVE回数</div><input style={inp} type="number" value={nLive.live_count} onChange={e => setNLive(p => ({...p, live_count: e.target.value}))} placeholder="0" /></div>
+                <div><div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>LIVE時間</div><input style={inp} type="number" step="0.1" value={nLive.live_hours} onChange={e => setNLive(p => ({...p, live_hours: e.target.value}))} placeholder="0.0" /></div>
+                <div><div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>報酬（円） *</div><input style={inp} type="number" value={nLive.reward_yen} onChange={e => setNLive(p => ({...p, reward_yen: e.target.value}))} placeholder="0" /></div>
+                <div><div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>メモ</div><input style={inp} value={nLive.notes} onChange={e => setNLive(p => ({...p, notes: e.target.value}))} /></div>
+              </div>
+              <div style={{ display: "flex", gap: 8 }}>
+                <button onClick={saveLive} style={actBtn("#a855f7")}>{editLive ? "更新" : "保存"}</button>
+                <button onClick={() => { setShowAddLive(false); setEditLive(null); }} style={actBtn("#94a3b8")}>キャンセル</button>
+              </div>
+            </div>
+          )}
+          {loading ? <div style={{ color: "#94a3b8", padding: 20 }}>読み込み中...</div> : (
+            <Table
+              headers={["年月", "クリエイター", "TikTok ID", "💎 ダイヤ", "LIVE回数", "LIVE時間", "報酬（円）", "メモ", "操作"]}
+              rows={liveRecs.map(r => [
+                <span style={{ fontWeight: 600, color: "#7c3aed" }}>{r.year_month}</span>,
+                r.creator_name,
+                r.tiktok_username || "—",
+                (r.diamonds||0).toLocaleString(),
+                r.live_count || 0,
+                r.live_hours || 0,
+                <span style={{ color: "#7c3aed", fontWeight: 600 }}>¥{(r.reward_yen||0).toLocaleString()}</span>,
+                r.notes || "—",
+                <div style={{ display: "flex", gap: 4 }}>
+                  <button onClick={() => { setEditLive(r); setNLive({...r, diamonds: String(r.diamonds||""), live_count: String(r.live_count||""), live_hours: String(r.live_hours||""), reward_yen: String(r.reward_yen||"")}); setShowAddLive(true); }} style={{ padding: "2px 8px", background: "#f3e8ff", color: "#7c3aed", border: "none", borderRadius: 4, cursor: "pointer", fontSize: 12 }}>✏️</button>
+                  <button onClick={() => deleteLive(r.id)} style={{ padding: "2px 8px", background: "#fee2e2", color: "#dc2626", border: "none", borderRadius: 4, cursor: "pointer", fontSize: 12 }}>🗑</button>
+                </div>
+              ])}
+            />
+          )}
+          {liveRecs.length === 0 && !loading && <div style={{ textAlign: "center", color: "#94a3b8", padding: 30 }}>データがありません。「クリエイター追加」から入力してください</div>}
+        </Section>
+      )}
+
+      {hTab === "tkt" && (
+        <Section title="🛒 TikTokショップ売上" color="#ff2d55">
+          <div style={{ marginBottom: 12 }}>
+            <button onClick={() => { setNSale({ channel: "tiktok_shop", product_name: "", amount: "", quantity: "1", sale_date: new Date().toISOString().split("T")[0], notes: "" }); setShowAddSale(true); }} style={actBtn("#ff2d55")}>+ 売上追加</button>
+          </div>
+          {showAddSale && hTab === "tkt" && (
+            <div style={{ background: "#fff1f2", border: "1px solid #fecdd3", borderRadius: 10, padding: 16, marginBottom: 16 }}>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 10 }}>
+                <div><div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>商品名</div><input style={inp} value={nSale.product_name} onChange={e => setNSale(p => ({...p, product_name: e.target.value}))} placeholder="商品名" /></div>
+                <div><div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>売上金額（円） *</div><input style={inp} type="number" value={nSale.amount} onChange={e => setNSale(p => ({...p, amount: e.target.value}))} placeholder="0" /></div>
+                <div><div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>数量</div><input style={inp} type="number" value={nSale.quantity} onChange={e => setNSale(p => ({...p, quantity: e.target.value}))} /></div>
+                <div><div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>日付 *</div><input style={inp} type="date" value={nSale.sale_date} onChange={e => setNSale(p => ({...p, sale_date: e.target.value}))} /></div>
+                <div style={{ gridColumn: "span 2" }}><div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>メモ</div><input style={inp} value={nSale.notes} onChange={e => setNSale(p => ({...p, notes: e.target.value}))} /></div>
+              </div>
+              <div style={{ display: "flex", gap: 8 }}>
+                <button onClick={saveSale} style={actBtn("#ff2d55")}>保存</button>
+                <button onClick={() => setShowAddSale(false)} style={actBtn("#94a3b8")}>キャンセル</button>
+              </div>
+            </div>
+          )}
+          {loading ? <div style={{ color: "#94a3b8", padding: 20 }}>読み込み中...</div> : (
+            <Table
+              headers={["日付", "商品名", "売上金額", "数量", "メモ", "操作"]}
+              rows={sales.filter(s => s.channel === "tiktok_shop").map(s => [
+                s.sale_date, s.product_name || "—",
+                <span style={{ color: "#e11d48", fontWeight: 600 }}>¥{(s.amount||0).toLocaleString()}</span>,
+                s.quantity, s.notes || "—",
+                <button onClick={() => deleteSale(s.id)} style={{ padding: "2px 8px", background: "#fee2e2", color: "#dc2626", border: "none", borderRadius: 4, cursor: "pointer", fontSize: 12 }}>🗑</button>
+              ])}
+            />
+          )}
+          {sales.filter(s => s.channel === "tiktok_shop").length === 0 && !loading && <div style={{ textAlign: "center", color: "#94a3b8", padding: 30 }}>TikTokショップの売上データがありません</div>}
+        </Section>
+      )}
+
+      {hTab === "ec" && (
+        <Section title="📦 ECサイト売上" color="#f59e0b">
+          <div style={{ marginBottom: 12 }}>
+            <button onClick={() => { setNSale({ channel: "base", product_name: "", amount: "", quantity: "1", sale_date: new Date().toISOString().split("T")[0], notes: "" }); setShowAddSale(true); }} style={actBtn("#f59e0b")}>+ 売上追加</button>
+          </div>
+          {showAddSale && hTab === "ec" && (
+            <div style={{ background: "#fffbeb", border: "1px solid #fde68a", borderRadius: 10, padding: 16, marginBottom: 16 }}>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 10 }}>
+                <div><div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>チャネル *</div>
+                  <select style={inp} value={nSale.channel} onChange={e => setNSale(p => ({...p, channel: e.target.value}))}>
+                    <option value="base">BASE</option><option value="shopify">Shopify</option><option value="stores">STORES</option><option value="rakuten">楽天</option><option value="amazon">Amazon</option><option value="other">その他</option>
+                  </select>
+                </div>
+                <div><div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>商品名</div><input style={inp} value={nSale.product_name} onChange={e => setNSale(p => ({...p, product_name: e.target.value}))} placeholder="商品名" /></div>
+                <div><div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>売上金額（円） *</div><input style={inp} type="number" value={nSale.amount} onChange={e => setNSale(p => ({...p, amount: e.target.value}))} placeholder="0" /></div>
+                <div><div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>日付 *</div><input style={inp} type="date" value={nSale.sale_date} onChange={e => setNSale(p => ({...p, sale_date: e.target.value}))} /></div>
+                <div style={{ gridColumn: "span 2" }}><div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>メモ</div><input style={inp} value={nSale.notes} onChange={e => setNSale(p => ({...p, notes: e.target.value}))} /></div>
+              </div>
+              <div style={{ display: "flex", gap: 8 }}>
+                <button onClick={saveSale} style={actBtn("#f59e0b")}>保存</button>
+                <button onClick={() => setShowAddSale(false)} style={actBtn("#94a3b8")}>キャンセル</button>
+              </div>
+            </div>
+          )}
+          {loading ? <div style={{ color: "#94a3b8", padding: 20 }}>読み込み中...</div> : (
+            <Table
+              headers={["日付", "チャネル", "商品名", "売上金額", "メモ", "操作"]}
+              rows={sales.filter(s => s.channel !== "tiktok_shop").map(s => [
+                s.sale_date,
+                <Badge label={CHANNELS[s.channel] || s.channel} color={CHAN_COLOR[s.channel] || "#9333ea"} />,
+                s.product_name || "—",
+                <span style={{ color: "#d97706", fontWeight: 600 }}>¥{(s.amount||0).toLocaleString()}</span>,
+                s.notes || "—",
+                <button onClick={() => deleteSale(s.id)} style={{ padding: "2px 8px", background: "#fee2e2", color: "#dc2626", border: "none", borderRadius: 4, cursor: "pointer", fontSize: 12 }}>🗑</button>
+              ])}
+            />
+          )}
+          {sales.filter(s => s.channel !== "tiktok_shop").length === 0 && !loading && <div style={{ textAlign: "center", color: "#94a3b8", padding: 30 }}>ECサイトの売上データがありません</div>}
+        </Section>
+      )}
+
+      {hTab === "partner" && (
+        <Section title="🤝 パートナー・案件管理" color="#9333ea">
+          <Table
+            headers={["パートナー名", "種別", "ステータス", "想定金額", "メモ"]}
+            rows={data.huppy.partners.map(p => [
+              <span style={{ fontWeight: 600 }}>{p.name}</span>,
+              p.type,
+              <Badge label={p.status} color={STATUS_COLOR[p.status]} />,
+              p.value, p.note,
+            ])}
+          />
+        </Section>
+      )}
     </div>
   );
 }
