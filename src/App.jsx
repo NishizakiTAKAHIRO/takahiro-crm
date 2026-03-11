@@ -1634,6 +1634,8 @@ function Huppy({ data }) {
   const blankSale = { channel: "tiktok_shop", product_name: "", amount: "", quantity: "1", sale_date: new Date().toISOString().split("T")[0], notes: "" };
   const [nLive, setNLive] = useState(blankLive);
   const [nSale, setNSale] = useState(blankSale);
+  const [vitaTarget, setVitaTarget] = useState(300000);
+  const VITA_PRODUCTS = ["ROYALHONEY VIP 1P","VITAMAX ENERGYHONEY FOR MEN","VITAMAX ENERGYHONEY FOR HER","VITAMAX ENERGYCOFFEE FOR MEN","VITAMAX ENERGYCOFFEE FOR HER","ROYALHONEY VIP PREMIUM 1P","キングハニーVIP 1筘12袋","キングハニーVIP 2筘24袋","キングハニーVIP 3筘36袋","キングハニーVIP 4筘48袋","キングハニーVIP 5筘60袋"];
 
   useEffect(() => { fetchHData(); }, []);
 
@@ -1680,18 +1682,21 @@ function Huppy({ data }) {
   const liveReward = thisMonthLive.reduce((s, r) => s + (r.reward_yen || 0), 0);
   const liveDiamonds = thisMonthLive.reduce((s, r) => s + (r.diamonds || 0), 0);
   const tktMonthly = sales.filter(s => s.channel === "tiktok_shop" && (s.sale_date||"").startsWith(curMonth)).reduce((s, r) => s + (r.amount||0), 0);
-  const ecMonthly = sales.filter(s => s.channel !== "tiktok_shop" && (s.sale_date||"").startsWith(curMonth)).reduce((s, r) => s + (r.amount||0), 0);
-  const totalMonthly = liveReward + tktMonthly + ecMonthly;
+  const vitaSales = sales.filter(s => s.channel === "vitamax");
+  const vitaMonthly = vitaSales.filter(s => (s.sale_date||"").startsWith(curMonth)).reduce((s, r) => s + (r.amount||0), 0);
+  const ecMonthly = sales.filter(s => s.channel !== "tiktok_shop" && s.channel !== "vitamax" && (s.sale_date||"").startsWith(curMonth)).reduce((s, r) => s + (r.amount||0), 0);
+  const totalMonthly = liveReward + tktMonthly + ecMonthly + vitaMonthly;
 
-  const CHANNELS = { tiktok_shop: "TikTokショップ", base: "BASE", shopify: "Shopify", stores: "STORES", rakuten: "楽天", amazon: "Amazon", other: "その他" };
-  const CHAN_COLOR = { tiktok_shop: "#ff2d55", base: "#e07a5f", shopify: "#96bf48", stores: "#00b4d8", rakuten: "#bf0000", amazon: "#ff9900", other: "#9333ea" };
+  const CHANNELS = { tiktok_shop: "TikTokショップ", base: "BASE", shopify: "Shopify", stores: "STORES", rakuten: "楽天", amazon: "Amazon", vitamax: "VITAMAX公式", other: "その他" };
+  const CHAN_COLOR = { tiktok_shop: "#ff2d55", base: "#e07a5f", shopify: "#96bf48", stores: "#00b4d8", rakuten: "#bf0000", amazon: "#ff9900", vitamax: "#16a34a", other: "#9333ea" };
 
   const allMonths = [...new Set([...liveRecs.map(r => r.year_month), ...sales.map(s => (s.sale_date||"").slice(0,7))].filter(Boolean))].sort();
   const monthlyChart = allMonths.map(m => ({
     month: m.slice(5) + "月",
     LIVE: liveRecs.filter(r => r.year_month === m).reduce((s, r) => s + (r.reward_yen||0), 0),
     TikTok: sales.filter(s => s.channel === "tiktok_shop" && (s.sale_date||"").startsWith(m)).reduce((s, r) => s + (r.amount||0), 0),
-    EC: sales.filter(s => s.channel !== "tiktok_shop" && (s.sale_date||"").startsWith(m)).reduce((s, r) => s + (r.amount||0), 0),
+    VITAMAX: sales.filter(s => s.channel === "vitamax" && (s.sale_date||"").startsWith(m)).reduce((s, r) => s + (r.amount||0), 0),
+    EC: sales.filter(s => s.channel !== "tiktok_shop" && s.channel !== "vitamax" && (s.sale_date||"").startsWith(m)).reduce((s, r) => s + (r.amount||0), 0),
   }));
 
   const inp = { padding: "6px 10px", border: "1px solid #e2e8f0", borderRadius: 6, fontSize: 13, width: "100%", boxSizing: "border-box" };
@@ -1705,11 +1710,12 @@ function Huppy({ data }) {
         <Card title="🎁 LIVEギフト報酬" value={"¥" + (liveReward/10000).toFixed(1) + "万"} sub={liveDiamonds.toLocaleString() + "💎"} color="#a855f7" icon="💎" />
         <Card title="🛒 TikTokショップ" value={"¥" + (tktMonthly/10000).toFixed(1) + "万"} color="#ff2d55" icon="🛒" />
         <Card title="📦 ECサイト" value={"¥" + (ecMonthly/10000).toFixed(1) + "万"} color="#f59e0b" icon="📦" />
+        <Card title="🛍️ VITAMAX公式" value={"¥" + (vitaMonthly/10000).toFixed(1) + "万"} sub={vitaTarget > 0 ? "目標: " + Math.round(vitaMonthly/vitaTarget*100) + "%" : ""} color="#16a34a" icon="🛍️" />
       </div>
 
       <div style={{ display: "flex", gap: 6, marginBottom: 16, flexWrap: "wrap" }}>
-        {[["summary","📊 サマリー"],["live","🎁 LIVEギフト"],["tkt","🛒 TikTokショップ"],["ec","📦 ECサイト"],["partner","🤝 パートナー"]].map(([id, label]) => (
-          <button key={id} onClick={() => setHTab(id)} style={hBtn("#9333ea", hTab===id)}>{label}</button>
+        {[["summary","📊 サマリー"],["live","🎁 LIVEギフト"],["tkt","🛒 TikTokショップ"],["ec","📦 ECサイト"],["vitamax","🛍️ VITAMAX"],["partner","🤝 パートナー"]].map(([id, label]) => (
+          <button key={id} onClick={() => setHTab(id)} style={hBtn(id==="vitamax" ? "#16a34a" : "#9333ea", hTab===id)}>{label}</button>
         ))}
       </div>
 
@@ -1724,6 +1730,7 @@ function Huppy({ data }) {
                 <Tooltip formatter={v => "¥" + v.toLocaleString()} />
                 <Bar dataKey="LIVE" fill="#a855f7" radius={[0,0,0,0]} name="LIVEギフト" stackId="a" />
                 <Bar dataKey="TikTok" fill="#ff2d55" radius={[0,0,0,0]} name="TikTokショップ" stackId="a" />
+                <Bar dataKey="VITAMAX" fill="#16a34a" radius={[0,0,0,0]} name="VITAMAX公式" stackId="a" />
                 <Bar dataKey="EC" fill="#f59e0b" radius={[4,4,0,0]} name="ECサイト" stackId="a" />
               </BarChart>
             </ResponsiveContainer>
@@ -1841,7 +1848,7 @@ function Huppy({ data }) {
           {loading ? <div style={{ color: "#94a3b8", padding: 20 }}>読み込み中...</div> : (
             <Table
               headers={["日付", "チャネル", "商品名", "売上金額", "メモ", "操作"]}
-              rows={sales.filter(s => s.channel !== "tiktok_shop").map(s => [
+              rows={sales.filter(s => s.channel !== "tiktok_shop" && s.channel !== "vitamax").map(s => [
                 s.sale_date,
                 <Badge label={CHANNELS[s.channel] || s.channel} color={CHAN_COLOR[s.channel] || "#9333ea"} />,
                 s.product_name || "—",
@@ -1851,11 +1858,91 @@ function Huppy({ data }) {
               ])}
             />
           )}
-          {sales.filter(s => s.channel !== "tiktok_shop").length === 0 && !loading && <div style={{ textAlign: "center", color: "#94a3b8", padding: 30 }}>ECサイトの売上データがありません</div>}
+          {sales.filter(s => s.channel !== "tiktok_shop" && s.channel !== "vitamax").length === 0 && !loading && <div style={{ textAlign: "center", color: "#94a3b8", padding: 30 }}>ECサイトの売上データがありません</div>}
         </Section>
       )}
 
-      {hTab === "partner" && (
+            {hTab === "vitamax" && (
+        <Section title="🛍️ VITAMAX公式サイト管理" color="#16a34a">
+          <div style={{ display: "flex", gap: 8, marginBottom: 20, flexWrap: "wrap" }}>
+            <a href="https://vitamax-asia.com/wp-admin/admin.php?page=wc-reports" target="_blank" rel="noopener noreferrer" style={{ padding: "8px 16px", background: "#16a34a", color: "#fff", borderRadius: 8, fontWeight: 600, fontSize: 13, textDecoration: "none" }}>📊 WC注文確認</a>
+            <a href="https://vitamax-asia.com/wp-admin/post-new.php?post_type=product" target="_blank" rel="noopener noreferrer" style={{ padding: "8px 16px", background: "#15803d", color: "#fff", borderRadius: 8, fontWeight: 600, fontSize: 13, textDecoration: "none" }}>+ 商品登録</a>
+            <a href="https://vitamax-asia.com" target="_blank" rel="noopener noreferrer" style={{ padding: "8px 16px", background: "#dcfce7", color: "#16a34a", border: "1px solid #86efac", borderRadius: 8, fontWeight: 600, fontSize: 13, textDecoration: "none" }}>🌐 サイト確認</a>
+            <a href="https://vitamax-asia.com/wp-admin/" target="_blank" rel="noopener noreferrer" style={{ padding: "8px 16px", background: "#f0fdf4", color: "#16a34a", border: "1px solid #86efac", borderRadius: 8, fontWeight: 600, fontSize: 13, textDecoration: "none" }}>WP管理画面</a>
+          </div>
+          <div style={{ background: "#f0fdf4", border: "1px solid #86efac", borderRadius: 12, padding: 16, marginBottom: 20 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10, flexWrap: "wrap", gap: 8 }}>
+              <span style={{ fontWeight: 700, fontSize: 15 }}>🎯 今月目標 vs 実績</span>
+              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                <span style={{ fontSize: 12, color: "#64748b" }}>月次目標:</span>
+                <input type="number" value={vitaTarget} onChange={e => setVitaTarget(parseInt(e.target.value)||0)} style={{ width: 120, padding: "4px 8px", border: "1px solid #86efac", borderRadius: 6, fontSize: 13 }} step="10000" />
+                <span style={{ fontSize: 12 }}>円</span>
+              </div>
+            </div>
+            <div style={{ background: "#d1fae5", borderRadius: 8, height: 18, overflow: "hidden", marginBottom: 8 }}>
+              <div style={{ width: vitaTarget > 0 ? Math.min(100, vitaMonthly/vitaTarget*100) + "%" : "0%", height: "100%", background: vitaMonthly >= vitaTarget ? "#15803d" : "#16a34a", borderRadius: 8, transition: "width 0.5s" }} />
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 14 }}>
+              <span style={{ fontWeight: 700, color: "#16a34a" }}>¥{vitaMonthly.toLocaleString()}</span>
+              <span style={{ color: "#64748b" }}>/ ¥{vitaTarget.toLocaleString()} ({vitaTarget > 0 ? Math.round(vitaMonthly/vitaTarget*100) : 0}%){vitaMonthly >= vitaTarget ? " 🎉目標達成！" : ""}</span>
+            </div>
+          </div>
+          <div style={{ marginBottom: 12 }}>
+            <button onClick={() => { setNSale({ channel: "vitamax", product_name: "", amount: "", quantity: "1", sale_date: new Date().toISOString().split("T")[0], notes: "" }); setShowAddSale(true); }} style={{ padding: "7px 16px", background: "#16a34a", color: "#fff", border: "none", borderRadius: 6, cursor: "pointer", fontSize: 13, fontWeight: 600 }}>+ 売上追加</button>
+          </div>
+          {showAddSale && hTab === "vitamax" && (
+            <div style={{ background: "#f0fdf4", border: "1px solid #86efac", borderRadius: 10, padding: 16, marginBottom: 16 }}>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 10 }}>
+                <div style={{ gridColumn: "span 2" }}>
+                  <div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>商品名</div>
+                  <input style={{ padding: "6px 10px", border: "1px solid #e2e8f0", borderRadius: 6, fontSize: 13, width: "100%", boxSizing: "border-box" }} list="vita-products" value={nSale.product_name} onChange={e => setNSale(p => ({...p, product_name: e.target.value}))} placeholder="商品を選択または直接入力" />
+                  <datalist id="vita-products">{VITA_PRODUCTS.map(p => <option key={p} value={p} />)}</datalist>
+                </div>
+                <div><div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>売上金額（円）*</div><input style={{ padding: "6px 10px", border: "1px solid #e2e8f0", borderRadius: 6, fontSize: 13, width: "100%", boxSizing: "border-box" }} type="number" value={nSale.amount} onChange={e => setNSale(p => ({...p, amount: e.target.value}))} placeholder="0" /></div>
+                <div><div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>数量</div><input style={{ padding: "6px 10px", border: "1px solid #e2e8f0", borderRadius: 6, fontSize: 13, width: "100%", boxSizing: "border-box" }} type="number" value={nSale.quantity} onChange={e => setNSale(p => ({...p, quantity: e.target.value}))} /></div>
+                <div><div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>日付 *</div><input style={{ padding: "6px 10px", border: "1px solid #e2e8f0", borderRadius: 6, fontSize: 13, width: "100%", boxSizing: "border-box" }} type="date" value={nSale.sale_date} onChange={e => setNSale(p => ({...p, sale_date: e.target.value}))} /></div>
+                <div style={{ gridColumn: "span 2" }}><div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>メモ</div><input style={{ padding: "6px 10px", border: "1px solid #e2e8f0", borderRadius: 6, fontSize: 13, width: "100%", boxSizing: "border-box" }} value={nSale.notes} onChange={e => setNSale(p => ({...p, notes: e.target.value}))} /></div>
+              </div>
+              <div style={{ display: "flex", gap: 8 }}>
+                <button onClick={saveSale} style={{ padding: "7px 16px", background: "#16a34a", color: "#fff", border: "none", borderRadius: 6, cursor: "pointer", fontSize: 13, fontWeight: 600 }}>保存</button>
+                <button onClick={() => setShowAddSale(false)} style={{ padding: "7px 16px", background: "#94a3b8", color: "#fff", border: "none", borderRadius: 6, cursor: "pointer", fontSize: 13, fontWeight: 600 }}>キャンセル</button>
+              </div>
+            </div>
+          )}
+          {vitaSales.length > 0 && (() => {
+            const prodMap = {};
+            vitaSales.forEach(s => { const k = s.product_name || "その他"; prodMap[k] = (prodMap[k]||0) + (s.amount||0); });
+            const sorted = Object.entries(prodMap).sort((a,b) => b[1]-a[1]);
+            return (
+              <div style={{ marginBottom: 16 }}>
+                <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 8, color: "#15803d" }}>📦 商品別売上実績</div>
+                {sorted.map(([name, total]) => (
+                  <div key={name} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "7px 12px", background: "#f0fdf4", border: "1px solid #dcfce7", borderRadius: 8, marginBottom: 6 }}>
+                    <span style={{ fontSize: 13 }}>{name}</span>
+                    <span style={{ fontWeight: 700, color: "#16a34a" }}>¥{total.toLocaleString()}</span>
+                  </div>
+                ))}
+              </div>
+            );
+          })()}
+          {loading ? <div style={{ color: "#94a3b8", padding: 20 }}>読み込み中...</div> : (
+            <Table
+              headers={["日付", "商品名", "売上金額", "数量", "メモ", "操作"]}
+              rows={vitaSales.map(s => [
+                s.sale_date,
+                s.product_name || "—",
+                <span style={{ color: "#16a34a", fontWeight: 600 }}>¥{(s.amount||0).toLocaleString()}</span>,
+                s.quantity,
+                s.notes || "—",
+                <button onClick={() => deleteSale(s.id)} style={{ padding: "2px 8px", background: "#fee2e2", color: "#dc2626", border: "none", borderRadius: 4, cursor: "pointer", fontSize: 12 }}>🗑</button>
+              ])}
+            />
+          )}
+          {vitaSales.length === 0 && !loading && <div style={{ textAlign: "center", color: "#94a3b8", padding: 30 }}>VITAMAX公式の売上データがありません。「売上追加」から入力してください</div>}
+        </Section>
+      )}
+
+{hTab === "partner" && (
         <Section title="🤝 パートナー・案件管理" color="#9333ea">
           <Table
             headers={["パートナー名", "種別", "ステータス", "想定金額", "メモ"]}
