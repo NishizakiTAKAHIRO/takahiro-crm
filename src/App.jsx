@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { createClient } from "@supabase/supabase-js";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, LineChart, Line, ResponsiveContainer, Cell } from "recharts";
+import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts";
 import { SeekerManagement, JobPostingManagement } from "./SeekerJobManager";
 
 // ── Supabase ──────────────────────────────────────────────────
@@ -91,29 +91,29 @@ function extractCity(addr, pref) {
 
 function Badge({ label, color }) {
   return (
-    <span style={{ background: color || "#64748b", color: "#fff", borderRadius: 12, padding: "2px 10px", fontSize: 11, fontWeight: 600, whiteSpace: "nowrap" }}>
+    <span style={{ background: `${color || "#6366f1"}22`, color: color || "#6366f1", borderRadius: 20, padding: "3px 12px", fontSize: 11, fontWeight: 700, whiteSpace: "nowrap", border: `1px solid ${color || "#6366f1"}44`, backdropFilter: "blur(4px)" }}>
       {label}
     </span>
   );
 }
 
-function Card({ title, value, sub, color = "#2563eb", icon }) {
+function Card({ title, value, sub, color = "#6366f1", icon }) {
   return (
-    <div style={{ background: "#fff", borderRadius: 12, padding: "18px 20px", boxShadow: "0 1px 6px rgba(0,0,0,0.08)", borderLeft: `4px solid ${color}`, flex: 1, minWidth: 140 }}>
-      <div style={{ fontSize: 22, marginBottom: 4 }}>{icon}</div>
-      <div style={{ fontSize: 11, color: "#64748b", fontWeight: 600, letterSpacing: 0.5 }}>{title}</div>
-      <div style={{ fontSize: 26, fontWeight: 800, color, lineHeight: 1.2, marginTop: 4 }}>{value}</div>
-      {sub && <div style={{ fontSize: 11, color: "#94a3b8", marginTop: 4 }}>{sub}</div>}
+    <div style={{ background: "rgba(255,255,255,0.7)", backdropFilter: "blur(12px)", borderRadius: 16, padding: "20px 22px", boxShadow: "0 4px 24px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04)", border: "1px solid rgba(255,255,255,0.8)", flex: 1, minWidth: 140, transition: "transform 0.2s, box-shadow 0.2s" }}>
+      <div style={{ fontSize: 24, marginBottom: 6 }}>{icon}</div>
+      <div style={{ fontSize: 11, color: "#64748b", fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase" }}>{title}</div>
+      <div style={{ fontSize: 28, fontWeight: 800, background: `linear-gradient(135deg, ${color}, ${color}cc)`, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", lineHeight: 1.2, marginTop: 6 }}>{value}</div>
+      {sub && <div style={{ fontSize: 11, color: "#94a3b8", marginTop: 6 }}>{sub}</div>}
     </div>
   );
 }
 
-function Section({ title, color = "#2563eb", children }) {
+function Section({ title, color = "#6366f1", children }) {
   return (
     <div style={{ marginBottom: 32 }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
-        <div style={{ width: 4, height: 22, background: color, borderRadius: 2 }} />
-        <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: "#1e293b" }}>{title}</h3>
+      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
+        <div style={{ width: 6, height: 24, background: `linear-gradient(180deg, ${color}, ${color}88)`, borderRadius: 3 }} />
+        <h3 style={{ margin: 0, fontSize: 17, fontWeight: 800, color: "#1e293b", letterSpacing: -0.3 }}>{title}</h3>
       </div>
       {children}
     </div>
@@ -122,17 +122,17 @@ function Section({ title, color = "#2563eb", children }) {
 
 function Table({ headers, rows }) {
   return (
-    <div style={{ overflowX: "auto", borderRadius: 10, border: "1px solid #e2e8f0" }}>
+    <div style={{ overflowX: "auto", borderRadius: 14, background: "rgba(255,255,255,0.7)", backdropFilter: "blur(12px)", border: "1px solid rgba(255,255,255,0.8)", boxShadow: "0 4px 24px rgba(0,0,0,0.04)" }}>
       <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
         <thead>
           <tr>{headers.map((h, i) => (
-            <th key={i} style={{ background: "#f1f5f9", padding: "8px 12px", textAlign: "left", color: "#475569", fontWeight: 600, fontSize: 12, whiteSpace: "nowrap" }}>{h}</th>
+            <th key={i} style={{ background: "rgba(241,245,249,0.8)", padding: "10px 14px", textAlign: "left", color: "#475569", fontWeight: 700, fontSize: 12, whiteSpace: "nowrap", borderBottom: "2px solid #e2e8f0" }}>{h}</th>
           ))}</tr>
         </thead>
         <tbody>{rows.map((row, i) => (
-          <tr key={i} style={{ borderTop: "1px solid #e2e8f0", background: i % 2 === 0 ? "#fff" : "#fafafa" }}>
+          <tr key={i} style={{ borderTop: "1px solid #f1f5f9", background: i % 2 === 0 ? "transparent" : "rgba(248,250,252,0.5)", transition: "background 0.15s" }}>
             {row.map((cell, j) => (
-              <td key={j} style={{ padding: "8px 12px", color: "#1e293b" }}>{cell}</td>
+              <td key={j} style={{ padding: "10px 14px", color: "#1e293b" }}>{cell}</td>
             ))}
           </tr>
         ))}</tbody>
@@ -188,8 +188,7 @@ function ShareView() {
   if (!snap || !snap.kimero?.kpi || snap.kimero.kpi.length === 0) {
     return (
       <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100vh", fontFamily: "'Hiragino Sans', Arial, sans-serif", color: "#64748b", flexDirection: "column", gap: 12 }}>
-        <div style={{ fontSize: 40 }}>�
-</div>
+        <div style={{ fontSize: 40 }}>📊</div>
         <div>データ準備中です。しばらくお待ちください。</div>
       </div>
     );
@@ -205,22 +204,13 @@ function ShareView() {
   );
 
   return (
-    <div style={{ fontFamily: "'Hiragino Sans', 'Yu Gothic', Arial, sans-serif", background: "#f1f5f9", minHeight: "100vh" }}>
-      <style>{`
-        * { box-sizing: border-box; }
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: #f1f5f9; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
-        @media (max-width: 768px) {
-          .crm-tabs { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-          .crm-tabs button { white-space: nowrap; flex-shrink: 0; }
-        }
-      `}</style>
+    <div style={{ fontFamily: "'Inter', 'Hiragino Sans', 'Yu Gothic', -apple-system, sans-serif", background: "linear-gradient(135deg, #f0f4ff 0%, #faf5ff 40%, #fff5f5 70%, #f0fdf4 100%)", minHeight: "100vh" }}>
+      <style>{`@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');`}</style>
       {/* Header */}
-      <div style={{ background: "#1e3a5f", padding: "16px 24px" }}>
+      <div style={{ background: "rgba(255,255,255,0.85)", backdropFilter: "blur(20px)", padding: "18px 24px", borderBottom: "1px solid rgba(226,232,240,0.6)" }}>
         <div style={{ maxWidth: 900, margin: "0 auto" }}>
-          <div style={{ color: "#fff", fontWeight: 800, fontSize: 20 }}>👔 キメロコスメ 進捗ダッシュボード</div>
-          <div style={{ color: "#93c5fd", fontSize: 12, marginTop: 4, display: "flex", gap: 16, flexWrap: "wrap" }}>
+          <div style={{ fontWeight: 900, fontSize: 20, background: "linear-gradient(135deg, #6366f1, #8b5cf6)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>👔 キメロコスメ 進捗ダッシュボード</div>
+          <div style={{ color: "#94a3b8", fontSize: 12, marginTop: 4, display: "flex", gap: 16, flexWrap: "wrap", fontWeight: 500 }}>
             <span>{new Date().toLocaleDateString("ja-JP", { year: "numeric", month: "long", day: "numeric", weekday: "short" })}</span>
             {lastUpdated && <span>最終更新: {lastUpdated.toLocaleString("ja-JP")}</span>}
           </div>
@@ -230,7 +220,7 @@ function ShareView() {
       <div style={{ maxWidth: 900, margin: "0 auto", padding: "24px 16px" }}>
 
         {/* 全体達成率 */}
-        <div style={{ background: "#fff", borderRadius: 14, padding: 24, marginBottom: 24, boxShadow: "0 1px 6px rgba(0,0,0,0.08)", textAlign: "center" }}>
+        <div style={{ background: "rgba(255,255,255,0.7)", backdropFilter: "blur(12px)", borderRadius: 20, padding: 28, marginBottom: 24, boxShadow: "0 4px 24px rgba(0,0,0,0.04)", border: "1px solid rgba(255,255,255,0.8)", textAlign: "center" }}>
           <div style={{ fontSize: 13, color: "#64748b", fontWeight: 600, marginBottom: 8 }}>今月の総合達成率</div>
           <div style={{ fontSize: 52, fontWeight: 900, color: overallPct >= 80 ? "#22c55e" : overallPct >= 50 ? "#f59e0b" : "#ef4444", lineHeight: 1 }}>
             {overallPct}%
@@ -376,7 +366,7 @@ function KpiPanel({ kpi, setData }) {
               const color = pct >= 100 ? "#22c55e" : pct >= 60 ? "#f59e0b" : "#ef4444";
               const isMoneyKPI = k.unit === "円";
               return (
-                <div key={k.id} style={{ background: "#fff", borderRadius: 12, padding: 18, boxShadow: "0 1px 6px rgba(0,0,0,0.08)", border: `1px solid ${pct >= 100 ? "#bbf7d0" : "#e2e8f0"}` }}>
+                <div key={k.id} style={{ background: "rgba(255,255,255,0.7)", backdropFilter: "blur(12px)", borderRadius: 16, padding: 20, boxShadow: "0 4px 24px rgba(0,0,0,0.04)", border: `1px solid ${pct >= 100 ? "#bbf7d0" : "rgba(255,255,255,0.8)"}`, transition: "transform 0.2s" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
                     <span style={{ fontSize: 20 }}>{k.icon}</span>
                     <span style={{ fontWeight: 700, fontSize: 14, color: "#1e293b" }}>{k.name}</span>
@@ -433,7 +423,7 @@ function KpiPanel({ kpi, setData }) {
           </div>
         </Section>
       ))}
-      <div style={{ background: "#f8fafc", borderRadius: 10, padding: 12, marginTop: 8, fontSize: 12, color: "#94a3b8", textAlign: "center" }}>
+      <div style={{ background: "rgba(248,250,252,0.6)", backdropFilter: "blur(8px)", borderRadius: 12, padding: 12, marginTop: 8, fontSize: 12, color: "#94a3b8", textAlign: "center", border: "1px solid rgba(226,232,240,0.4)" }}>
         💡 実績・目標の数字をクリックすると編集できます
       </div>
     </div>
@@ -538,7 +528,7 @@ function CompanyList({ onAddContact }) {
   return (
     <div>
       <div style={{ display: "flex", gap: 12, marginBottom: 20, flexWrap: "wrap", alignItems: "center" }}>
-        <div style={{ fontWeight: 800, fontSize: 18, color: "#1e3a5f" }}>🏢 企業リスト</div>
+        <div style={{ fontWeight: 900, fontSize: 18, background: "linear-gradient(135deg, #6366f1, #8b5cf6)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>🏢 企業リスト</div>
         <div style={{ background: "#dbeafe", color: "#1d4ed8", borderRadius: 12, padding: "3px 12px", fontSize: 12, fontWeight: 700 }}>
           {filtered.length}件 / 全{companies.length}件
         </div>
@@ -579,10 +569,10 @@ function CompanyList({ onAddContact }) {
         )}
       </div>
 
-      <div style={{ background: "#fff", borderRadius: 12, boxShadow: "0 1px 6px rgba(0,0,0,0.08)", overflow: "auto" }}>
+      <div style={{ background: "rgba(255,255,255,0.7)", backdropFilter: "blur(12px)", borderRadius: 16, boxShadow: "0 4px 24px rgba(0,0,0,0.04)", border: "1px solid rgba(255,255,255,0.8)", overflow: "auto" }}>
         <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
           <thead>
-            <tr style={{ background: "#f8fafc", borderBottom: "2px solid #e2e8f0" }}>
+            <tr style={{ background: "rgba(241,245,249,0.8)", borderBottom: "2px solid #e2e8f0" }}>
               {["社名", "業種（大）", "業種（小）", "紹介実績", "求人状況", "アプローチ状況", "メモ", "操作"].map(h => (
                 <th key={h} style={{ padding: "10px 12px", textAlign: "left", color: "#475569", fontWeight: 700, whiteSpace: "nowrap" }}>{h}</th>
               ))}
@@ -691,7 +681,7 @@ function CompanyList({ onAddContact }) {
 const TABS = [
   { id: "dashboard", label: "📊 ダッシュボード" },
   { id: "kimero", label: "👔 キメロコスメ" },
-  { id: "smile", label: "🍱 スマォル&ナリッシュ" },
+  { id: "smile", label: "🍱 スマイル&ナリッシュ" },
   { id: "huppy", label: "🎵 フーピー" },
   { id: "tasks", label: "🔥 TODAY" },
 ];
@@ -714,14 +704,14 @@ function Dashboard({ data }) {
   const goalData = [
     { name: "フーピー", 現在: huppyCurrent.personal, 目標: 500000 },
     { name: "キメロ", 現在: 0, 目標: 400000 },
-    { name: "スマォル", 現在: 0, 目標: 150000 },
+    { name: "スマイル", 現在: 0, 目標: 150000 },
   ];
 
   return (
     <div>
-      <div style={{ marginBottom: 24 }}>
-        <h2 style={{ margin: 0, fontSize: 20, fontWeight: 800, color: "#1e293b" }}>全社ダッシュボード</h2>
-        <p style={{ margin: "4px 0 0", color: "#64748b", fontSize: 13 }}>月収100万円達成ロードマップ</p>
+      <div style={{ marginBottom: 28 }}>
+        <h2 style={{ margin: 0, fontSize: 22, fontWeight: 900, color: "#1e293b", letterSpacing: -0.5 }}>全社ダッシュボード</h2>
+        <p style={{ margin: "6px 0 0", color: "#94a3b8", fontSize: 13, fontWeight: 500 }}>月収100万円達成ロードマップ</p>
       </div>
       <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 24 }}>
         <Card title="個人報酬合計（今月）" value={`${((huppyCurrent.personal)/10000).toFixed(0)}万円`} sub="目標：100万円" color="#2563eb" icon="💰" />
@@ -731,8 +721,8 @@ function Dashboard({ data }) {
         <Card title="キメロ KPI達成率" value={`${kpiAvg}%`} sub={`${data.kimero.kpi.length}KPI追跡中`} color={kpiAvg >= 80 ? "#22c55e" : kpiAvg >= 50 ? "#f59e0b" : "#ef4444"} icon="🎯" />
         <Card title="今日のTASK達成" value={`${taskDone}/${taskTotal}`} sub={`${Math.round(taskDone/taskTotal*100)}%`} color="#ef4444" icon="🔥" />
       </div>
-      <div style={{ background: "#fff", borderRadius: 12, padding: 20, boxShadow: "0 1px 6px rgba(0,0,0,0.08)", marginBottom: 20 }}>
-        <h4 style={{ margin: "0 0 16px", fontSize: 13, color: "#475569", fontWeight: 700 }}>👔 キメロコスメ KPI進捗（今月）</h4>
+      <div style={{ background: "rgba(255,255,255,0.7)", backdropFilter: "blur(12px)", borderRadius: 16, padding: 24, boxShadow: "0 4px 24px rgba(0,0,0,0.04)", border: "1px solid rgba(255,255,255,0.8)", marginBottom: 24 }}>
+        <h4 style={{ margin: "0 0 16px", fontSize: 14, color: "#475569", fontWeight: 700 }}>👔 キメロコスメ KPI進捗（今月）</h4>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: 10 }}>
           {data.kimero.kpi.map(k => {
             const pct = k.target > 0 ? Math.min(100, Math.round((k.actual / k.target) * 100)) : 0;
@@ -755,8 +745,8 @@ function Dashboard({ data }) {
         </div>
       </div>
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 24 }}>
-        <div style={{ background: "#fff", borderRadius: 12, padding: 20, boxShadow: "0 1px 6px rgba(0,0,0,0.08)" }}>
-          <h4 style={{ margin: "0 0 16px", fontSize: 13, color: "#475569", fontWeight: 700 }}>事業別売上（今月）</h4>
+        <div style={{ background: "rgba(255,255,255,0.7)", backdropFilter: "blur(12px)", borderRadius: 16, padding: 24, boxShadow: "0 4px 24px rgba(0,0,0,0.04)", border: "1px solid rgba(255,255,255,0.8)" }}>
+          <h4 style={{ margin: "0 0 16px", fontSize: 14, color: "#475569", fontWeight: 700 }}>事業別売上（今月）</h4>
           <ResponsiveContainer width="100%" height={180}>
             <BarChart data={bizData} barSize={28}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
@@ -768,8 +758,8 @@ function Dashboard({ data }) {
             </BarChart>
           </ResponsiveContainer>
         </div>
-        <div style={{ background: "#fff", borderRadius: 12, padding: 20, boxShadow: "0 1px 6px rgba(0,0,0,0.08)" }}>
-          <h4 style={{ margin: "0 0 16px", fontSize: 13, color: "#475569", fontWeight: 700 }}>目標達成率</h4>
+        <div style={{ background: "rgba(255,255,255,0.7)", backdropFilter: "blur(12px)", borderRadius: 16, padding: 24, boxShadow: "0 4px 24px rgba(0,0,0,0.04)", border: "1px solid rgba(255,255,255,0.8)" }}>
+          <h4 style={{ margin: "0 0 16px", fontSize: 14, color: "#475569", fontWeight: 700 }}>目標達成率</h4>
           {goalData.map(g => {
             const pct = Math.min(100, Math.round(g.現在 / g.目標 * 100));
             return (
@@ -866,13 +856,24 @@ function Kimero({ data, setData }) {
 
   // ── タグ管理 ──
   function addTag(contactId, tagText) {
-    const key = String(contactId); const t = tagText.trim(); if (!t) return;
-    setTags(prev => { const next = { ...prev, [key]: [...new Set([...(prev[key] || []), t])] }; localStorage.setItem("crm_tags", JSON.stringify(next)); return next; });
+    const key = String(contactId);
+    const t = tagText.trim();
+    if (!t) return;
+    setTags(prev => {
+      const next = { ...prev, [key]: [...new Set([...(prev[key] || []), t])] };
+      localStorage.setItem("crm_tags", JSON.stringify(next));
+      return next;
+    });
   }
   function removeTag(contactId, tagText) {
     const key = String(contactId);
-    setTags(prev => { const next = { ...prev, [key]: (prev[key] || []).filter(t => t !== tagText) }; localStorage.setItem("crm_tags", JSON.stringify(next)); return next; });
+    setTags(prev => {
+      const next = { ...prev, [key]: (prev[key] || []).filter(t => t !== tagText) };
+      localStorage.setItem("crm_tags", JSON.stringify(next));
+      return next;
+    });
   }
+
   // ── 保存フィルター ──
   function saveCurrentFilter() {
     if (!filterName.trim()) return;
@@ -890,12 +891,45 @@ function Kimero({ data, setData }) {
   function deleteSavedFilter(idx) {
     setSavedFilters(prev => { const next = prev.filter((_,i) => i !== idx); localStorage.setItem("crm_saved_filters", JSON.stringify(next)); return next; });
   }
+
   // ── メールテンプレート ──
   const MAIL_TEMPLATES = {
-    "初回コンタクト": (c) => `件名: 【ご挨拶】${c.company_name||"貴社"}様へのご提案\n\n${c.person?`${c.person}様\n\n`:""}お世話になっております。\nキメロコスメ 営業担当と申します。\n\nこの度は弊社サービスについてご案内させていただきたくご連絡いたしました。\n人材派遣・職業紹介のご支援を通じて、貴社の採用課題解決のお力になれればと存じます。\n\nご都合のよろしい際に、一度お打ち合わせのお時間をいただけますでしょうか。\n\n何卒よろしくお願いいたします。`,
-    "フォローアップ": (c) => `件名: 【ご確認】先日ご提案の件について\n\n${c.person?`${c.person}様\n\n`:""}先日はお時間をいただきありがとうございました。\n\n先日ご提案させていただいた件について、ご検討状況はいかがでしょうか。\n\n引き続きよろしくお願いいたします。`,
-    "商談後御礼": (c) => `件名: 【御礼】本日はありがとうございました\n\n${c.person?`${c.person}様\n\n`:""}本日はお忙しい中、貴重なお時間をいただきありがとうございました。\n\n近日中に詳細をお送りいたします。\n\n今後ともどうぞよろしくお願いいたします。`,
-    "提案書送付": (c) => `件名: 【ご提案】${c.company_name||"貴社"}様向け人材サービスのご案内\n\n${c.person?`${c.person}様\n\n`:""}お世話になっております。\n\nご要望いただいた内容に基づき、提案書を作成いたしましたのでご送付いたします。\n${c.type?`今回は「${c.type}」のご提案となっております。\n`:""}\nよろしくお願いいたします。`
+    "初回コンタクト": (c) => `件名: 【ご挨拶】${c.company_name || "貴社"}様へのご提案
+
+${c.person ? `${c.person}様\n\n` : ""}お世話になっております。
+キメロコスメ　営業担当と申します。
+
+この度は弊社サービスについてご案内させていただきたくご連絡いたしました。
+人材派遣・職業紹介のご支援を通じて、貴社の採用課題解決のお力になれればと存じます。
+
+ご都合のよろしい際に、一度お打ち合わせのお時間をいただけますでしょうか。
+
+何卒よろしくお願いいたします。`,
+    "フォローアップ": (c) => `件名: 【ご確認】先日ご提案の件について
+
+${c.person ? `${c.person}様\n\n` : ""}先日はお時間をいただきありがとうございました。
+
+先日ご提案させていただいた件について、ご検討状況はいかがでしょうか。
+ご不明な点がございましたら、お気軽にご連絡ください。
+
+引き続きよろしくお願いいたします。`,
+    "商談後御礼": (c) => `件名: 【御礼】本日はありがとうございました
+
+${c.person ? `${c.person}様\n\n` : ""}本日はお忙しい中、貴重なお時間をいただきありがとうございました。
+
+ご提示いただいたご要望につきまして、弊社にて対応可能な内容をご提案させていただきたく存じます。
+近日中に詳細をお送りいたします。
+
+今後ともどうぞよろしくお願いいたします。`,
+    "提案書送付": (c) => `件名: 【ご提案】${c.company_name || "貴社"}様向け人材サービスのご案内
+
+${c.person ? `${c.person}様\n\n` : ""}お世話になっております。
+
+ご要望いただいた内容に基づき、提案書を作成いたしましたのでご送付いたします。
+${c.type ? `今回は「${c.type}」のご提案となっております。\n` : ""}
+ご確認いただき、ご意見・ご要望がございましたらお気軽にご連絡ください。
+
+よろしくお願いいたします。`
   };
 
   function handleCompanyInput(val) {
@@ -978,18 +1012,18 @@ function Kimero({ data, setData }) {
       notes: editContactRow.notes || null,
     }).eq("id", id);
     if (!error) {
-      const oldC = contacts.find(c => c.id === id);
-      if (oldC) {
+      const oldContact = contacts.find(c => c.id === id);
+      if (oldContact) {
         const changes = [];
-        if (oldC.status !== editContactRow.status) changes.push(`ステータス: ${oldC.status} → ${editContactRow.status}`);
-        if ((oldC.next_action||"") !== (editContactRow.next_action||"")) changes.push(`次回AK: ${oldC.next_action||"なし"} → ${editContactRow.next_action||"なし"}`);
-        if ((oldC.person||"") !== (editContactRow.person||"")) changes.push(`担当者: ${oldC.person||"なし"} → ${editContactRow.person||"なし"}`);
-        if ((oldC.job_status||"") !== (editContactRow.job_status||"")) changes.push(`求人状況: ${oldC.job_status||"なし"} → ${editContactRow.job_status||"なし"}`);
+        if (oldContact.status !== editContactRow.status) changes.push(`ステータス: ${oldContact.status} → ${editContactRow.status}`);
+        if ((oldContact.next_action || "") !== (editContactRow.next_action || "")) changes.push(`次回AK: ${oldContact.next_action || "なし"} → ${editContactRow.next_action || "なし"}`);
+        if ((oldContact.person || "") !== (editContactRow.person || "")) changes.push(`担当者: ${oldContact.person || "なし"} → ${editContactRow.person || "なし"}`);
+        if ((oldContact.job_status || "") !== (editContactRow.job_status || "")) changes.push(`求人状況: ${oldContact.job_status || "なし"} → ${editContactRow.job_status || "なし"}`);
         if (changes.length > 0) {
           setContactHistory(prev => {
             const key = String(id);
-            const entry = { date: new Date().toISOString().slice(0,16).replace("T"," "), changes };
-            const next = { ...prev, [key]: [entry,...(prev[key]||[])].slice(0,50) };
+            const entry = { date: new Date().toISOString().slice(0, 16).replace("T", " "), changes };
+            const next = { ...prev, [key]: [entry, ...(prev[key] || [])].slice(0, 50) };
             localStorage.setItem("crm_history", JSON.stringify(next));
             return next;
           });
@@ -1010,13 +1044,15 @@ function Kimero({ data, setData }) {
       c.prefecture||"", c.city||"", c.status||"", c.job_status||"",
       c.contact_date||"", c.next_action||"", (c.notes||"").replace(/"/g,'""')
     ]);
-    const csv = [headers, ...rows].map(r => r.map(v => '"' + String(v).replace(/"/g,'""') + '"').join(",")).join("\n");
+    const csv = [headers, ...rows].map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(",")).join("\n");
     const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a"); a.href = url;
-    a.download = "contacts_" + new Date().toISOString().split("T")[0] + ".csv"; a.click();
+    a.download = `contacts_${new Date().toISOString().split("T")[0]}.csv`; a.click();
     URL.revokeObjectURL(url);
   }
+
+  // ── CSV インポート ──
   async function importCSV(e) {
     const file = e.target.files[0]; if (!file) return;
     setImportMsg("読み込み中...");
@@ -1030,26 +1066,31 @@ function Kimero({ data, setData }) {
     if (rows.length === 0) { setImportMsg("有効なデータがありません"); e.target.value=""; return; }
     const { data: inserted, error } = await supabase.from("contacts").insert(rows).select();
     if (error) { setImportMsg("エラー: " + error.message); }
-    else { setContacts(prev => [...inserted, ...prev]); setImportMsg("✅ " + inserted.length + "件インポート完了"); }
+    else { setContacts(prev => [...inserted, ...prev]); setImportMsg(`✅ ${inserted.length}件インポート完了`); }
     e.target.value="";
     setTimeout(() => setImportMsg(""), 4000);
   }
+
+  // ── 一括削除 ──
   async function bulkDelete() {
     if (selectedIds.size === 0) return;
-    if (!window.confirm("選択した" + selectedIds.size + "件を削除しますか？この操作は元に戻せません。")) return;
+    if (!window.confirm(`選択した${selectedIds.size}件を削除しますか？この操作は元に戻せません。`)) return;
     setBulkDeleting(true);
     const ids = [...selectedIds];
     const { error } = await supabase.from("contacts").delete().in("id", ids);
     if (!error) { setContacts(prev => prev.filter(c => !selectedIds.has(c.id))); setSelectedIds(new Set()); }
     setBulkDeleting(false);
   }
+
+  // ── 一括ステータス変更 ──
   async function bulkChangeStatus() {
     if (selectedIds.size === 0 || !bulkStatus) return;
     const ids = [...selectedIds];
     const { error } = await supabase.from("contacts").update({ status: bulkStatus }).in("id", ids);
     if (!error) { setContacts(prev => prev.map(c => selectedIds.has(c.id) ? {...c, status: bulkStatus} : c)); setSelectedIds(new Set()); setBulkStatus(""); }
   }
-    const statusCount = ["初回コンタクト","提案済","商談中","契約済"].map(s => ({
+
+  const statusCount = ["初回コンタクト","提案済","商談中","契約済"].map(s => ({
     status: s, count: contacts.filter(c => c.status === s).length
   }));
 
@@ -1058,9 +1099,13 @@ function Kimero({ data, setData }) {
   const today = new Date().toISOString().split("T")[0];
   const allTags = [...new Set(Object.values(tags).flat())].sort();
   const filtered = contacts.filter(c => {
-    const terms = search.trim().split(/\s+/).filter(Boolean);
-    const field = `${c.company_name||""} ${c.person||""} ${c.contact_info||""} ${c.notes||""}`.toLowerCase();
-    const ms = terms.length === 0 || (searchMode === "AND" ? terms.every(t => field.includes(t.toLowerCase())) : terms.some(t => field.includes(t.toLowerCase())));
+    const searchTerms = search.trim().split(/\s+/).filter(Boolean);
+    const searchField = `${c.company_name||""} ${c.person||""} ${c.contact_info||""} ${c.notes||""}`.toLowerCase();
+    const ms = searchTerms.length === 0 || (
+      searchMode === "AND"
+        ? searchTerms.every(t => searchField.includes(t.toLowerCase()))
+        : searchTerms.some(t => searchField.includes(t.toLowerCase()))
+    );
     const cTags = tags[String(c.id)] || [];
     return ms
       && (!filterPref || c.prefecture === filterPref)
@@ -1149,11 +1194,12 @@ function Kimero({ data, setData }) {
           </div>
           {/* ── フィルターバー ── */}
           <div style={{ background: "#eff6ff", borderRadius: 8, border: "1px solid #bfdbfe", marginBottom: 12, overflow: "hidden" }}>
+            {/* 1行目: 基本フィルター */}
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center", padding: "10px 14px", borderBottom: "1px solid #bfdbfe" }}>
               <span style={{ fontSize: 12, fontWeight: 700, color: "#2563eb" }}>🔍</span>
               <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
                 <input value={search} onChange={e => setSearch(e.target.value)} placeholder="会社名・担当者・メモ…" style={{ padding: "5px 10px", borderRadius: 6, border: "1px solid #bfdbfe", fontSize: 12, width: 180 }} />
-                <button onClick={() => setSearchMode(m => m === "OR" ? "AND" : "OR")} style={{ padding: "5px 8px", borderRadius: 6, border: "1px solid #bfdbfe", background: searchMode === "AND" ? "#2563eb" : "#fff", color: searchMode === "AND" ? "#fff" : "#2563eb", fontSize: 11, fontWeight: 700, cursor: "pointer" }}>{searchMode}</button>
+                <button onClick={() => setSearchMode(m => m === "OR" ? "AND" : "OR")} title="検索モード切替" style={{ padding: "5px 8px", borderRadius: 6, border: "1px solid #bfdbfe", background: searchMode === "AND" ? "#2563eb" : "#fff", color: searchMode === "AND" ? "#fff" : "#2563eb", fontSize: 11, fontWeight: 700, cursor: "pointer" }}>{searchMode}</button>
               </div>
               <select value={filterPref} onChange={e => setFilterPref(e.target.value)} style={{ padding: "5px 10px", borderRadius: 6, border: "1px solid #bfdbfe", fontSize: 12 }}>
                 <option value="">都道府県 全て</option>
@@ -1188,6 +1234,7 @@ function Kimero({ data, setData }) {
                 <span style={{ marginLeft: 4, fontSize: 12, color: "#64748b", fontWeight: 600 }}>{sorted.length}件</span>
               </div>
             </div>
+            {/* 2行目: 日付フィルター */}
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center", padding: "8px 14px", borderBottom: "1px solid #bfdbfe", background: "#f8faff" }}>
               <span style={{ fontSize: 11, fontWeight: 700, color: "#64748b" }}>📅 日付範囲</span>
               <span style={{ fontSize: 11, color: "#94a3b8" }}>コンタクト日:</span>
@@ -1198,18 +1245,22 @@ function Kimero({ data, setData }) {
               <input type="date" value={filterNextFrom} onChange={e => setFilterNextFrom(e.target.value)} style={{ padding: "3px 8px", borderRadius: 5, border: "1px solid #bfdbfe", fontSize: 12 }} />
               <span style={{ fontSize: 11, color: "#94a3b8" }}>〜</span>
               <input type="date" value={filterNextTo} onChange={e => setFilterNextTo(e.target.value)} style={{ padding: "3px 8px", borderRadius: 5, border: "1px solid #bfdbfe", fontSize: 12 }} />
+              {/* 今週のAK */}
               <button onClick={() => { const d = new Date(); const mon = new Date(d); mon.setDate(d.getDate() - d.getDay() + 1); const sun = new Date(mon); sun.setDate(mon.getDate() + 6); setFilterNextFrom(mon.toISOString().split("T")[0]); setFilterNextTo(sun.toISOString().split("T")[0]); }} style={{ padding: "3px 9px", borderRadius: 5, border: "1px solid #bfdbfe", background: "#fff", color: "#2563eb", fontSize: 11, cursor: "pointer", fontWeight: 600 }}>今週</button>
               <button onClick={() => { setFilterNextFrom(today); setFilterNextTo(today); }} style={{ padding: "3px 9px", borderRadius: 5, border: "1px solid #fca5a5", background: "#fff7f7", color: "#ef4444", fontSize: 11, cursor: "pointer", fontWeight: 600 }}>🔴 本日</button>
             </div>
+            {/* 3行目: アクションボタン + 保存フィルター */}
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center", padding: "8px 14px" }}>
               <button onClick={exportCSV} style={{ padding: "5px 12px", borderRadius: 6, border: "1px solid #bbf7d0", background: "#f0fdf4", color: "#16a34a", fontSize: 12, cursor: "pointer", fontWeight: 600 }}>📤 CSV出力</button>
-              <label style={{ padding: "5px 12px", borderRadius: 6, border: "1px solid #bfdbfe", background: "#eff6ff", color: "#2563eb", fontSize: 12, cursor: "pointer", fontWeight: 600 }}>📥 CSV取込 <input type="file" accept=".csv" onChange={importCSV} style={{ display: "none" }} /></label>
+              <label style={{ padding: "5px 12px", borderRadius: 6, border: "1px solid #bfdbfe", background: "#eff6ff", color: "#2563eb", fontSize: 12, cursor: "pointer", fontWeight: 600 }}>
+                📥 CSV取込 <input type="file" accept=".csv" onChange={importCSV} style={{ display: "none" }} />
+              </label>
               {importMsg && <span style={{ fontSize: 11, color: importMsg.startsWith("✅") ? "#16a34a" : "#ef4444", fontWeight: 600 }}>{importMsg}</span>}
               <button onClick={() => setShowAnalytics(a => !a)} style={{ padding: "5px 12px", borderRadius: 6, border: "1px solid #e9d5ff", background: showAnalytics ? "#9333ea" : "#faf5ff", color: showAnalytics ? "#fff" : "#9333ea", fontSize: 12, cursor: "pointer", fontWeight: 600 }}>📊 分析</button>
               <button onClick={() => setViewMode(v => v === "table" ? "kanban" : "table")} style={{ padding: "5px 12px", borderRadius: 6, border: "1px solid #fde68a", background: viewMode === "kanban" ? "#f59e0b" : "#fffbeb", color: viewMode === "kanban" ? "#fff" : "#d97706", fontSize: 12, cursor: "pointer", fontWeight: 600 }}>🗂 {viewMode === "table" ? "カンバン表示" : "テーブル表示"}</button>
-              <button onClick={() => { if (!notifEnabled && typeof Notification !== "undefined") Notification.requestPermission().then(p => { if (p === "granted") setNotifEnabled(true); }); }} style={{ padding: "5px 12px", borderRadius: 6, border: "1px solid #fde68a", background: notifEnabled ? "#f59e0b" : "#fffbeb", color: notifEnabled ? "#fff" : "#d97706", fontSize: 12, cursor: notifEnabled ? "default" : "pointer", fontWeight: 600 }}>{notifEnabled ? "🔔 通知ON" : "🔔 通知許可"}</button>
-              <button onClick={() => setShowFilterSave(x => !x)} style={{ padding: "5px 12px", borderRadius: 6, border: "1px solid #e2e8f0", background: "#fff", color: "#475569", fontSize: 12, cursor: "pointer", fontWeight: 600 }}>📌 フィルター保存</button>
-              {savedFilters.map((f, i) => (
+              <button onClick={() => { if (!notifEnabled) { Notification.requestPermission().then(p => { if (p === "granted") setNotifEnabled(true); }); } }} style={{ padding: "5px 12px", borderRadius: 6, border: "1px solid #fde68a", background: notifEnabled ? "#f59e0b" : "#fffbeb", color: notifEnabled ? "#fff" : "#d97706", fontSize: 12, cursor: notifEnabled ? "default" : "pointer", fontWeight: 600 }}>{notifEnabled ? "🔔 通知ON" : "🔔 通知許可"}</button>
+              <button onClick={() => setShowFilterSave(s => !s)} style={{ padding: "5px 12px", borderRadius: 6, border: "1px solid #e2e8f0", background: "#fff", color: "#475569", fontSize: 12, cursor: "pointer", fontWeight: 600 }}>📌 フィルター保存</button>
+              {savedFilters.length > 0 && savedFilters.map((f, i) => (
                 <div key={i} style={{ display: "flex", alignItems: "center", gap: 2 }}>
                   <button onClick={() => loadFilter(f)} style={{ padding: "3px 8px", borderRadius: 5, border: "1px solid #cbd5e1", background: "#f8fafc", color: "#2563eb", fontSize: 11, cursor: "pointer" }}>📌 {f.name}</button>
                   <button onClick={() => deleteSavedFilter(i)} style={{ padding: "2px 5px", borderRadius: 5, border: "none", background: "transparent", color: "#94a3b8", fontSize: 11, cursor: "pointer" }}>✕</button>
@@ -1225,32 +1276,46 @@ function Kimero({ data, setData }) {
           </div>
           {/* ── 分析グラフ ── */}
           {showAnalytics && (() => {
+            // 月別登録推移データ
             const monthlyMap = {};
-            contacts.forEach(c => { const m = (c.contact_date||c.created_at||"").slice(0,7); if(m) monthlyMap[m]=(monthlyMap[m]||0)+1; });
-            const monthlyData = Object.entries(monthlyMap).sort().slice(-12).map(([m,n]) => ({ name: m.replace("-","/"), 件数: n }));
+            contacts.forEach(c => {
+              const m = (c.contact_date || c.created_at || "").slice(0, 7);
+              if (m) monthlyMap[m] = (monthlyMap[m] || 0) + 1;
+            });
+            const monthlyData = Object.entries(monthlyMap).sort().slice(-12).map(([m, n]) => ({ name: m.replace("-", "/"), 件数: n }));
+            // 都道府県別ランキング (上位10)
             const prefMap = {};
-            contacts.forEach(c => { if(c.prefecture) prefMap[c.prefecture]=(prefMap[c.prefecture]||0)+1; });
-            const prefData = Object.entries(prefMap).sort((a,b)=>b[1]-a[1]).slice(0,10).map(([p,n])=>({ name:p, 件数:n }));
+            contacts.forEach(c => { if (c.prefecture) prefMap[c.prefecture] = (prefMap[c.prefecture] || 0) + 1; });
+            const prefData = Object.entries(prefMap).sort((a,b) => b[1]-a[1]).slice(0,10).map(([p,n]) => ({ name: p, 件数: n }));
+            // ファネル（ステータス進捗）
             const statuses = ["初回コンタクト","提案済","商談中","契約済","失注"];
-            const fColors = ["#94a3b8","#60a5fa","#f59e0b","#22c55e","#ef4444"];
-            const fData = statuses.map((st,i) => ({ name:st, 件数:contacts.filter(c=>c.status===st).length, color:fColors[i] }));
+            const funnelColors = ["#94a3b8","#60a5fa","#f59e0b","#22c55e","#ef4444"];
+            const funnelData = statuses.map((s,i) => ({ name: s, 件数: contacts.filter(c=>c.status===s).length, color: funnelColors[i] }));
             return (
               <div style={{ marginBottom: 16 }}>
                 <div style={{ display: "flex", gap: 16, flexWrap: "wrap", marginBottom: 16 }}>
                   <div style={{ flex: 1, minWidth: 260, background: "#fff", borderRadius: 10, padding: 16, border: "1px solid #e9d5ff" }}>
                     <div style={{ fontSize: 12, fontWeight: 700, color: "#9333ea", marginBottom: 8 }}>ステータス別件数</div>
                     <ResponsiveContainer width="100%" height={160}>
-                      <BarChart data={fData} layout="vertical">
-                        <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" /><XAxis type="number" /><YAxis type="category" dataKey="name" width={90} style={{ fontSize: 10 }} /><Tooltip />
-                        <Bar dataKey="件数" radius={[0,4,4,0]}>{fData.map((d,i)=><Cell key={i} fill={d.color}/>)}</Bar>
+                      <BarChart data={funnelData} layout="vertical">
+                        <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                        <XAxis type="number" />
+                        <YAxis type="category" dataKey="name" width={90} style={{ fontSize: 10 }} />
+                        <Tooltip />
+                        <Bar dataKey="件数" radius={[0,4,4,0]}>
+                          {funnelData.map((d,i) => <Cell key={i} fill={d.color} />)}
+                        </Bar>
                       </BarChart>
                     </ResponsiveContainer>
                   </div>
                   <div style={{ flex: 1, minWidth: 260, background: "#fff", borderRadius: 10, padding: 16, border: "1px solid #bfdbfe" }}>
                     <div style={{ fontSize: 12, fontWeight: 700, color: "#2563eb", marginBottom: 8 }}>種別件数</div>
                     <ResponsiveContainer width="100%" height={160}>
-                      <BarChart data={["人材派遣","職業紹介","業務委託","BPO"].map(t=>({ name:t, 件数:contacts.filter(c=>c.type===t).length }))}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" /><XAxis dataKey="name" style={{ fontSize:10 }} /><YAxis /><Tooltip />
+                      <BarChart data={["人材派遣","職業紹介","業務委託","BPO"].map(t => ({ name: t, 件数: contacts.filter(c=>c.type===t).length }))}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                        <XAxis dataKey="name" style={{ fontSize: 10 }} />
+                        <YAxis />
+                        <Tooltip />
                         <Bar dataKey="件数" fill="#2563eb" radius={[4,4,0,0]} />
                       </BarChart>
                     </ResponsiveContainer>
@@ -1258,20 +1323,26 @@ function Kimero({ data, setData }) {
                   <div style={{ flex: 1, minWidth: 260, background: "#fff", borderRadius: 10, padding: 16, border: "1px solid #bbf7d0" }}>
                     <div style={{ fontSize: 12, fontWeight: 700, color: "#16a34a", marginBottom: 8 }}>求人状況</div>
                     <ResponsiveContainer width="100%" height={160}>
-                      <BarChart data={["確認中","求人あり","求人なし"].map(j=>({ name:j, 件数:contacts.filter(c=>c.job_status===j).length }))}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" /><XAxis dataKey="name" style={{ fontSize:10 }} /><YAxis /><Tooltip />
+                      <BarChart data={["確認中","求人あり","求人なし"].map(j => ({ name: j, 件数: contacts.filter(c=>c.job_status===j).length }))}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                        <XAxis dataKey="name" style={{ fontSize: 10 }} />
+                        <YAxis />
+                        <Tooltip />
                         <Bar dataKey="件数" fill="#16a34a" radius={[4,4,0,0]} />
                       </BarChart>
                     </ResponsiveContainer>
                   </div>
                 </div>
-                <div style={{ display: "flex", gap: 16, flexWrap: "wrap", marginBottom: 16 }}>
+                <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
                   <div style={{ flex: 2, minWidth: 300, background: "#fff", borderRadius: 10, padding: 16, border: "1px solid #fde68a" }}>
                     <div style={{ fontSize: 12, fontWeight: 700, color: "#d97706", marginBottom: 8 }}>📈 月別登録推移（直近12ヶ月）</div>
                     <ResponsiveContainer width="100%" height={160}>
                       <LineChart data={monthlyData}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" /><XAxis dataKey="name" style={{ fontSize:10 }} /><YAxis /><Tooltip />
-                        <Line type="monotone" dataKey="件数" stroke="#d97706" strokeWidth={2} dot={{ r:4 }} />
+                        <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                        <XAxis dataKey="name" style={{ fontSize: 10 }} />
+                        <YAxis />
+                        <Tooltip />
+                        <Line type="monotone" dataKey="件数" stroke="#d97706" strokeWidth={2} dot={{ r: 4 }} />
                       </LineChart>
                     </ResponsiveContainer>
                   </div>
@@ -1279,66 +1350,83 @@ function Kimero({ data, setData }) {
                     <div style={{ fontSize: 12, fontWeight: 700, color: "#dc2626", marginBottom: 8 }}>🗺 都道府県別ランキング（上位10）</div>
                     <ResponsiveContainer width="100%" height={160}>
                       <BarChart data={prefData} layout="vertical">
-                        <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" /><XAxis type="number" /><YAxis type="category" dataKey="name" width={70} style={{ fontSize:10 }} /><Tooltip />
+                        <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                        <XAxis type="number" />
+                        <YAxis type="category" dataKey="name" width={70} style={{ fontSize: 10 }} />
+                        <Tooltip />
                         <Bar dataKey="件数" fill="#dc2626" radius={[0,4,4,0]} />
                       </BarChart>
                     </ResponsiveContainer>
                   </div>
                 </div>
-                <div style={{ background: "#fff", borderRadius: 10, padding: 16, border: "1px solid #e2e8f0" }}>
+                {/* ファネル分析 */}
+                <div style={{ background: "#fff", borderRadius: 10, padding: 16, border: "1px solid #e2e8f0", marginTop: 16 }}>
                   <div style={{ fontSize: 12, fontWeight: 700, color: "#475569", marginBottom: 12 }}>🎯 ファネル分析（ステータス進捗）</div>
                   <div style={{ display: "flex", gap: 4, alignItems: "flex-end", height: 100 }}>
-                    {(() => { const mx = Math.max(...fData.map(d=>d.件数),1); return fData.map((d,i)=>( <div key={i} style={{ flex:1, display:"flex", flexDirection:"column", alignItems:"center", gap:4 }}><span style={{ fontSize:11, fontWeight:700, color:d.color }}>{d.件数}</span><div style={{ width:"100%", height:Math.max(8,d.件数/mx*80), background:d.color, borderRadius:"4px 4px 0 0" }}/><span style={{ fontSize:9, color:"#64748b", textAlign:"center", whiteSpace:"nowrap" }}>{d.name}</span></div> )); })()}
+                    {(() => {
+                      const max = Math.max(...funnelData.map(d => d.件数), 1);
+                      return funnelData.map((d,i) => (
+                        <div key={i} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
+                          <span style={{ fontSize: 11, fontWeight: 700, color: d.color }}>{d.件数}</span>
+                          <div style={{ width: "100%", height: Math.max(8, d.件数 / max * 80), background: d.color, borderRadius: "4px 4px 0 0", transition: "height 0.3s" }} />
+                          <span style={{ fontSize: 9, color: "#64748b", textAlign: "center", lineHeight: 1.2, whiteSpace: "nowrap" }}>{d.name}</span>
+                        </div>
+                      ));
+                    })()}
                   </div>
                 </div>
               </div>
             );
           })()}
-          {/* カンバンビュー */}
+          {/* ── カンバンビュー ── */}
           {viewMode === "kanban" && (
-            <div style={{ display:"flex", gap:12, overflowX:"auto", paddingBottom:8, marginBottom:12 }}>
+            <div style={{ display: "flex", gap: 12, overflowX: "auto", paddingBottom: 8, marginBottom: 12 }}>
               {["初回コンタクト","提案済","商談中","契約済","失注"].map(status => {
-                const colC = filtered.filter(c => c.status === status);
-                const col = STATUS_COLOR[status]||"#94a3b8";
+                const colContacts = filtered.filter(c => c.status === status);
+                const colColor = STATUS_COLOR[status] || "#94a3b8";
                 return (
                   <div key={status}
-                    onDragOver={e=>{e.preventDefault();setDragOverStatus(status);}}
-                    onDragLeave={()=>setDragOverStatus(null)}
-                    onDrop={async e=>{
-                      e.preventDefault();setDragOverStatus(null);
-                      const id=parseInt(e.dataTransfer.getData("contactId"));
-                      if(!id)return;
-                      const{error}=await supabase.from("contacts").update({status}).eq("id",id);
-                      if(!error){
-                        const oldC=contacts.find(c=>c.id===id);
-                        if(oldC&&oldC.status!==status){
-                          setContactHistory(prev=>{
-                            const key=String(id);
-                            const chg="ステータス: "+oldC.status+" → "+status;
-                            const entry={date:new Date().toISOString().slice(0,16).replace("T"," "),changes:[chg]};
-                            const next={...prev,[key]:[entry,...(prev[key]||[])].slice(0,50)};
-                            localStorage.setItem("crm_history",JSON.stringify(next));
+                    onDragOver={e => { e.preventDefault(); setDragOverStatus(status); }}
+                    onDragLeave={() => setDragOverStatus(null)}
+                    onDrop={async e => {
+                      e.preventDefault(); setDragOverStatus(null);
+                      const id = parseInt(e.dataTransfer.getData("contactId"));
+                      if (!id) return;
+                      const { error } = await supabase.from("contacts").update({ status }).eq("id", id);
+                      if (!error) {
+                        const old = contacts.find(c => c.id === id);
+                        if (old && old.status !== status) {
+                          setContactHistory(prev => {
+                            const key = String(id);
+                            const entry = { date: new Date().toISOString().slice(0, 16).replace("T"," "), changes: [`ステータス: ${old.status} → ${status}`] };
+                            const next = { ...prev, [key]: [entry, ...(prev[key] || [])].slice(0, 50) };
+                            localStorage.setItem("crm_history", JSON.stringify(next));
                             return next;
                           });
                         }
-                        setContacts(prev=>prev.map(c=>c.id===id?{...c,status}:c));
+                        setContacts(prev => prev.map(c => c.id === id ? { ...c, status } : c));
                       }
                     }}
-                    style={{ minWidth:200, maxWidth:220, background:dragOverStatus===status?"#f0f9ff":"#f8fafc", borderRadius:10, border:"2px solid "+(dragOverStatus===status?col:"#e2e8f0"), flexShrink:0, overflow:"hidden", transition:"border-color 0.15s" }}>
-                    <div style={{ background:col, color:"#fff", padding:"8px 12px", fontWeight:700, fontSize:12, display:"flex", justifyContent:"space-between" }}>
-                      <span>{status}</span><span>{colC.length}件</span>
+                    style={{ minWidth: 200, maxWidth: 220, background: dragOverStatus === status ? "#f0f9ff" : "#f8fafc", borderRadius: 10, border: `2px solid ${dragOverStatus === status ? colColor : "#e2e8f0"}`, flexShrink: 0, overflow: "hidden", transition: "border-color 0.15s" }}>
+                    <div style={{ background: colColor, color: "#fff", padding: "8px 12px", fontWeight: 700, fontSize: 12, display: "flex", justifyContent: "space-between" }}>
+                      <span>{status}</span><span>{colContacts.length}件</span>
                     </div>
-                    <div style={{ padding:8, display:"flex", flexDirection:"column", gap:6, maxHeight:500, overflowY:"auto" }}>
-                      {colC.slice(0,30).map(c => {
-                        const cTags=tags[String(c.id)]||[]; const isUrg=c.next_action&&c.next_action<=today;
-                        return (<div key={c.id} draggable onDragStart={e=>{e.dataTransfer.setData("contactId",String(c.id));}} style={{ background:"#fff", borderRadius:7, padding:"8px 10px", border:"1px solid #e2e8f0", cursor:"grab", boxShadow:"0 1px 3px rgba(0,0,0,0.06)" }}>
-                          <div style={{ fontWeight:700, fontSize:12, color:"#1e3a5f", whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis" }}>{c.company_name}</div>
-                          {c.person&&<div style={{ fontSize:11, color:"#64748b" }}>{c.person}</div>}
-                          {c.next_action&&<div style={{ fontSize:11, color:isUrg?"#ef4444":"#f59e0b", fontWeight:700 }}>{isUrg?"🔴 ":"🟡 "}{c.next_action}</div>}
-                          {cTags.length>0&&<div style={{ display:"flex", gap:3, flexWrap:"wrap", marginTop:4 }}>{cTags.map(t=><span key={t} style={{ padding:"1px 6px", borderRadius:10, background:"#ede9fe", color:"#7c3aed", fontSize:10 }}>{t}</span>)}</div>}
-                        </div>);
+                    <div style={{ padding: 8, display: "flex", flexDirection: "column", gap: 6, maxHeight: 500, overflowY: "auto" }}>
+                      {colContacts.slice(0, 30).map(c => {
+                        const cTags = tags[String(c.id)] || [];
+                        const isUrgent = c.next_action && c.next_action <= today;
+                        return (
+                          <div key={c.id} draggable
+                            onDragStart={e => { e.dataTransfer.setData("contactId", String(c.id)); }}
+                            style={{ background: "#fff", borderRadius: 7, padding: "8px 10px", border: "1px solid #e2e8f0", cursor: "grab", boxShadow: "0 1px 3px rgba(0,0,0,0.06)" }}>
+                            <div style={{ fontWeight: 700, fontSize: 12, color: "#1e3a5f", marginBottom: 3, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{c.company_name}</div>
+                            {c.person && <div style={{ fontSize: 11, color: "#64748b", marginBottom: 3 }}>{c.person}</div>}
+                            {c.next_action && <div style={{ fontSize: 11, color: isUrgent ? "#ef4444" : "#f59e0b", fontWeight: 700 }}>{isUrgent ? "🔴 " : "🟡 "}{c.next_action}</div>}
+                            {cTags.length > 0 && <div style={{ display: "flex", gap: 3, flexWrap: "wrap", marginTop: 4 }}>{cTags.map(t => <span key={t} style={{ padding: "1px 6px", borderRadius: 10, background: "#ede9fe", color: "#7c3aed", fontSize: 10 }}>{t}</span>)}</div>}
+                          </div>
+                        );
                       })}
-                      {colC.length>30&&<div style={{ fontSize:11, color:"#94a3b8", textAlign:"center" }}>+{colC.length-30}件</div>}
+                      {colContacts.length > 30 && <div style={{ fontSize: 11, color: "#94a3b8", textAlign: "center" }}>+{colContacts.length - 30}件</div>}
                     </div>
                   </div>
                 );
@@ -1352,13 +1440,13 @@ function Kimero({ data, setData }) {
               <button onClick={() => setSelectedIds(new Set())} style={{ padding: "4px 10px", borderRadius: 6, border: "none", background: "#475569", color: "#fff", fontSize: 12, cursor: "pointer" }}>選択解除</button>
               <select value={bulkStatus} onChange={e => setBulkStatus(e.target.value)} style={{ padding: "4px 10px", borderRadius: 6, border: "none", fontSize: 12 }}>
                 <option value="">ステータスを選択…</option>
-                {["初回コンタクト","提案済","商談中","契約済","失注"].map(st => <option key={st}>{st}</option>)}
+                {["初回コンタクト","提案済","商談中","契約済","失注"].map(s => <option key={s}>{s}</option>)}
               </select>
               <button onClick={bulkChangeStatus} disabled={!bulkStatus} style={{ padding: "4px 12px", borderRadius: 6, border: "none", background: bulkStatus ? "#2563eb" : "#475569", color: "#fff", fontSize: 12, cursor: bulkStatus ? "pointer" : "default", fontWeight: 700 }}>一括変更</button>
               <button onClick={bulkDelete} disabled={bulkDeleting} style={{ padding: "4px 12px", borderRadius: 6, border: "none", background: "#ef4444", color: "#fff", fontSize: 12, cursor: "pointer", fontWeight: 700, marginLeft: "auto" }}>{bulkDeleting ? "削除中..." : "🗑 一括削除"}</button>
             </div>
           )}
-                    {/* ── コンタクト一覧テーブル ── */}
+          {/* ── コンタクト一覧テーブル ── */}
           {loadingContacts ? (
             <div style={{ textAlign: "center", padding: 40, color: "#64748b" }}>⏳ 読み込み中...</div>
           ) : (
@@ -1447,19 +1535,20 @@ function Kimero({ data, setData }) {
                       </td>
                       {/* タグ列 */}
                       <td style={{ padding: "8px 10px", minWidth: 100 }}>
-                        <div style={{ display:"flex", flexWrap:"wrap", gap:3 }}>
-                          {(tags[String(c.id)]||[]).map(t=>(
-                            <span key={t} style={{ display:"inline-flex", alignItems:"center", gap:2, padding:"1px 6px", borderRadius:10, background:"#ede9fe", color:"#7c3aed", fontSize:10 }}>
-                              {t}<span onClick={()=>removeTag(c.id,t)} style={{ cursor:"pointer", color:"#a78bfa", fontWeight:700 }}>×</span>
+                        <div style={{ display: "flex", flexWrap: "wrap", gap: 3 }}>
+                          {(tags[String(c.id)] || []).map(t => (
+                            <span key={t} style={{ display: "inline-flex", alignItems: "center", gap: 2, padding: "1px 6px", borderRadius: 10, background: "#ede9fe", color: "#7c3aed", fontSize: 10 }}>
+                              {t}
+                              <span onClick={() => removeTag(c.id, t)} style={{ cursor: "pointer", color: "#a78bfa", fontWeight: 700 }}>×</span>
                             </span>
                           ))}
-                          {editingTagId===c.id ? (
-                            <input autoFocus value={tagInput} onChange={e=>setTagInput(e.target.value)}
-                              onKeyDown={e=>{if(e.key==="Enter"){addTag(c.id,tagInput);setTagInput("");setEditingTagId(null);}if(e.key==="Escape"){setTagInput("");setEditingTagId(null);}}}
-                              onBlur={()=>{if(tagInput.trim())addTag(c.id,tagInput);setTagInput("");setEditingTagId(null);}}
-                              style={{ width:70, padding:"1px 5px", borderRadius:5, border:"1px solid #c4b5fd", fontSize:11 }} placeholder="タグ追加" />
+                          {editingTagId === c.id ? (
+                            <input autoFocus value={tagInput} onChange={e => setTagInput(e.target.value)}
+                              onKeyDown={e => { if (e.key === "Enter") { addTag(c.id, tagInput); setTagInput(""); setEditingTagId(null); } if (e.key === "Escape") { setTagInput(""); setEditingTagId(null); } }}
+                              onBlur={() => { if (tagInput.trim()) addTag(c.id, tagInput); setTagInput(""); setEditingTagId(null); }}
+                              style={{ width: 70, padding: "1px 5px", borderRadius: 5, border: "1px solid #c4b5fd", fontSize: 11 }} placeholder="タグ追加" />
                           ) : (
-                            <span onClick={()=>setEditingTagId(c.id)} style={{ cursor:"pointer", padding:"1px 5px", borderRadius:10, border:"1px dashed #c4b5fd", color:"#a78bfa", fontSize:10 }}>＋</span>
+                            <span onClick={() => setEditingTagId(c.id)} style={{ cursor: "pointer", padding: "1px 5px", borderRadius: 10, border: "1px dashed #c4b5fd", color: "#a78bfa", fontSize: 10 }}>＋</span>
                           )}
                         </div>
                       </td>
@@ -1472,17 +1561,17 @@ function Kimero({ data, setData }) {
                             <button onClick={cancelEditContact} style={{ padding: "4px 8px", background: "#f1f5f9", color: "#64748b", border: "none", borderRadius: 6, fontSize: 11, cursor: "pointer" }}>✕</button>
                           </div>
                         ) : (
-                          <div style={{ display:"flex", gap:3 }}>
-                            <button onClick={()=>startEditContact(c)} style={{ padding:"4px 8px", background:"#f1f5f9", color:"#2563eb", border:"1px solid #bfdbfe", borderRadius:6, fontSize:11, fontWeight:700, cursor:"pointer" }}>✏️</button>
-                            <button onClick={()=>setShowHistoryId(c.id)} title="履歴" style={{ padding:"4px 8px", background:"#f1f5f9", color:"#64748b", border:"1px solid #e2e8f0", borderRadius:6, fontSize:11, cursor:"pointer" }}>📋</button>
-                            <button onClick={()=>setShowMailId(c)} title="メールテンプレート" style={{ padding:"4px 8px", background:"#f1f5f9", color:"#16a34a", border:"1px solid #bbf7d0", borderRadius:6, fontSize:11, cursor:"pointer" }}>📧</button>
+                          <div style={{ display: "flex", gap: 3 }}>
+                            <button onClick={() => startEditContact(c)} style={{ padding: "4px 8px", background: "#f1f5f9", color: "#2563eb", border: "1px solid #bfdbfe", borderRadius: 6, fontSize: 11, fontWeight: 700, cursor: "pointer" }}>✏️</button>
+                            <button onClick={() => setShowHistoryId(c.id)} title="履歴" style={{ padding: "4px 8px", background: "#f1f5f9", color: "#64748b", border: "1px solid #e2e8f0", borderRadius: 6, fontSize: 11, cursor: "pointer" }}>📋</button>
+                            <button onClick={() => setShowMailId(c)} title="メールテンプレート" style={{ padding: "4px 8px", background: "#f1f5f9", color: "#64748b", border: "1px solid #e2e8f0", borderRadius: 6, fontSize: 11, cursor: "pointer" }}>📧</button>
                           </div>
                         )}
                       </td>
                     </tr>
                   );
                 })}
-                                {sorted.length === 0 && (
+                {sorted.length === 0 && (
                   <tr><td colSpan={14} style={{ padding: 24, textAlign: "center", color: "#94a3b8" }}>該当するコンタクトがありません</td></tr>
                 )}
               </tbody>
@@ -1515,22 +1604,22 @@ function Kimero({ data, setData }) {
           )}
           {/* ── 履歴モーダル ── */}
           {showHistoryId && (() => {
-            const mc = contacts.find(x => x.id === showHistoryId);
+            const c = contacts.find(x => x.id === showHistoryId);
             const hist = contactHistory[String(showHistoryId)] || [];
             return (
-              <div style={{ position:"fixed", inset:0, background:"rgba(0,0,0,0.5)", zIndex:1000, display:"flex", alignItems:"center", justifyContent:"center" }} onClick={()=>setShowHistoryId(null)}>
-                <div style={{ background:"#fff", borderRadius:12, padding:24, width:420, maxWidth:"90vw", maxHeight:"70vh", overflow:"hidden", display:"flex", flexDirection:"column" }} onClick={e=>e.stopPropagation()}>
-                  <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:16 }}>
-                    <div style={{ fontWeight:700, color:"#1e3a5f", fontSize:15 }}>📋 変更履歴 — {mc?.company_name}</div>
-                    <button onClick={()=>setShowHistoryId(null)} style={{ border:"none", background:"none", fontSize:18, cursor:"pointer", color:"#94a3b8" }}>✕</button>
+              <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center" }} onClick={() => setShowHistoryId(null)}>
+                <div style={{ background: "#fff", borderRadius: 12, padding: 24, width: 420, maxWidth: "90vw", maxHeight: "70vh", overflow: "hidden", display: "flex", flexDirection: "column" }} onClick={e => e.stopPropagation()}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+                    <div style={{ fontWeight: 700, color: "#1e3a5f", fontSize: 15 }}>📋 変更履歴 — {c?.company_name}</div>
+                    <button onClick={() => setShowHistoryId(null)} style={{ border: "none", background: "none", fontSize: 18, cursor: "pointer", color: "#94a3b8" }}>✕</button>
                   </div>
-                  <div style={{ overflowY:"auto", flex:1 }}>
-                    {hist.length===0 ? (
-                      <div style={{ color:"#94a3b8", textAlign:"center", padding:24 }}>履歴がありません</div>
-                    ) : hist.map((h,i)=>(
-                      <div key={i} style={{ padding:"10px 0", borderBottom:"1px solid #f1f5f9" }}>
-                        <div style={{ fontSize:11, color:"#94a3b8", marginBottom:4 }}>{h.date}</div>
-                        {h.changes.map((ch,j)=><div key={j} style={{ fontSize:13, color:"#475569" }}>• {ch}</div>)}
+                  <div style={{ overflowY: "auto", flex: 1 }}>
+                    {hist.length === 0 ? (
+                      <div style={{ color: "#94a3b8", textAlign: "center", padding: 24 }}>履歴がありません</div>
+                    ) : hist.map((h, i) => (
+                      <div key={i} style={{ padding: "10px 0", borderBottom: "1px solid #f1f5f9" }}>
+                        <div style={{ fontSize: 11, color: "#94a3b8", marginBottom: 4 }}>{h.date}</div>
+                        {h.changes.map((ch, j) => <div key={j} style={{ fontSize: 13, color: "#475569" }}>• {ch}</div>)}
                       </div>
                     ))}
                   </div>
@@ -1540,8 +1629,8 @@ function Kimero({ data, setData }) {
           })()}
           {/* ── メールテンプレートモーダル ── */}
           {showMailId && (
-            <div style={{ position:"fixed", inset:0, background:"rgba(0,0,0,0.5)", zIndex:1000, display:"flex", alignItems:"center", justifyContent:"center" }} onClick={()=>setShowMailId(null)}>
-              <MailTemplateModal contact={showMailId} templates={MAIL_TEMPLATES} onClose={()=>setShowMailId(null)} />
+            <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center" }} onClick={() => setShowMailId(null)}>
+              <MailTemplateModal contact={showMailId} templates={MAIL_TEMPLATES} onClose={() => setShowMailId(null)} />
             </div>
           )}
         </Section>
@@ -1620,7 +1709,7 @@ function Smile({ data, setData }) {
   );
 }
 
-// ── HUPPY ──────────────────────────────────────────────────────────
+// ── HUPPY ──────────────────────────────────────────────────
 function Huppy({ data }) {
   const [hTab, setHTab] = useState("summary");
   const [liveRecs, setLiveRecs] = useState([]);
@@ -1635,7 +1724,7 @@ function Huppy({ data }) {
   const [nLive, setNLive] = useState(blankLive);
   const [nSale, setNSale] = useState(blankSale);
   const [vitaTarget, setVitaTarget] = useState(300000);
-  const VITA_PRODUCTS = ["ROYALHONEY VIP 1P","VITAMAX ENERGYHONEY FOR MEN","VITAMAX ENERGYHONEY FOR HER","VITAMAX ENERGYCOFFEE FOR MEN","VITAMAX ENERGYCOFFEE FOR HER","ROYALHONEY VIP PREMIUM 1P","キングハニーVIP 1筘12袋","キングハニーVIP 2筘24袋","キングハニーVIP 3筘36袋","キングハニーVIP 4筘48袋","キングハニーVIP 5筘60袋"];
+  const VITA_PRODUCTS = ["ROYALHONEY VIP 1P","VITAMAX ENERGYHONEY FOR MEN","VITAMAX ENERGYHONEY FOR HER","VITAMAX ENERGYCOFFEE FOR MEN","VITAMAX ENERGYCOFFEE FOR HER","ROYALHONEY VIP PREMIUM 1P","キングハニーVIP 1箱12袋","キングハニーVIP 2箱24袋","キングハニーVIP 3箱36袋","キングハニーVIP 4箱48袋","キングハニーVIP 5箱60袋"];
 
   useEffect(() => { fetchHData(); }, []);
 
@@ -1692,7 +1781,7 @@ function Huppy({ data }) {
 
   const allMonths = [...new Set([...liveRecs.map(r => r.year_month), ...sales.map(s => (s.sale_date||"").slice(0,7))].filter(Boolean))].sort();
   const monthlyChart = allMonths.map(m => ({
-    month: m.slice(5) + "月",
+    month: m.slice(5) + "\u6708",
     LIVE: liveRecs.filter(r => r.year_month === m).reduce((s, r) => s + (r.reward_yen||0), 0),
     TikTok: sales.filter(s => s.channel === "tiktok_shop" && (s.sale_date||"").startsWith(m)).reduce((s, r) => s + (r.amount||0), 0),
     VITAMAX: sales.filter(s => s.channel === "vitamax" && (s.sale_date||"").startsWith(m)).reduce((s, r) => s + (r.amount||0), 0),
@@ -1706,251 +1795,259 @@ function Huppy({ data }) {
   return (
     <div>
       <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 20 }}>
-        <Card title="今月合計売上" value={"¥" + (totalMonthly/10000).toFixed(1) + "万"} color="#9333ea" icon="🎵" />
-        <Card title="🎁 LIVEギフト報酬" value={"¥" + (liveReward/10000).toFixed(1) + "万"} sub={liveDiamonds.toLocaleString() + "💎"} color="#a855f7" icon="💎" />
-        <Card title="🛒 TikTokショップ" value={"¥" + (tktMonthly/10000).toFixed(1) + "万"} color="#ff2d55" icon="🛒" />
-        <Card title="📦 ECサイト" value={"¥" + (ecMonthly/10000).toFixed(1) + "万"} color="#f59e0b" icon="📦" />
-        <Card title="🛍️ VITAMAX公式" value={"¥" + (vitaMonthly/10000).toFixed(1) + "万"} sub={vitaTarget > 0 ? "目標: " + Math.round(vitaMonthly/vitaTarget*100) + "%" : ""} color="#16a34a" icon="🛍️" />
+        <Card title="\u4eca\u6708\u5408\u8a08\u58f2\u4e0a" value={`\u00a5${(totalMonthly/10000).toFixed(1)}\u4e07`} color="#9333ea" icon="🎵" />
+        <Card title="🎁 LIVE\u30ae\u30d5\u30c8\u5831\u916c" value={`\u00a5${(liveReward/10000).toFixed(1)}\u4e07`} sub={`${liveDiamonds.toLocaleString()}💎`} color="#a855f7" icon="💎" />
+        <Card title="🛒 TikTok\u30b7\u30e7\u30c3\u30d7" value={`\u00a5${(tktMonthly/10000).toFixed(1)}\u4e07`} color="#ff2d55" icon="🛒" />
+        <Card title="📦 EC\u30b5\u30a4\u30c8" value={`\u00a5${(ecMonthly/10000).toFixed(1)}\u4e07`} color="#f59e0b" icon="📦" />
+        <Card title="🛍\ufe0f VITAMAX\u516c\u5f0f" value={`\u00a5${(vitaMonthly/10000).toFixed(1)}\u4e07`} sub={vitaTarget > 0 ? `\u76ee\u6a19: ${Math.round(vitaMonthly/vitaTarget*100)}%` : ""} color="#16a34a" icon="🛍\ufe0f" />
       </div>
 
       <div style={{ display: "flex", gap: 6, marginBottom: 16, flexWrap: "wrap" }}>
-        {[["summary","📊 サマリー"],["live","🎁 LIVEギフト"],["tkt","🛒 TikTokショップ"],["ec","📦 ECサイト"],["vitamax","🛍️ VITAMAX"],["partner","🤝 パートナー"]].map(([id, label]) => (
+        {[["summary","📊 \u30b5\u30de\u30ea\u30fc"],["live","🎁 LIVE\u30ae\u30d5\u30c8"],["tkt","🛒 TikTok\u30b7\u30e7\u30c3\u30d7"],["ec","📦 EC\u30b5\u30a4\u30c8"],["vitamax","🛍\ufe0f VITAMAX"],["partner","🤝 \u30d1\u30fc\u30c8\u30ca\u30fc"]].map(([id, label]) => (
           <button key={id} onClick={() => setHTab(id)} style={hBtn(id==="vitamax" ? "#16a34a" : "#9333ea", hTab===id)}>{label}</button>
         ))}
       </div>
 
       {hTab === "summary" && (
-        <Section title="月次推移（売上内訳）" color="#9333ea">
+        <Section title="\u6708\u6b21\u63a8\u79fb\uff08\u58f2\u4e0a\u5185\u8a33\uff09" color="#9333ea">
           {monthlyChart.length > 0 ? (
             <ResponsiveContainer width="100%" height={220}>
               <BarChart data={monthlyChart}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
                 <XAxis dataKey="month" />
-                <YAxis tickFormatter={v => (v/10000).toFixed(0) + "万"} />
-                <Tooltip formatter={v => "¥" + v.toLocaleString()} />
-                <Bar dataKey="LIVE" fill="#a855f7" radius={[0,0,0,0]} name="LIVEギフト" stackId="a" />
-                <Bar dataKey="TikTok" fill="#ff2d55" radius={[0,0,0,0]} name="TikTokショップ" stackId="a" />
-                <Bar dataKey="VITAMAX" fill="#16a34a" radius={[0,0,0,0]} name="VITAMAX公式" stackId="a" />
-                <Bar dataKey="EC" fill="#f59e0b" radius={[4,4,0,0]} name="ECサイト" stackId="a" />
+                <YAxis tickFormatter={v => `${(v/10000).toFixed(0)}\u4e07`} />
+                <Tooltip formatter={v => `\u00a5${v.toLocaleString()}`} />
+                <Bar dataKey="LIVE" fill="#a855f7" radius={[0,0,0,0]} name="LIVE\u30ae\u30d5\u30c8" stackId="a" />
+                <Bar dataKey="TikTok" fill="#ff2d55" radius={[0,0,0,0]} name="TikTok\u30b7\u30e7\u30c3\u30d7" stackId="a" />
+                <Bar dataKey="VITAMAX" fill="#16a34a" radius={[0,0,0,0]} name="VITAMAX\u516c\u5f0f" stackId="a" />
+                <Bar dataKey="EC" fill="#f59e0b" radius={[4,4,0,0]} name="EC\u30b5\u30a4\u30c8" stackId="a" />
               </BarChart>
             </ResponsiveContainer>
           ) : (
-            <div style={{ textAlign: "center", color: "#94a3b8", padding: 40 }}>データを入力すると月次グラフが表示されます</div>
+            <div style={{ textAlign: "center", color: "#94a3b8", padding: 40 }}>\u30c7\u30fc\u30bf\u3092\u5165\u529b\u3059\u308b\u3068\u6708\u6b21\u30b0\u30e9\u30d5\u304c\u8868\u793a\u3055\u308c\u307e\u3059</div>
           )}
         </Section>
       )}
 
       {hTab === "live" && (
-        <Section title="🎁 LIVEギフト売上管理" color="#a855f7">
+        <Section title="🎁 LIVE\u30ae\u30d5\u30c8\u58f2\u4e0a\u7ba1\u7406" color="#a855f7">
           <div style={{ marginBottom: 12 }}>
-            <button onClick={() => { setEditLive(null); setNLive(blankLive); setShowAddLive(true); }} style={actBtn("#a855f7")}>+ クリエイター追加</button>
+            <button onClick={() => { setEditLive(null); setNLive(blankLive); setShowAddLive(true); }} style={actBtn("#a855f7")}>+ \u30af\u30ea\u30a8\u30a4\u30bf\u30fc\u8ffd\u52a0</button>
           </div>
           {showAddLive && (
             <div style={{ background: "#faf5ff", border: "1px solid #d8b4fe", borderRadius: 10, padding: 16, marginBottom: 16 }}>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 10 }}>
-                <div><div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>クリエイター名 *</div><input style={inp} value={nLive.creator_name} onChange={e => setNLive(p => ({...p, creator_name: e.target.value}))} placeholder="例：みい" /></div>
+                <div><div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>\u30af\u30ea\u30a8\u30a4\u30bf\u30fc\u540d *</div><input style={inp} value={nLive.creator_name} onChange={e => setNLive(p => ({...p, creator_name: e.target.value}))} placeholder="\u4f8b\uff1a\u307f\u3044" /></div>
                 <div><div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>TikTok ID</div><input style={inp} value={nLive.tiktok_username} onChange={e => setNLive(p => ({...p, tiktok_username: e.target.value}))} placeholder="@username" /></div>
-                <div><div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>年月 *</div><input style={inp} type="month" value={nLive.year_month} onChange={e => setNLive(p => ({...p, year_month: e.target.value}))} /></div>
-                <div><div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>ダイヤモンド数</div><input style={inp} type="number" value={nLive.diamonds} onChange={e => setNLive(p => ({...p, diamonds: e.target.value}))} placeholder="0" /></div>
-                <div><div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>LIVE回数</div><input style={inp} type="number" value={nLive.live_count} onChange={e => setNLive(p => ({...p, live_count: e.target.value}))} placeholder="0" /></div>
-                <div><div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>LIVE時間</div><input style={inp} type="number" step="0.1" value={nLive.live_hours} onChange={e => setNLive(p => ({...p, live_hours: e.target.value}))} placeholder="0.0" /></div>
-                <div><div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>報酬（円） *</div><input style={inp} type="number" value={nLive.reward_yen} onChange={e => setNLive(p => ({...p, reward_yen: e.target.value}))} placeholder="0" /></div>
-                <div><div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>メモ</div><input style={inp} value={nLive.notes} onChange={e => setNLive(p => ({...p, notes: e.target.value}))} /></div>
+                <div><div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>\u5e74\u6708 *</div><input style={inp} type="month" value={nLive.year_month} onChange={e => setNLive(p => ({...p, year_month: e.target.value}))} /></div>
+                <div><div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>\u30c0\u30a4\u30e4\u30e2\u30f3\u30c9\u6570</div><input style={inp} type="number" value={nLive.diamonds} onChange={e => setNLive(p => ({...p, diamonds: e.target.value}))} placeholder="0" /></div>
+                <div><div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>LIVE\u56de\u6570</div><input style={inp} type="number" value={nLive.live_count} onChange={e => setNLive(p => ({...p, live_count: e.target.value}))} placeholder="0" /></div>
+                <div><div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>LIVE\u6642\u9593</div><input style={inp} type="number" step="0.1" value={nLive.live_hours} onChange={e => setNLive(p => ({...p, live_hours: e.target.value}))} placeholder="0.0" /></div>
+                <div><div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>\u5831\u916c\uff08\u5186\uff09*</div><input style={inp} type="number" value={nLive.reward_yen} onChange={e => setNLive(p => ({...p, reward_yen: e.target.value}))} placeholder="0" /></div>
+                <div><div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>\u30e1\u30e2</div><input style={inp} value={nLive.notes} onChange={e => setNLive(p => ({...p, notes: e.target.value}))} /></div>
               </div>
               <div style={{ display: "flex", gap: 8 }}>
-                <button onClick={saveLive} style={actBtn("#a855f7")}>{editLive ? "更新" : "保存"}</button>
-                <button onClick={() => { setShowAddLive(false); setEditLive(null); }} style={actBtn("#94a3b8")}>キャンセル</button>
+                <button onClick={saveLive} style={actBtn("#a855f7")}>{editLive ? "\u66f4\u65b0" : "\u4fdd\u5b58"}</button>
+                <button onClick={() => { setShowAddLive(false); setEditLive(null); }} style={actBtn("#94a3b8")}>\u30ad\u30e3\u30f3\u30bb\u30eb</button>
               </div>
             </div>
           )}
-          {loading ? <div style={{ color: "#94a3b8", padding: 20 }}>読み込み中...</div> : (
+          {loading ? <div style={{ color: "#94a3b8", padding: 20 }}>\u8aad\u307f\u8fbc\u307f\u4e2d...</div> : (
             <Table
-              headers={["年月", "クリエイター", "TikTok ID", "💎 ダイヤ", "LIVE回数", "LIVE時間", "報酬（円）", "メモ", "操作"]}
+              headers={["\u5e74\u6708", "\u30af\u30ea\u30a8\u30a4\u30bf\u30fc", "TikTok ID", "💎 \u30c0\u30a4\u30e4", "LIVE\u56de\u6570", "LIVE\u6642\u9593", "\u5831\u916c\uff08\u5186\uff09", "\u30e1\u30e2", "\u64cd\u4f5c"]}
               rows={liveRecs.map(r => [
                 <span style={{ fontWeight: 600, color: "#7c3aed" }}>{r.year_month}</span>,
                 r.creator_name,
-                r.tiktok_username || "—",
+                r.tiktok_username || "\u2014",
                 (r.diamonds||0).toLocaleString(),
                 r.live_count || 0,
                 r.live_hours || 0,
-                <span style={{ color: "#7c3aed", fontWeight: 600 }}>¥{(r.reward_yen||0).toLocaleString()}</span>,
-                r.notes || "—",
+                <span style={{ color: "#7c3aed", fontWeight: 600 }}>\u00a5{(r.reward_yen||0).toLocaleString()}</span>,
+                r.notes || "\u2014",
                 <div style={{ display: "flex", gap: 4 }}>
-                  <button onClick={() => { setEditLive(r); setNLive({...r, diamonds: String(r.diamonds||""), live_count: String(r.live_count||""), live_hours: String(r.live_hours||""), reward_yen: String(r.reward_yen||"")}); setShowAddLive(true); }} style={{ padding: "2px 8px", background: "#f3e8ff", color: "#7c3aed", border: "none", borderRadius: 4, cursor: "pointer", fontSize: 12 }}>✏️</button>
-                  <button onClick={() => deleteLive(r.id)} style={{ padding: "2px 8px", background: "#fee2e2", color: "#dc2626", border: "none", borderRadius: 4, cursor: "pointer", fontSize: 12 }}>🗑</button>
+                  <button onClick={() => { setEditLive(r); setNLive({...r, diamonds: String(r.diamonds||""), live_count: String(r.live_count||""), live_hours: String(r.live_hours||""), reward_yen: String(r.reward_yen||"")}); setShowAddLive(true); }} style={{ padding: "2px 8px", background: "#f3e8ff", color: "#7c3aed", border: "none", borderRadius: 4, cursor: "pointer", fontSize: 12 }}>\u270f\ufe0f</button>
+                  <button onClick={() => deleteLive(r.id)} style={{ padding: "2px 8px", background: "#fee2e2", color: "#dc2626", border: "none", borderRadius: 4, cursor: "pointer", fontSize: 12 }}>{"🗑"}</button>
                 </div>
               ])}
             />
           )}
-          {liveRecs.length === 0 && !loading && <div style={{ textAlign: "center", color: "#94a3b8", padding: 30 }}>データがありません。「クリエイター追加」から入力してください</div>}
+          {liveRecs.length === 0 && !loading && <div style={{ textAlign: "center", color: "#94a3b8", padding: 30 }}>\u30c7\u30fc\u30bf\u304c\u3042\u308a\u307e\u305b\u3093\u3002\u300c\u30af\u30ea\u30a8\u30a4\u30bf\u30fc\u8ffd\u52a0\u300d\u304b\u3089\u5165\u529b\u3057\u3066\u304f\u3060\u3055\u3044</div>}
         </Section>
       )}
 
       {hTab === "tkt" && (
-        <Section title="🛒 TikTokショップ売上" color="#ff2d55">
+        <Section title="🛒 TikTok\u30b7\u30e7\u30c3\u30d7\u58f2\u4e0a" color="#ff2d55">
           <div style={{ marginBottom: 12 }}>
-            <button onClick={() => { setNSale({ channel: "tiktok_shop", product_name: "", amount: "", quantity: "1", sale_date: new Date().toISOString().split("T")[0], notes: "" }); setShowAddSale(true); }} style={actBtn("#ff2d55")}>+ 売上追加</button>
+            <button onClick={() => { setNSale({ channel: "tiktok_shop", product_name: "", amount: "", quantity: "1", sale_date: new Date().toISOString().split("T")[0], notes: "" }); setShowAddSale(true); }} style={actBtn("#ff2d55")}>+ \u58f2\u4e0a\u8ffd\u52a0</button>
           </div>
           {showAddSale && hTab === "tkt" && (
             <div style={{ background: "#fff1f2", border: "1px solid #fecdd3", borderRadius: 10, padding: 16, marginBottom: 16 }}>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 10 }}>
-                <div><div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>商品名</div><input style={inp} value={nSale.product_name} onChange={e => setNSale(p => ({...p, product_name: e.target.value}))} placeholder="商品名" /></div>
-                <div><div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>売上金額（円） *</div><input style={inp} type="number" value={nSale.amount} onChange={e => setNSale(p => ({...p, amount: e.target.value}))} placeholder="0" /></div>
-                <div><div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>数量</div><input style={inp} type="number" value={nSale.quantity} onChange={e => setNSale(p => ({...p, quantity: e.target.value}))} /></div>
-                <div><div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>日付 *</div><input style={inp} type="date" value={nSale.sale_date} onChange={e => setNSale(p => ({...p, sale_date: e.target.value}))} /></div>
-                <div style={{ gridColumn: "span 2" }}><div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>メモ</div><input style={inp} value={nSale.notes} onChange={e => setNSale(p => ({...p, notes: e.target.value}))} /></div>
+                <div><div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>\u5546\u54c1\u540d</div><input style={inp} value={nSale.product_name} onChange={e => setNSale(p => ({...p, product_name: e.target.value}))} placeholder="\u5546\u54c1\u540d" /></div>
+                <div><div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>\u58f2\u4e0a\u91d1\u984d\uff08\u5186\uff09*</div><input style={inp} type="number" value={nSale.amount} onChange={e => setNSale(p => ({...p, amount: e.target.value}))} placeholder="0" /></div>
+                <div><div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>\u6570\u91cf</div><input style={inp} type="number" value={nSale.quantity} onChange={e => setNSale(p => ({...p, quantity: e.target.value}))} /></div>
+                <div><div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>\u65e5\u4ed8 *</div><input style={inp} type="date" value={nSale.sale_date} onChange={e => setNSale(p => ({...p, sale_date: e.target.value}))} /></div>
+                <div style={{ gridColumn: "span 2" }}><div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>\u30e1\u30e2</div><input style={inp} value={nSale.notes} onChange={e => setNSale(p => ({...p, notes: e.target.value}))} /></div>
               </div>
               <div style={{ display: "flex", gap: 8 }}>
-                <button onClick={saveSale} style={actBtn("#ff2d55")}>保存</button>
-                <button onClick={() => setShowAddSale(false)} style={actBtn("#94a3b8")}>キャンセル</button>
+                <button onClick={saveSale} style={actBtn("#ff2d55")}>\u4fdd\u5b58</button>
+                <button onClick={() => setShowAddSale(false)} style={actBtn("#94a3b8")}>\u30ad\u30e3\u30f3\u30bb\u30eb</button>
               </div>
             </div>
           )}
-          {loading ? <div style={{ color: "#94a3b8", padding: 20 }}>読み込み中...</div> : (
+          {loading ? <div style={{ color: "#94a3b8", padding: 20 }}>\u8aad\u307f\u8fbc\u307f\u4e2d...</div> : (
             <Table
-              headers={["日付", "商品名", "売上金額", "数量", "メモ", "操作"]}
+              headers={["\u65e5\u4ed8", "\u5546\u54c1\u540d", "\u58f2\u4e0a\u91d1\u984d", "\u6570\u91cf", "\u30e1\u30e2", "\u64cd\u4f5c"]}
               rows={sales.filter(s => s.channel === "tiktok_shop").map(s => [
-                s.sale_date, s.product_name || "—",
-                <span style={{ color: "#e11d48", fontWeight: 600 }}>¥{(s.amount||0).toLocaleString()}</span>,
-                s.quantity, s.notes || "—",
-                <button onClick={() => deleteSale(s.id)} style={{ padding: "2px 8px", background: "#fee2e2", color: "#dc2626", border: "none", borderRadius: 4, cursor: "pointer", fontSize: 12 }}>🗑</button>
+                s.sale_date,
+                s.product_name || "\u2014",
+                <span style={{ color: "#e11d48", fontWeight: 600 }}>\u00a5{(s.amount||0).toLocaleString()}</span>,
+                s.quantity,
+                s.notes || "\u2014",
+                <button onClick={() => deleteSale(s.id)} style={{ padding: "2px 8px", background: "#fee2e2", color: "#dc2626", border: "none", borderRadius: 4, cursor: "pointer", fontSize: 12 }}>{"🗑"}</button>
               ])}
             />
           )}
-          {sales.filter(s => s.channel === "tiktok_shop").length === 0 && !loading && <div style={{ textAlign: "center", color: "#94a3b8", padding: 30 }}>TikTokショップの売上データがありません</div>}
+          {sales.filter(s => s.channel === "tiktok_shop").length === 0 && !loading && <div style={{ textAlign: "center", color: "#94a3b8", padding: 30 }}>TikTok\u30b7\u30e7\u30c3\u30d7\u306e\u58f2\u4e0a\u30c7\u30fc\u30bf\u304c\u3042\u308a\u307e\u305b\u3093</div>}
         </Section>
       )}
 
       {hTab === "ec" && (
-        <Section title="📦 ECサイト売上" color="#f59e0b">
+        <Section title="📦 EC\u30b5\u30a4\u30c8\u58f2\u4e0a" color="#f59e0b">
           <div style={{ marginBottom: 12 }}>
-            <button onClick={() => { setNSale({ channel: "base", product_name: "", amount: "", quantity: "1", sale_date: new Date().toISOString().split("T")[0], notes: "" }); setShowAddSale(true); }} style={actBtn("#f59e0b")}>+ 売上追加</button>
+            <button onClick={() => { setNSale({ channel: "base", product_name: "", amount: "", quantity: "1", sale_date: new Date().toISOString().split("T")[0], notes: "" }); setShowAddSale(true); }} style={actBtn("#f59e0b")}>+ \u58f2\u4e0a\u8ffd\u52a0</button>
           </div>
           {showAddSale && hTab === "ec" && (
             <div style={{ background: "#fffbeb", border: "1px solid #fde68a", borderRadius: 10, padding: 16, marginBottom: 16 }}>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 10 }}>
-                <div><div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>チャネル *</div>
+                <div><div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>\u30c1\u30e3\u30cd\u30eb *</div>
                   <select style={inp} value={nSale.channel} onChange={e => setNSale(p => ({...p, channel: e.target.value}))}>
-                    <option value="base">BASE</option><option value="shopify">Shopify</option><option value="stores">STORES</option><option value="rakuten">楽天</option><option value="amazon">Amazon</option><option value="other">その他</option>
+                    <option value="base">BASE</option><option value="shopify">Shopify</option><option value="stores">STORES</option><option value="rakuten">\u697d\u5929</option><option value="amazon">Amazon</option><option value="other">\u305d\u306e\u4ed6</option>
                   </select>
                 </div>
-                <div><div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>商品名</div><input style={inp} value={nSale.product_name} onChange={e => setNSale(p => ({...p, product_name: e.target.value}))} placeholder="商品名" /></div>
-                <div><div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>売上金額（円） *</div><input style={inp} type="number" value={nSale.amount} onChange={e => setNSale(p => ({...p, amount: e.target.value}))} placeholder="0" /></div>
-                <div><div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>日付 *</div><input style={inp} type="date" value={nSale.sale_date} onChange={e => setNSale(p => ({...p, sale_date: e.target.value}))} /></div>
-                <div style={{ gridColumn: "span 2" }}><div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>メモ</div><input style={inp} value={nSale.notes} onChange={e => setNSale(p => ({...p, notes: e.target.value}))} /></div>
+                <div><div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>\u5546\u54c1\u540d</div><input style={inp} value={nSale.product_name} onChange={e => setNSale(p => ({...p, product_name: e.target.value}))} placeholder="\u5546\u54c1\u540d" /></div>
+                <div><div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>\u58f2\u4e0a\u91d1\u984d\uff08\u5186\uff09*</div><input style={inp} type="number" value={nSale.amount} onChange={e => setNSale(p => ({...p, amount: e.target.value}))} placeholder="0" /></div>
+                <div><div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>\u65e5\u4ed8 *</div><input style={inp} type="date" value={nSale.sale_date} onChange={e => setNSale(p => ({...p, sale_date: e.target.value}))} /></div>
+                <div style={{ gridColumn: "span 2" }}><div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>\u30e1\u30e2</div><input style={inp} value={nSale.notes} onChange={e => setNSale(p => ({...p, notes: e.target.value}))} /></div>
               </div>
               <div style={{ display: "flex", gap: 8 }}>
-                <button onClick={saveSale} style={actBtn("#f59e0b")}>保存</button>
-                <button onClick={() => setShowAddSale(false)} style={actBtn("#94a3b8")}>キャンセル</button>
+                <button onClick={saveSale} style={actBtn("#f59e0b")}>\u4fdd\u5b58</button>
+                <button onClick={() => setShowAddSale(false)} style={actBtn("#94a3b8")}>\u30ad\u30e3\u30f3\u30bb\u30eb</button>
               </div>
             </div>
           )}
-          {loading ? <div style={{ color: "#94a3b8", padding: 20 }}>読み込み中...</div> : (
+          {loading ? <div style={{ color: "#94a3b8", padding: 20 }}>\u8aad\u307f\u8fbc\u307f\u4e2d...</div> : (
             <Table
-              headers={["日付", "チャネル", "商品名", "売上金額", "メモ", "操作"]}
+              headers={["\u65e5\u4ed8", "\u30c1\u30e3\u30cd\u30eb", "\u5546\u54c1\u540d", "\u58f2\u4e0a\u91d1\u984d", "\u30e1\u30e2", "\u64cd\u4f5c"]}
               rows={sales.filter(s => s.channel !== "tiktok_shop" && s.channel !== "vitamax").map(s => [
                 s.sale_date,
                 <Badge label={CHANNELS[s.channel] || s.channel} color={CHAN_COLOR[s.channel] || "#9333ea"} />,
-                s.product_name || "—",
-                <span style={{ color: "#d97706", fontWeight: 600 }}>¥{(s.amount||0).toLocaleString()}</span>,
-                s.notes || "—",
-                <button onClick={() => deleteSale(s.id)} style={{ padding: "2px 8px", background: "#fee2e2", color: "#dc2626", border: "none", borderRadius: 4, cursor: "pointer", fontSize: 12 }}>🗑</button>
+                s.product_name || "\u2014",
+                <span style={{ color: "#d97706", fontWeight: 600 }}>\u00a5{(s.amount||0).toLocaleString()}</span>,
+                s.notes || "\u2014",
+                <button onClick={() => deleteSale(s.id)} style={{ padding: "2px 8px", background: "#fee2e2", color: "#dc2626", border: "none", borderRadius: 4, cursor: "pointer", fontSize: 12 }}>{"🗑"}</button>
               ])}
             />
           )}
-          {sales.filter(s => s.channel !== "tiktok_shop" && s.channel !== "vitamax").length === 0 && !loading && <div style={{ textAlign: "center", color: "#94a3b8", padding: 30 }}>ECサイトの売上データがありません</div>}
+          {sales.filter(s => s.channel !== "tiktok_shop" && s.channel !== "vitamax").length === 0 && !loading && <div style={{ textAlign: "center", color: "#94a3b8", padding: 30 }}>EC\u30b5\u30a4\u30c8\u306e\u58f2\u4e0a\u30c7\u30fc\u30bf\u304c\u3042\u308a\u307e\u305b\u3093</div>}
         </Section>
       )}
 
-            {hTab === "vitamax" && (
-        <Section title="🛍️ VITAMAX公式サイト管理" color="#16a34a">
+      {hTab === "vitamax" && (
+        <Section title="🛍\ufe0f VITAMAX\u516c\u5f0f\u30b5\u30a4\u30c8\u7ba1\u7406" color="#16a34a">
+          {/* クイックリンク */}
           <div style={{ display: "flex", gap: 8, marginBottom: 20, flexWrap: "wrap" }}>
-            <a href="https://vitamax-asia.com/wp-admin/admin.php?page=wc-reports" target="_blank" rel="noopener noreferrer" style={{ padding: "8px 16px", background: "#16a34a", color: "#fff", borderRadius: 8, fontWeight: 600, fontSize: 13, textDecoration: "none" }}>📊 WC注文確認</a>
-            <a href="https://vitamax-asia.com/wp-admin/post-new.php?post_type=product" target="_blank" rel="noopener noreferrer" style={{ padding: "8px 16px", background: "#15803d", color: "#fff", borderRadius: 8, fontWeight: 600, fontSize: 13, textDecoration: "none" }}>+ 商品登録</a>
-            <a href="https://vitamax-asia.com" target="_blank" rel="noopener noreferrer" style={{ padding: "8px 16px", background: "#dcfce7", color: "#16a34a", border: "1px solid #86efac", borderRadius: 8, fontWeight: 600, fontSize: 13, textDecoration: "none" }}>🌐 サイト確認</a>
-            <a href="https://vitamax-asia.com/wp-admin/" target="_blank" rel="noopener noreferrer" style={{ padding: "8px 16px", background: "#f0fdf4", color: "#16a34a", border: "1px solid #86efac", borderRadius: 8, fontWeight: 600, fontSize: 13, textDecoration: "none" }}>WP管理画面</a>
+            <a href="https://vitamax-asia.com/wp-admin/admin.php?page=wc-reports" target="_blank" rel="noopener noreferrer" style={{ padding: "8px 16px", background: "#16a34a", color: "#fff", borderRadius: 8, fontWeight: 600, fontSize: 13, textDecoration: "none" }}>📊 WC\u6ce8\u6587\u78ba\u8a8d</a>
+            <a href="https://vitamax-asia.com/wp-admin/post-new.php?post_type=product" target="_blank" rel="noopener noreferrer" style={{ padding: "8px 16px", background: "#15803d", color: "#fff", borderRadius: 8, fontWeight: 600, fontSize: 13, textDecoration: "none" }}>+ \u5546\u54c1\u767b\u9332</a>
+            <a href="https://vitamax-asia.com" target="_blank" rel="noopener noreferrer" style={{ padding: "8px 16px", background: "#dcfce7", color: "#16a34a", border: "1px solid #86efac", borderRadius: 8, fontWeight: 600, fontSize: 13, textDecoration: "none" }}>🌐 \u30b5\u30a4\u30c8\u78ba\u8a8d</a>
+            <a href="https://vitamax-asia.com/wp-admin/" target="_blank" rel="noopener noreferrer" style={{ padding: "8px 16px", background: "#f0fdf4", color: "#16a34a", border: "1px solid #86efac", borderRadius: 8, fontWeight: 600, fontSize: 13, textDecoration: "none" }}>WP\u7ba1\u7406\u753b\u9762</a>
           </div>
+          {/* 月次目標トラッカー */}
           <div style={{ background: "#f0fdf4", border: "1px solid #86efac", borderRadius: 12, padding: 16, marginBottom: 20 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10, flexWrap: "wrap", gap: 8 }}>
-              <span style={{ fontWeight: 700, fontSize: 15 }}>🎯 今月目標 vs 実績</span>
+              <span style={{ fontWeight: 700, fontSize: 15 }}>🎯 \u4eca\u6708\u76ee\u6a19 vs \u5b9f\u7e3e</span>
               <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                <span style={{ fontSize: 12, color: "#64748b" }}>月次目標:</span>
+                <span style={{ fontSize: 12, color: "#64748b" }}>\u6708\u6b21\u76ee\u6a19:</span>
                 <input type="number" value={vitaTarget} onChange={e => setVitaTarget(parseInt(e.target.value)||0)} style={{ width: 120, padding: "4px 8px", border: "1px solid #86efac", borderRadius: 6, fontSize: 13 }} step="10000" />
-                <span style={{ fontSize: 12 }}>円</span>
+                <span style={{ fontSize: 12 }}>\u5186</span>
               </div>
             </div>
             <div style={{ background: "#d1fae5", borderRadius: 8, height: 18, overflow: "hidden", marginBottom: 8 }}>
-              <div style={{ width: vitaTarget > 0 ? Math.min(100, vitaMonthly/vitaTarget*100) + "%" : "0%", height: "100%", background: vitaMonthly >= vitaTarget ? "#15803d" : "#16a34a", borderRadius: 8, transition: "width 0.5s" }} />
+              <div style={{ width: `${Math.min(100, vitaTarget > 0 ? vitaMonthly/vitaTarget*100 : 0)}%`, height: "100%", background: vitaMonthly >= vitaTarget ? "#15803d" : "#16a34a", borderRadius: 8, transition: "width 0.5s" }} />
             </div>
             <div style={{ display: "flex", justifyContent: "space-between", fontSize: 14 }}>
-              <span style={{ fontWeight: 700, color: "#16a34a" }}>¥{vitaMonthly.toLocaleString()}</span>
-              <span style={{ color: "#64748b" }}>/ ¥{vitaTarget.toLocaleString()} ({vitaTarget > 0 ? Math.round(vitaMonthly/vitaTarget*100) : 0}%){vitaMonthly >= vitaTarget ? " 🎉目標達成！" : ""}</span>
+              <span style={{ fontWeight: 700, color: "#16a34a" }}>\u00a5{vitaMonthly.toLocaleString()}</span>
+              <span style={{ color: "#64748b" }}>/ \u00a5{vitaTarget.toLocaleString()} ({vitaTarget > 0 ? Math.round(vitaMonthly/vitaTarget*100) : 0}%){vitaMonthly >= vitaTarget ? " 🎉\u76ee\u6a19\u9054\u6210\uff01" : ""}</span>
             </div>
           </div>
+          {/* 売上追加 */}
           <div style={{ marginBottom: 12 }}>
-            <button onClick={() => { setNSale({ channel: "vitamax", product_name: "", amount: "", quantity: "1", sale_date: new Date().toISOString().split("T")[0], notes: "" }); setShowAddSale(true); }} style={{ padding: "7px 16px", background: "#16a34a", color: "#fff", border: "none", borderRadius: 6, cursor: "pointer", fontSize: 13, fontWeight: 600 }}>+ 売上追加</button>
+            <button onClick={() => { setNSale({ channel: "vitamax", product_name: "", amount: "", quantity: "1", sale_date: new Date().toISOString().split("T")[0], notes: "" }); setShowAddSale(true); }} style={{ padding: "7px 16px", background: "#16a34a", color: "#fff", border: "none", borderRadius: 6, cursor: "pointer", fontSize: 13, fontWeight: 600 }}>+ \u58f2\u4e0a\u8ffd\u52a0</button>
           </div>
           {showAddSale && hTab === "vitamax" && (
             <div style={{ background: "#f0fdf4", border: "1px solid #86efac", borderRadius: 10, padding: 16, marginBottom: 16 }}>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 10 }}>
                 <div style={{ gridColumn: "span 2" }}>
-                  <div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>商品名</div>
-                  <input style={{ padding: "6px 10px", border: "1px solid #e2e8f0", borderRadius: 6, fontSize: 13, width: "100%", boxSizing: "border-box" }} list="vita-products" value={nSale.product_name} onChange={e => setNSale(p => ({...p, product_name: e.target.value}))} placeholder="商品を選択または直接入力" />
+                  <div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>\u5546\u54c1\u540d</div>
+                  <input style={{ padding: "6px 10px", border: "1px solid #e2e8f0", borderRadius: 6, fontSize: 13, width: "100%", boxSizing: "border-box" }} list="vita-products" value={nSale.product_name} onChange={e => setNSale(p => ({...p, product_name: e.target.value}))} placeholder="\u5546\u54c1\u3092\u9078\u629e\u307e\u305f\u306f\u76f4\u63a5\u5165\u529b" />
                   <datalist id="vita-products">{VITA_PRODUCTS.map(p => <option key={p} value={p} />)}</datalist>
                 </div>
-                <div><div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>売上金額（円）*</div><input style={{ padding: "6px 10px", border: "1px solid #e2e8f0", borderRadius: 6, fontSize: 13, width: "100%", boxSizing: "border-box" }} type="number" value={nSale.amount} onChange={e => setNSale(p => ({...p, amount: e.target.value}))} placeholder="0" /></div>
-                <div><div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>数量</div><input style={{ padding: "6px 10px", border: "1px solid #e2e8f0", borderRadius: 6, fontSize: 13, width: "100%", boxSizing: "border-box" }} type="number" value={nSale.quantity} onChange={e => setNSale(p => ({...p, quantity: e.target.value}))} /></div>
-                <div><div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>日付 *</div><input style={{ padding: "6px 10px", border: "1px solid #e2e8f0", borderRadius: 6, fontSize: 13, width: "100%", boxSizing: "border-box" }} type="date" value={nSale.sale_date} onChange={e => setNSale(p => ({...p, sale_date: e.target.value}))} /></div>
-                <div style={{ gridColumn: "span 2" }}><div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>メモ</div><input style={{ padding: "6px 10px", border: "1px solid #e2e8f0", borderRadius: 6, fontSize: 13, width: "100%", boxSizing: "border-box" }} value={nSale.notes} onChange={e => setNSale(p => ({...p, notes: e.target.value}))} /></div>
+                <div><div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>\u58f2\u4e0a\u91d1\u984d\uff08\u5186\uff09*</div><input style={{ padding: "6px 10px", border: "1px solid #e2e8f0", borderRadius: 6, fontSize: 13, width: "100%", boxSizing: "border-box" }} type="number" value={nSale.amount} onChange={e => setNSale(p => ({...p, amount: e.target.value}))} placeholder="0" /></div>
+                <div><div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>\u6570\u91cf</div><input style={{ padding: "6px 10px", border: "1px solid #e2e8f0", borderRadius: 6, fontSize: 13, width: "100%", boxSizing: "border-box" }} type="number" value={nSale.quantity} onChange={e => setNSale(p => ({...p, quantity: e.target.value}))} /></div>
+                <div><div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>\u65e5\u4ed8 *</div><input style={{ padding: "6px 10px", border: "1px solid #e2e8f0", borderRadius: 6, fontSize: 13, width: "100%", boxSizing: "border-box" }} type="date" value={nSale.sale_date} onChange={e => setNSale(p => ({...p, sale_date: e.target.value}))} /></div>
+                <div style={{ gridColumn: "span 2" }}><div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>\u30e1\u30e2</div><input style={{ padding: "6px 10px", border: "1px solid #e2e8f0", borderRadius: 6, fontSize: 13, width: "100%", boxSizing: "border-box" }} value={nSale.notes} onChange={e => setNSale(p => ({...p, notes: e.target.value}))} /></div>
               </div>
               <div style={{ display: "flex", gap: 8 }}>
-                <button onClick={saveSale} style={{ padding: "7px 16px", background: "#16a34a", color: "#fff", border: "none", borderRadius: 6, cursor: "pointer", fontSize: 13, fontWeight: 600 }}>保存</button>
-                <button onClick={() => setShowAddSale(false)} style={{ padding: "7px 16px", background: "#94a3b8", color: "#fff", border: "none", borderRadius: 6, cursor: "pointer", fontSize: 13, fontWeight: 600 }}>キャンセル</button>
+                <button onClick={saveSale} style={{ padding: "7px 16px", background: "#16a34a", color: "#fff", border: "none", borderRadius: 6, cursor: "pointer", fontSize: 13, fontWeight: 600 }}>\u4fdd\u5b58</button>
+                <button onClick={() => setShowAddSale(false)} style={{ padding: "7px 16px", background: "#94a3b8", color: "#fff", border: "none", borderRadius: 6, cursor: "pointer", fontSize: 13, fontWeight: 600 }}>\u30ad\u30e3\u30f3\u30bb\u30eb</button>
               </div>
             </div>
           )}
+          {/* 商品別実績 */}
           {vitaSales.length > 0 && (() => {
             const prodMap = {};
-            vitaSales.forEach(s => { const k = s.product_name || "その他"; prodMap[k] = (prodMap[k]||0) + (s.amount||0); });
+            vitaSales.forEach(s => { const k = s.product_name || "\u305d\u306e\u4ed6"; prodMap[k] = (prodMap[k]||0) + (s.amount||0); });
             const sorted = Object.entries(prodMap).sort((a,b) => b[1]-a[1]);
             return (
               <div style={{ marginBottom: 16 }}>
-                <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 8, color: "#15803d" }}>📦 商品別売上実績</div>
+                <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 8, color: "#15803d" }}>📦 \u5546\u54c1\u5225\u58f2\u4e0a\u5b9f\u7e3e</div>
                 {sorted.map(([name, total]) => (
                   <div key={name} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "7px 12px", background: "#f0fdf4", border: "1px solid #dcfce7", borderRadius: 8, marginBottom: 6 }}>
                     <span style={{ fontSize: 13 }}>{name}</span>
-                    <span style={{ fontWeight: 700, color: "#16a34a" }}>¥{total.toLocaleString()}</span>
+                    <span style={{ fontWeight: 700, color: "#16a34a" }}>\u00a5{total.toLocaleString()}</span>
                   </div>
                 ))}
               </div>
             );
           })()}
-          {loading ? <div style={{ color: "#94a3b8", padding: 20 }}>読み込み中...</div> : (
+          {/* 売上一覧 */}
+          {loading ? <div style={{ color: "#94a3b8", padding: 20 }}>\u8aad\u307f\u8fbc\u307f\u4e2d...</div> : (
             <Table
-              headers={["日付", "商品名", "売上金額", "数量", "メモ", "操作"]}
+              headers={["\u65e5\u4ed8", "\u5546\u54c1\u540d", "\u58f2\u4e0a\u91d1\u984d", "\u6570\u91cf", "\u30e1\u30e2", "\u64cd\u4f5c"]}
               rows={vitaSales.map(s => [
                 s.sale_date,
-                s.product_name || "—",
-                <span style={{ color: "#16a34a", fontWeight: 600 }}>¥{(s.amount||0).toLocaleString()}</span>,
+                s.product_name || "\u2014",
+                <span style={{ color: "#16a34a", fontWeight: 600 }}>\u00a5{(s.amount||0).toLocaleString()}</span>,
                 s.quantity,
-                s.notes || "—",
-                <button onClick={() => deleteSale(s.id)} style={{ padding: "2px 8px", background: "#fee2e2", color: "#dc2626", border: "none", borderRadius: 4, cursor: "pointer", fontSize: 12 }}>🗑</button>
+                s.notes || "\u2014",
+                <button onClick={() => deleteSale(s.id)} style={{ padding: "2px 8px", background: "#fee2e2", color: "#dc2626", border: "none", borderRadius: 4, cursor: "pointer", fontSize: 12 }}>{"🗑"}</button>
               ])}
             />
           )}
-          {vitaSales.length === 0 && !loading && <div style={{ textAlign: "center", color: "#94a3b8", padding: 30 }}>VITAMAX公式の売上データがありません。「売上追加」から入力してください</div>}
+          {vitaSales.length === 0 && !loading && <div style={{ textAlign: "center", color: "#94a3b8", padding: 30 }}>VITAMAX\u516c\u5f0f\u306e\u58f2\u4e0a\u30c7\u30fc\u30bf\u304c\u3042\u308a\u307e\u305b\u3093\u3002\u300c\u58f2\u4e0a\u8ffd\u52a0\u300d\u304b\u3089\u5165\u529b\u3057\u3066\u304f\u3060\u3055\u3044</div>}
         </Section>
       )}
 
-{hTab === "partner" && (
-        <Section title="🤝 パートナー・案件管理" color="#9333ea">
+      {hTab === "partner" && (
+        <Section title="🤝 \u30d1\u30fc\u30c8\u30ca\u30fc\u30fb\u6848\u4ef6\u7ba1\u7406" color="#9333ea">
           <Table
-            headers={["パートナー名", "種別", "ステータス", "想定金額", "メモ"]}
+            headers={["\u30d1\u30fc\u30c8\u30ca\u30fc\u540d", "\u7a2e\u5225", "\u30b9\u30c6\u30fc\u30bf\u30b9", "\u60f3\u5b9a\u91d1\u984d", "\u30e1\u30e2"]}
             rows={data.huppy.partners.map(p => [
               <span style={{ fontWeight: 600 }}>{p.name}</span>,
               p.type,
               <Badge label={p.status} color={STATUS_COLOR[p.status]} />,
-              p.value, p.note,
+              p.value,
+              p.note,
             ])}
           />
         </Section>
@@ -1968,11 +2065,14 @@ function Today({ data, setData }) {
     supabase.from("contacts").select("id,company_name,next_action,status").not("next_action","is",null).lte("next_action", soon).order("next_action", { ascending: true }).limit(30)
       .then(({ data: rows }) => { if (rows) setReminders(rows); });
   }, []);
+
   function toggle(id) {
     setData(d => ({ ...d, tasks: d.tasks.map(t => t.id === id ? { ...t, done: !t.done } : t) }));
   }
   const done = data.tasks.filter(t=>t.done).length;
   const pct = Math.round(done/data.tasks.length*100);
+  const today = new Date().toISOString().split("T")[0];
+  const tomorrow = new Date(Date.now() + 86400000).toISOString().split("T")[0];
 
   return (
     <div>
@@ -1997,23 +2097,24 @@ function Today({ data, setData }) {
           <div style={{ textAlign: "center", padding: 16, color: "#22c55e", fontWeight: 800, fontSize: 16 }}>🎉 今日のタスク全完了！お疲れ様でした！</div>
         )}
       </div>
+      {/* ── 次回アクション リマインダー ── */}
       {reminders.length > 0 && (
         <div style={{ background: "#fff", borderRadius: 12, padding: 20, boxShadow: "0 1px 6px rgba(0,0,0,0.08)" }}>
           <h3 style={{ margin: "0 0 14px", fontSize: 15, fontWeight: 700 }}>🔔 企業コンタクト アクション予定</h3>
           {reminders.map(r => {
             const isOver = r.next_action < today;
-            const isToday2 = r.next_action === today;
-            const isTomorrow = r.next_action === new Date(Date.now() + 86400000).toISOString().split("T")[0];
-            const bg = isOver ? "#fff7f7" : isToday2 ? "#fffbeb" : "#f0fdf4";
-            const bd = isOver ? "#fca5a5" : isToday2 ? "#fde68a" : "#bbf7d0";
-            const icon = isOver ? "🔴" : isToday2 ? "🟡" : "🟢";
-            const label = isOver ? "期限切れ" : isToday2 ? "本日" : isTomorrow ? "明日" : r.next_action;
+            const isToday = r.next_action === today;
+            const isTomorrow = r.next_action === tomorrow;
+            const bg = isOver ? "#fff7f7" : isToday ? "#fffbeb" : "#f0fdf4";
+            const bd = isOver ? "#fca5a5" : isToday ? "#fde68a" : "#bbf7d0";
+            const icon = isOver ? "🔴" : isToday ? "🟡" : "🟢";
+            const label = isOver ? "期限切れ" : isToday ? "本日" : isTomorrow ? "明日" : `${r.next_action}`;
             return (
-              <div key={r.id} style={{ display: "flex", alignItems: "center", gap: 10, padding: "9px 14px", borderRadius: 8, marginBottom: 6, background: bg, border: "1px solid " + bd }}>
+              <div key={r.id} style={{ display: "flex", alignItems: "center", gap: 10, padding: "9px 14px", borderRadius: 8, marginBottom: 6, background: bg, border: `1px solid ${bd}` }}>
                 <span style={{ fontSize: 16 }}>{icon}</span>
                 <span style={{ fontWeight: 700, color: "#1e3a5f", flex: 1, fontSize: 13 }}>{r.company_name}</span>
                 <Badge label={r.status} color={STATUS_COLOR[r.status] || "#94a3b8"} />
-                <span style={{ fontSize: 12, color: isOver ? "#ef4444" : isToday2 ? "#f59e0b" : "#16a34a", fontWeight: 700, whiteSpace: "nowrap" }}>{label}</span>
+                <span style={{ fontSize: 12, color: isOver ? "#ef4444" : isToday ? "#f59e0b" : "#16a34a", fontWeight: 700, whiteSpace: "nowrap" }}>{label}</span>
               </div>
             );
           })}
@@ -2023,29 +2124,29 @@ function Today({ data, setData }) {
   );
 }
 
-// ── MAIL TEMPLATE MODAL ──────────────────────────────────
+// ── MAIL TEMPLATE MODAL ──────────────────────────────────────
 function MailTemplateModal({ contact, templates, onClose }) {
   const [selected, setSelected] = useState(Object.keys(templates)[0]);
   const [copied, setCopied] = useState(false);
   const text = templates[selected](contact);
   function copy() {
-    navigator.clipboard.writeText(text).then(()=>{ setCopied(true); setTimeout(()=>setCopied(false),2000); });
+    navigator.clipboard.writeText(text).then(() => { setCopied(true); setTimeout(() => setCopied(false), 2000); });
   }
   return (
-    <div style={{ background:"#fff", borderRadius:12, padding:24, width:520, maxWidth:"90vw", maxHeight:"80vh", overflow:"hidden", display:"flex", flexDirection:"column" }} onClick={e=>e.stopPropagation()}>
-      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:16 }}>
-        <div style={{ fontWeight:700, color:"#1e3a5f", fontSize:15 }}>📧 メールテンプレート — {contact.company_name}</div>
-        <button onClick={onClose} style={{ border:"none", background:"none", fontSize:18, cursor:"pointer", color:"#94a3b8" }}>✕</button>
+    <div style={{ background: "#fff", borderRadius: 12, padding: 24, width: 520, maxWidth: "90vw", maxHeight: "80vh", overflow: "hidden", display: "flex", flexDirection: "column" }} onClick={e => e.stopPropagation()}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+        <div style={{ fontWeight: 700, color: "#1e3a5f", fontSize: 15 }}>📧 メールテンプレート — {contact.company_name}</div>
+        <button onClick={onClose} style={{ border: "none", background: "none", fontSize: 18, cursor: "pointer", color: "#94a3b8" }}>✕</button>
       </div>
-      <div style={{ display:"flex", gap:6, marginBottom:12, flexWrap:"wrap" }}>
-        {Object.keys(templates).map(k=>(
-          <button key={k} onClick={()=>setSelected(k)} style={{ padding:"5px 12px", borderRadius:6, border:"1px solid", fontSize:12, cursor:"pointer", fontWeight:selected===k?700:400, background:selected===k?"#2563eb":"#f8fafc", color:selected===k?"#fff":"#475569", borderColor:selected===k?"#2563eb":"#e2e8f0" }}>{k}</button>
+      <div style={{ display: "flex", gap: 6, marginBottom: 12, flexWrap: "wrap" }}>
+        {Object.keys(templates).map(k => (
+          <button key={k} onClick={() => setSelected(k)} style={{ padding: "5px 12px", borderRadius: 6, border: "1px solid", fontSize: 12, cursor: "pointer", fontWeight: selected === k ? 700 : 400, background: selected === k ? "#2563eb" : "#f8fafc", color: selected === k ? "#fff" : "#475569", borderColor: selected === k ? "#2563eb" : "#e2e8f0" }}>{k}</button>
         ))}
       </div>
-      <textarea readOnly value={text} style={{ flex:1, minHeight:240, padding:12, borderRadius:8, border:"1px solid #e2e8f0", fontSize:13, fontFamily:"inherit", resize:"none", color:"#1e293b", background:"#f8fafc" }} />
-      <div style={{ display:"flex", gap:8, marginTop:12 }}>
-        <button onClick={copy} style={{ flex:1, padding:"8px 0", borderRadius:8, border:"none", background:copied?"#22c55e":"#2563eb", color:"#fff", fontWeight:700, fontSize:13, cursor:"pointer" }}>{copied?"✅ コピー完了！":"📋 クリップボードにコピー"}</button>
-        <button onClick={onClose} style={{ padding:"8px 16px", borderRadius:8, border:"1px solid #e2e8f0", background:"#f8fafc", color:"#64748b", fontSize:13, cursor:"pointer" }}>閉じる</button>
+      <textarea readOnly value={text} style={{ flex: 1, minHeight: 240, padding: 12, borderRadius: 8, border: "1px solid #e2e8f0", fontSize: 13, fontFamily: "inherit", resize: "none", color: "#1e293b", background: "#f8fafc" }} />
+      <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
+        <button onClick={copy} style={{ flex: 1, padding: "8px 0", borderRadius: 8, border: "none", background: copied ? "#22c55e" : "#2563eb", color: "#fff", fontWeight: 700, fontSize: 13, cursor: "pointer" }}>{copied ? "✅ コピー完了！" : "📋 クリップボードにコピー"}</button>
+        <button onClick={onClose} style={{ padding: "8px 16px", borderRadius: 8, border: "1px solid #e2e8f0", background: "#f8fafc", color: "#64748b", fontSize: 13, cursor: "pointer" }}>閉じる</button>
       </div>
     </div>
   );
@@ -2062,7 +2163,7 @@ function LoginScreen({ onLogin }) {
       sessionStorage.setItem("crm_auth", "1");
       onLogin();
     } else {
-      setErr("ユーザヾ名またはパスワードが違います");
+      setErr("ユーザー名またはパスワードが違います");
     }
   };
   return (
@@ -2171,29 +2272,46 @@ export default function App() {
   };
 
   return (
-    <div style={{ fontFamily: "'Hiragino Sans', 'Yu Gothic', Arial, sans-serif", background: "#f1f5f9", minHeight: "100vh" }}>
-      <div style={{ background: "#1e3a5f", padding: "14px 24px", display: "flex", alignItems: "center", gap: 16, boxShadow: "0 2px 8px rgba(0,0,0,0.2)" }}>
+    <div style={{ fontFamily: "'Inter', 'Hiragino Sans', 'Yu Gothic', -apple-system, sans-serif", background: "linear-gradient(135deg, #f0f4ff 0%, #faf5ff 40%, #fff5f5 70%, #f0fdf4 100%)", minHeight: "100vh" }}>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+        @media (max-width: 768px) {
+          .crm-tabs { overflow-x: auto; flex-wrap: nowrap !important; -webkit-overflow-scrolling: touch; }
+          .crm-tabs button { flex-shrink: 0; white-space: nowrap; }
+          .crm-section { padding: 10px !important; }
+          .crm-form-row { flex-direction: column !important; }
+          .crm-header-title { font-size: 14px !important; }
+          .crm-card-row { gap: 8px !important; }
+        }
+        * { box-sizing: border-box; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #c7d2fe; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #a5b4fc; }
+        .crm-tab-btn:hover { background: rgba(99,102,241,0.08) !important; }
+      `}</style>
+      <div style={{ background: "rgba(255,255,255,0.85)", backdropFilter: "blur(20px)", padding: "16px 28px", display: "flex", alignItems: "center", gap: 16, borderBottom: "1px solid rgba(226,232,240,0.6)", position: "sticky", top: 0, zIndex: 100 }}>
         <div>
-          <div style={{ color: "#fff", fontWeight: 800, fontSize: 18, letterSpacing: 0.5 }}>UCHIWA_CRM</div>
-          <div style={{ color: "#93c5fd", fontSize: 11, marginTop: 1 }}>月収100万円達成ダッシュボード</div>
+          <div style={{ fontWeight: 900, fontSize: 20, letterSpacing: -0.5, background: "linear-gradient(135deg, #6366f1, #8b5cf6)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>UCHIWA_CRM</div>
+          <div style={{ color: "#94a3b8", fontSize: 11, marginTop: 1, fontWeight: 500 }}>月収100万円達成ダッシュボード</div>
         </div>
-        <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 12 }}>
-          {syncStatus === "syncing" && <span style={{ fontSize: 11, color: "#93c5fd" }}>⏳ 同期中...</span>}
-          {syncStatus === "ok" && <span style={{ fontSize: 11, color: "#86efac" }}>✓ 同期完了</span>}
-          {syncStatus === "error" && <span style={{ fontSize: 11, color: "#fca5a5" }}>⚠ 同期エラー</span>}
-          <div style={{ color: "#93c5fd", fontSize: 12 }}>{new Date().toLocaleDateString("ja-JP", { year: "numeric", month: "long", day: "numeric", weekday: "short" })}</div>
+        <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 14 }}>
+          {syncStatus === "syncing" && <span style={{ fontSize: 11, color: "#8b5cf6", fontWeight: 600 }}>⏳ 同期中...</span>}
+          {syncStatus === "ok" && <span style={{ fontSize: 11, color: "#22c55e", fontWeight: 600 }}>✓ 同期完了</span>}
+          {syncStatus === "error" && <span style={{ fontSize: 11, color: "#ef4444", fontWeight: 600 }}>⚠ 同期エラー</span>}
+          <div style={{ color: "#94a3b8", fontSize: 12, fontWeight: 500 }}>{new Date().toLocaleDateString("ja-JP", { year: "numeric", month: "long", day: "numeric", weekday: "short" })}</div>
         </div>
       </div>
 
-      <div style={{ background: "#fff", borderBottom: "1px solid #e2e8f0", padding: "0 24px", display: "flex", gap: 4, overflowX: "auto" }}>
+      <div style={{ background: "rgba(255,255,255,0.5)", backdropFilter: "blur(12px)", borderBottom: "1px solid rgba(226,232,240,0.4)", padding: "0 28px", display: "flex", gap: 2, overflowX: "auto" }}>
         {TABS.map(t => (
-          <button key={t.id} onClick={() => setTab(t.id)} style={{ padding: "12px 16px", background: "none", border: "none", cursor: "pointer", fontSize: 13, fontWeight: 600, color: tab === t.id ? "#2563eb" : "#64748b", borderBottom: tab === t.id ? "2px solid #2563eb" : "2px solid transparent", whiteSpace: "nowrap" }}>
+          <button className="crm-tab-btn" key={t.id} onClick={() => setTab(t.id)} style={{ padding: "14px 18px", background: tab === t.id ? "rgba(99,102,241,0.1)" : "none", border: "none", cursor: "pointer", fontSize: 13, fontWeight: tab === t.id ? 700 : 500, color: tab === t.id ? "#6366f1" : "#64748b", borderBottom: tab === t.id ? "2px solid #6366f1" : "2px solid transparent", whiteSpace: "nowrap", borderRadius: "8px 8px 0 0", transition: "all 0.2s" }}>
             {t.label}
           </button>
         ))}
       </div>
 
-      <div style={{ maxWidth: 1100, margin: "0 auto", padding: "24px 20px" }}>
+      <div style={{ maxWidth: 1100, margin: "0 auto", padding: "28px 24px" }}>
         {tabContent[tab]}
       </div>
     </div>
