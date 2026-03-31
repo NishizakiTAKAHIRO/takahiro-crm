@@ -1709,6 +1709,78 @@ function Smile({ data, setData }) {
   );
 }
 
+// ── EMANON 売上管理データ (Google Sheets連携) ──────────────
+const EMANON_PL = [
+  { month: "2025-05", label: "2025/5", revenue: 722434, payment: 234000, grossProfit: 488434, laborCost: 234115, netProfit: 254319, expenses: 0 },
+  { month: "2025-06", label: "2025/6", revenue: 839385, payment: 263499, grossProfit: 575886, laborCost: 241969, netProfit: 333917, expenses: 0 },
+  { month: "2025-07", label: "2025/7", revenue: 695809, payment: 350427, grossProfit: 345382, laborCost: 234790, netProfit: 110591, expenses: 0 },
+  { month: "2025-08", label: "2025/8", revenue: 855538, payment: 501047, grossProfit: 354491, laborCost: 206347, netProfit: 148144, expenses: 30000 },
+  { month: "2025-09", label: "2025/9", revenue: 1310417, payment: 988933, grossProfit: 321484, laborCost: 196445, netProfit: 125039, expenses: 30000 },
+  { month: "2025-10", label: "2025/10", revenue: 1216339, payment: 765995, grossProfit: 450344, laborCost: 235103, netProfit: 215241, expenses: 30000 },
+  { month: "2025-11", label: "2025/11", revenue: 1370180, payment: 738992, grossProfit: 631188, laborCost: 289356, netProfit: 341832, expenses: 30000 },
+  { month: "2025-12", label: "2025/12", revenue: 2254721, payment: 1166829, grossProfit: 1087892, laborCost: 426367, netProfit: 661524, expenses: 30000 },
+  { month: "2026-01", label: "2026/1", revenue: 1525138, payment: 1073845, grossProfit: 451293, laborCost: 235388, netProfit: 215905, expenses: 30000 },
+  { month: "2026-02", label: "2026/2", revenue: 1488651, payment: 1006113, grossProfit: 482538, laborCost: 244761, netProfit: 237777, expenses: 30000 },
+];
+
+const EMANON_ENTERTAINERS = {
+  "2025-07": [
+    { name: "福禄寿", reward: 32070 }, { name: "大阪の村長", reward: 1732 }, { name: "o_van entertainment", reward: 10005 },
+    { name: "EMANON Entertainment Odakei", reward: 12120 }, { name: "EMANON Entertainment Miguel", reward: 531 },
+    { name: "EMANON Entertainment DJMARU", reward: 6120 }, { name: "EMANON Entertainment CHIHA", reward: 249191 },
+    { name: "EMANON Entertainment", reward: 276634 }, { name: "DAIKI EMANON Entertainment", reward: 7052 },
+    { name: "Bridge Stars Entertainment Japan", reward: 168332 },
+  ],
+  "2025-08": [
+    { name: "福禄寿", reward: 5059 }, { name: "o_van entertainment", reward: 762 },
+    { name: "EMANON Entertainment Odakei", reward: 2786 }, { name: "EMANON Entertainment DJMARU", reward: 3066 },
+    { name: "EMANON Entertainment CHIHA", reward: 90577 }, { name: "EMANON Entertainment", reward: 280158 },
+    { name: "DAIKI EMANON Entertainment", reward: 1809 }, { name: "Bridge Stars Entertainment Japan", reward: 470757 },
+  ],
+  "2025-09": [
+    { name: "福禄寿", reward: 17356 }, { name: "o_van entertainment", reward: 4575 },
+    { name: "EMANON Entertainment Odakei", reward: 6234 }, { name: "EMANON Entertainment Miguel", reward: 5292 },
+    { name: "EMANON Entertainment DJMARU", reward: 1636 }, { name: "EMANON Entertainment CHIHA", reward: 307028 },
+    { name: "EMANON Entertainment", reward: 474696 }, { name: "DAIKI EMANON Entertainment", reward: 3458 },
+    { name: "Bridge Stars Entertainment Japan", reward: 489265 },
+  ],
+  "2025-10": [
+    { name: "福禄寿", reward: 9316 }, { name: "大阪の村長", reward: 2102 }, { name: "o_van entertainment", reward: 7714 },
+    { name: "ken", reward: 4076 }, { name: "EMANON Entertainment Odakei", reward: 11100 },
+    { name: "EMANON Entertainment Miguel", reward: 488 }, { name: "EMANON Entertainment DJMARU", reward: 8055 },
+    { name: "EMANON Entertainment CHIHA", reward: 77982 }, { name: "EMANON Entertainment", reward: 461556 },
+    { name: "DAIKI EMANON Entertainment", reward: 5005 }, { name: "Bridge Stars Entertainment Japan", reward: 628945 },
+  ],
+  "2025-11": [
+    { name: "福禄寿", reward: 10291 }, { name: "大阪の村長", reward: 540 }, { name: "o_van entertainment", reward: 3614 },
+    { name: "ken", reward: 6270 }, { name: "EMANON Entertainment Odakei", reward: 14474 },
+    { name: "EMANON Entertainment Miguel", reward: 438 }, { name: "EMANON Entertainment DJMARU", reward: 8001 },
+    { name: "EMANON Entertainment CHIHA", reward: 72032 }, { name: "EMANON Entertainment", reward: 389625 },
+    { name: "DAIKI EMANON Entertainment", reward: 2929 }, { name: "Bridge Stars Entertainment Japan", reward: 861966 },
+  ],
+  "2025-12": [
+    { name: "福禄寿", reward: 14499 }, { name: "大阪の村長", reward: 1022 }, { name: "o_van entertainment", reward: 25102 },
+    { name: "ken", reward: 9694 }, { name: "EMANON Entertainment Odakei", reward: 15746 },
+    { name: "EMANON Entertainment Miguel", reward: 724 }, { name: "EMANON Entertainment DJMARU", reward: 3648 },
+    { name: "EMANON Entertainment CHIHA", reward: 86261 }, { name: "EMANON Entertainment", reward: 661038 },
+    { name: "DAIKI EMANON Entertainment", reward: 10133 }, { name: "Bridge Stars Entertainment Japan", reward: 1426854 },
+  ],
+  "2026-01": [
+    { name: "福禄寿", reward: 10714 }, { name: "大阪の村長", reward: 1159 }, { name: "o_van entertainment", reward: 20476 },
+    { name: "ken", reward: 7629 }, { name: "EMANON Entertainment Odakei", reward: 16001 },
+    { name: "EMANON Entertainment Miguel", reward: 596 }, { name: "EMANON Entertainment DJMARU", reward: 6186 },
+    { name: "EMANON Entertainment CHIHA", reward: 70131 }, { name: "EMANON Entertainment", reward: 319076 },
+    { name: "DAIKI EMANON Entertainment", reward: 8429 }, { name: "Bridge Stars Entertainment Japan", reward: 1064740 },
+  ],
+  "2026-02": [
+    { name: "福禄寿", reward: 13617 }, { name: "大阪の村長", reward: 490 }, { name: "o_van entertainment", reward: 14862 },
+    { name: "ken", reward: 5561 }, { name: "EMANON Entertainment Odakei", reward: 11694 },
+    { name: "EMANON Entertainment Miguel", reward: 381 }, { name: "EMANON Entertainment DJMARU", reward: 3226 },
+    { name: "EMANON Entertainment CHIHA", reward: 77369 }, { name: "EMANON Entertainment", reward: 303481 },
+    { name: "DAIKI EMANON Entertainment", reward: 6622 }, { name: "Bridge Stars Entertainment Japan", reward: 1051760 },
+  ],
+};
+
 // ── HUPPY ──────────────────────────────────────────────────
 function Huppy({ data }) {
   const [hTab, setHTab] = useState("summary");
@@ -1803,7 +1875,7 @@ function Huppy({ data }) {
       </div>
 
       <div style={{ display: "flex", gap: 6, marginBottom: 16, flexWrap: "wrap" }}>
-        {[["summary","📊 サマリー"],["live","🎁 LIVEギフト"],["tkt","🛒 TikTokショップ"],["ec","📦 ECサイト"],["vitamax","🛍️ VITAMAX"],["partner","🤝 パートナー"]].map(([id, label]) => (
+        {[["summary","📊 サマリー"],["pl","📈 収支管理"],["live","🎁 LIVEギフト"],["tkt","🛒 TikTokショップ"],["ec","📦 ECサイト"],["vitamax","🛍️ VITAMAX"],["partner","🤝 パートナー"]].map(([id, label]) => (
           <button key={id} onClick={() => setHTab(id)} style={hBtn(id==="vitamax" ? "#16a34a" : "#9333ea", hTab===id)}>{label}</button>
         ))}
       </div>
@@ -1828,6 +1900,115 @@ function Huppy({ data }) {
           )}
         </Section>
       )}
+
+      {hTab === "pl" && (() => {
+        const plChart = EMANON_PL.map(d => ({
+          month: d.label.split("/")[1] + "月",
+          全体報酬: d.revenue,
+          支払合計: d.payment,
+          粗利益: d.grossProfit,
+          純利益: d.netProfit,
+        }));
+        const totalRev = EMANON_PL.reduce((s, d) => s + d.revenue, 0);
+        const totalProfit = EMANON_PL.reduce((s, d) => s + d.netProfit, 0);
+        const totalGP = EMANON_PL.reduce((s, d) => s + d.grossProfit, 0);
+        const avgProfit = Math.round(totalProfit / EMANON_PL.length);
+        return (
+          <div>
+            <Section title="📈 EMANON 収支管理" color="#6366f1">
+              <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 20 }}>
+                <div style={{ flex: 1, minWidth: 140, background: "linear-gradient(135deg, #6366f1, #818cf8)", borderRadius: 12, padding: 16, color: "#fff" }}>
+                  <div style={{ fontSize: 11, opacity: 0.8 }}>累計売上</div>
+                  <div style={{ fontSize: 22, fontWeight: 800 }}>¥{(totalRev/10000).toFixed(0)}万</div>
+                </div>
+                <div style={{ flex: 1, minWidth: 140, background: "linear-gradient(135deg, #10b981, #34d399)", borderRadius: 12, padding: 16, color: "#fff" }}>
+                  <div style={{ fontSize: 11, opacity: 0.8 }}>累計純利益</div>
+                  <div style={{ fontSize: 22, fontWeight: 800 }}>¥{(totalProfit/10000).toFixed(0)}万</div>
+                </div>
+                <div style={{ flex: 1, minWidth: 140, background: "linear-gradient(135deg, #f59e0b, #fbbf24)", borderRadius: 12, padding: 16, color: "#fff" }}>
+                  <div style={{ fontSize: 11, opacity: 0.8 }}>月平均利益</div>
+                  <div style={{ fontSize: 22, fontWeight: 800 }}>¥{(avgProfit/10000).toFixed(1)}万</div>
+                </div>
+                <div style={{ flex: 1, minWidth: 140, background: "linear-gradient(135deg, #8b5cf6, #a78bfa)", borderRadius: 12, padding: 16, color: "#fff" }}>
+                  <div style={{ fontSize: 11, opacity: 0.8 }}>粗利益率</div>
+                  <div style={{ fontSize: 22, fontWeight: 800 }}>{totalRev > 0 ? Math.round(totalGP/totalRev*100) : 0}%</div>
+                </div>
+              </div>
+
+              <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 10, color: "#4f46e5" }}>月次収支推移</div>
+              <ResponsiveContainer width="100%" height={260}>
+                <BarChart data={plChart}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                  <XAxis dataKey="month" />
+                  <YAxis tickFormatter={v => `${(v/10000).toFixed(0)}万`} />
+                  <Tooltip formatter={v => `¥${v.toLocaleString()}`} />
+                  <Bar dataKey="全体報酬" fill="#818cf8" radius={[0,0,0,0]} stackId="b" />
+                  <Bar dataKey="純利益" fill="#34d399" radius={[4,4,0,0]} />
+                </BarChart>
+              </ResponsiveContainer>
+
+              <div style={{ fontWeight: 700, fontSize: 15, marginTop: 24, marginBottom: 10, color: "#4f46e5" }}>月別収支詳細</div>
+              <div style={{ overflowX: "auto" }}>
+                <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+                  <thead>
+                    <tr style={{ background: "#eef2ff" }}>
+                      {["月", "全体報酬", "支払合計", "経費", "粗利益", "人件費", "純利益", "利益率"].map(h => (
+                        <th key={h} style={{ padding: "8px 10px", textAlign: h === "月" ? "left" : "right", fontWeight: 700, color: "#4338ca", borderBottom: "2px solid #c7d2fe", whiteSpace: "nowrap" }}>{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {EMANON_PL.map((d, i) => (
+                      <tr key={d.month} style={{ background: i % 2 === 0 ? "#fff" : "#f8fafc" }}>
+                        <td style={{ padding: "7px 10px", fontWeight: 600, color: "#4f46e5" }}>{d.label}</td>
+                        <td style={{ padding: "7px 10px", textAlign: "right" }}>¥{d.revenue.toLocaleString()}</td>
+                        <td style={{ padding: "7px 10px", textAlign: "right" }}>¥{d.payment.toLocaleString()}</td>
+                        <td style={{ padding: "7px 10px", textAlign: "right" }}>¥{d.expenses.toLocaleString()}</td>
+                        <td style={{ padding: "7px 10px", textAlign: "right", color: "#059669", fontWeight: 600 }}>¥{d.grossProfit.toLocaleString()}</td>
+                        <td style={{ padding: "7px 10px", textAlign: "right" }}>¥{d.laborCost.toLocaleString()}</td>
+                        <td style={{ padding: "7px 10px", textAlign: "right", color: d.netProfit >= 0 ? "#059669" : "#dc2626", fontWeight: 700 }}>¥{d.netProfit.toLocaleString()}</td>
+                        <td style={{ padding: "7px 10px", textAlign: "right", fontWeight: 600 }}>{d.revenue > 0 ? Math.round(d.netProfit/d.revenue*100) : 0}%</td>
+                      </tr>
+                    ))}
+                    <tr style={{ background: "#eef2ff", fontWeight: 700 }}>
+                      <td style={{ padding: "8px 10px", color: "#4338ca" }}>合計</td>
+                      <td style={{ padding: "8px 10px", textAlign: "right" }}>¥{totalRev.toLocaleString()}</td>
+                      <td style={{ padding: "8px 10px", textAlign: "right" }}>¥{EMANON_PL.reduce((s,d)=>s+d.payment,0).toLocaleString()}</td>
+                      <td style={{ padding: "8px 10px", textAlign: "right" }}>¥{EMANON_PL.reduce((s,d)=>s+d.expenses,0).toLocaleString()}</td>
+                      <td style={{ padding: "8px 10px", textAlign: "right", color: "#059669" }}>¥{totalGP.toLocaleString()}</td>
+                      <td style={{ padding: "8px 10px", textAlign: "right" }}>¥{EMANON_PL.reduce((s,d)=>s+d.laborCost,0).toLocaleString()}</td>
+                      <td style={{ padding: "8px 10px", textAlign: "right", color: "#059669" }}>¥{totalProfit.toLocaleString()}</td>
+                      <td style={{ padding: "8px 10px", textAlign: "right" }}>{totalRev > 0 ? Math.round(totalProfit/totalRev*100) : 0}%</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <div style={{ fontWeight: 700, fontSize: 15, marginTop: 24, marginBottom: 10, color: "#4f46e5" }}>エンターテイナー別報酬（直近月）</div>
+              {(() => {
+                const latestMonth = EMANON_PL[EMANON_PL.length - 1].month;
+                const entertainers = EMANON_ENTERTAINERS[latestMonth] || [];
+                const sorted = [...entertainers].sort((a,b) => b.reward - a.reward);
+                const maxReward = sorted.length > 0 ? sorted[0].reward : 1;
+                return (
+                  <div>
+                    <div style={{ fontSize: 12, color: "#64748b", marginBottom: 8 }}>{EMANON_PL[EMANON_PL.length-1].label} の報酬内訳</div>
+                    {sorted.map(e => (
+                      <div key={e.name} style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
+                        <div style={{ width: 200, fontSize: 12, fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{e.name}</div>
+                        <div style={{ flex: 1, background: "#e0e7ff", borderRadius: 4, height: 16, overflow: "hidden" }}>
+                          <div style={{ width: `${(e.reward/maxReward*100)}%`, height: "100%", background: "linear-gradient(90deg, #6366f1, #818cf8)", borderRadius: 4 }} />
+                        </div>
+                        <div style={{ width: 100, textAlign: "right", fontSize: 12, fontWeight: 600, color: "#4f46e5" }}>¥{e.reward.toLocaleString()}</div>
+                      </div>
+                    ))}
+                  </div>
+                );
+              })()}
+            </Section>
+          </div>
+        );
+      })()}
 
       {hTab === "live" && (
         <Section title="🎁 LIVEギフト売上管理" color="#a855f7">
