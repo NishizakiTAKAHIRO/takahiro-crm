@@ -1841,7 +1841,8 @@ function Huppy({ data }) {
 
   const thisMonthLive = liveRecs.filter(r => r.year_month === curMonth);
   const liveRewardDB = thisMonthLive.reduce((s, r) => s + (r.reward_yen || 0), 0);
-  const emanonCurMonth = EMANON_PL.find(e => e.month === curMonth);
+  const emanonCurMonth = EMANON_PL.find(e => e.month === curMonth) || EMANON_PL[EMANON_PL.length - 1];
+  const emanonLabel = emanonCurMonth ? emanonCurMonth.label : "";
   const liveReward = liveRewardDB + (emanonCurMonth ? emanonCurMonth.revenue : 0);
   const liveDiamonds = thisMonthLive.reduce((s, r) => s + (r.diamonds || 0), 0);
   const tktMonthly = sales.filter(s => s.channel === "tiktok_shop" && (s.sale_date||"").startsWith(curMonth)).reduce((s, r) => s + (r.amount||0), 0);
@@ -1872,8 +1873,8 @@ function Huppy({ data }) {
   return (
     <div>
       <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 20 }}>
-        <Card title="今月合計売上" value={`¥${(totalMonthly/10000).toFixed(1)}万`} color="#9333ea" icon="🎵" />
-        <Card title="🎁 LIVEギフト報酬" value={`¥${(liveReward/10000).toFixed(1)}万`} sub={`${liveDiamonds.toLocaleString()}💎`} color="#a855f7" icon="💎" />
+        <Card title={emanonCurMonth && emanonCurMonth.month !== curMonth ? `合計売上（${emanonLabel}）` : "今月合計売上"} value={`¥${(totalMonthly/10000).toFixed(1)}万`} color="#9333ea" icon="🎵" />
+        <Card title={emanonCurMonth && emanonCurMonth.month !== curMonth ? `🎁 LIVEギフト（${emanonLabel}）` : "🎁 LIVEギフト報酬"} value={`¥${(liveReward/10000).toFixed(1)}万`} sub={`${liveDiamonds.toLocaleString()}💎`} color="#a855f7" icon="💎" />
         <Card title="🛒 TikTokショップ" value={`¥${(tktMonthly/10000).toFixed(1)}万`} color="#ff2d55" icon="🛒" />
         <Card title="📦 ECサイト" value={`¥${(ecMonthly/10000).toFixed(1)}万`} color="#f59e0b" icon="📦" />
         <Card title="🛍️ VITAMAX公式" value={`¥${(vitaMonthly/10000).toFixed(1)}万`} sub={vitaTarget > 0 ? `目標: ${Math.round(vitaMonthly/vitaTarget*100)}%` : ""} color="#16a34a" icon="🛍️" />
