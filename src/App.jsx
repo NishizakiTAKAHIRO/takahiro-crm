@@ -1865,7 +1865,10 @@ function Huppy({ data }) {
 
   const thisMonthLive = liveRecs.filter(r => r.year_month === curMonth);
   const liveRewardDB = thisMonthLive.reduce((s, r) => s + (r.reward_yen || 0), 0);
-  const emanonCurMonth = EMANON_PL.find(e => e.month === curMonth);
+  const shiftMonthFn = (m) => { const d = new Date(m + "-01"); d.setMonth(d.getMonth() + 1); return d.toISOString().slice(0,7); };
+  const emanonCurMonth = plcfMode === "cf"
+    ? EMANON_PL.find(e => shiftMonthFn(e.month) === curMonth)
+    : EMANON_PL.find(e => e.month === curMonth);
   const liveReward = liveRewardDB + (emanonCurMonth ? emanonCurMonth.revenue : 0);
   const liveDiamonds = thisMonthLive.reduce((s, r) => s + (r.diamonds || 0), 0);
   const tktMonthly = sales.filter(s => s.channel === "tiktok_shop" && (s.sale_date||"").startsWith(curMonth)).reduce((s, r) => s + (r.amount||0), 0);
@@ -1897,15 +1900,20 @@ function Huppy({ data }) {
 
   return (
     <div>
-      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10, flexWrap: "wrap" }}>
         <span style={{ fontSize: 13, fontWeight: 600, color: "#64748b" }}>📅 表示月:</span>
         <select value={selectedMonth} onChange={e => setSelectedMonth(e.target.value)} style={{ padding: "5px 10px", borderRadius: 6, border: "1px solid #e2e8f0", fontSize: 13, fontWeight: 600, color: "#1e293b" }}>
           {huppyMonthOptions.map(m => <option key={m} value={m}>{m.replace("-","/")} {m === nowMonth ? "（今月）" : ""}</option>)}
         </select>
+        <span style={{ fontSize: 13, fontWeight: 600, color: "#64748b", marginLeft: 6 }}>📊 集計:</span>
+        {[["pl","P/L（発生主義）"],["cf","C/F（現金主義）"]].map(([id, label]) => (
+          <button key={id} onClick={() => setPlcfMode(id)} style={{ padding: "5px 12px", background: plcfMode === id ? "#6366f1" : "#f1f5f9", color: plcfMode === id ? "#fff" : "#64748b", border: "none", borderRadius: 20, cursor: "pointer", fontWeight: 600, fontSize: 12 }}>{label}</button>
+        ))}
+        {plcfMode === "cf" && <span style={{ fontSize: 11, color: "#94a3b8" }}>※ 売上月の翌月末着金ベース</span>}
       </div>
       <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 20 }}>
-        <Card title={`合計売上（${curMonth.replace("-","/")}）`} value={`¥${(totalMonthly/10000).toFixed(1)}万`} color="#9333ea" icon="🎵" />
-        <Card title={`🎁 LIVEギフト（${curMonth.replace("-","/")}）`} value={`¥${(liveReward/10000).toFixed(1)}万`} sub={`${liveDiamonds.toLocaleString()}💎`} color="#a855f7" icon="💎" />
+        <Card title={`${plcfMode === "cf" ? "合計着金" : "合計売上"}（${curMonth.replace("-","/")}）`} value={`¥${(totalMonthly/10000).toFixed(1)}万`} color={plcfMode === "cf" ? "#0891b2" : "#9333ea"} icon={plcfMode === "cf" ? "💰" : "🎵"} />
+        <Card title={`🎁 LIVEギフト（${plcfMode === "cf" ? "着金" : "売上"}）`} value={`¥${(liveReward/10000).toFixed(1)}万`} sub={`${liveDiamonds.toLocaleString()}💎`} color={plcfMode === "cf" ? "#0891b2" : "#a855f7"} icon="💎" />
         <Card title="🛒 TikTokショップ" value={`¥${(tktMonthly/10000).toFixed(1)}万`} color="#ff2d55" icon="🛒" />
         <Card title="📦 ECサイト" value={`¥${(ecMonthly/10000).toFixed(1)}万`} color="#f59e0b" icon="📦" />
         <Card title="🛍️ VITAMAX公式" value={`¥${(vitaMonthly/10000).toFixed(1)}万`} sub={vitaTarget > 0 ? `目標: ${Math.round(vitaMonthly/vitaTarget*100)}%` : ""} color="#16a34a" icon="🛍️" />
