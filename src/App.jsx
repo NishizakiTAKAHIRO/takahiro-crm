@@ -1819,6 +1819,7 @@ function Huppy({ data }) {
   const [nLive, setNLive] = useState(blankLive);
   const [nSale, setNSale] = useState(blankSale);
   const [vitaTarget, setVitaTarget] = useState(300000);
+  const [plcfMode, setPlcfMode] = useState("pl");
   const VITA_PRODUCTS = ["ROYALHONEY VIP 1P","VITAMAX ENERGYHONEY FOR MEN","VITAMAX ENERGYHONEY FOR HER","VITAMAX ENERGYCOFFEE FOR MEN","VITAMAX ENERGYCOFFEE FOR HER","ROYALHONEY VIP PREMIUM 1P","キングハニーVIP 1箱12袋","キングハニーVIP 2箱24袋","キングハニーVIP 3箱36袋","キングハニーVIP 4箱48袋","キングハニーVIP 5箱60袋"];
 
   useEffect(() => { fetchHData(); }, []);
@@ -1938,23 +1939,35 @@ function Huppy({ data }) {
       )}
 
       {hTab === "live" && (() => {
-        const plChart = EMANON_PL.map(d => ({
+        const shiftMonth = (m) => { const d = new Date(m + "-01"); d.setMonth(d.getMonth() + 1); return d.toISOString().slice(0,7); };
+        const EMANON_CF = EMANON_PL.map(d => {
+          const cfMonth = shiftMonth(d.month);
+          return { ...d, month: cfMonth, label: cfMonth.replace("-","/"), origLabel: d.label };
+        });
+        const viewData = plcfMode === "cf" ? EMANON_CF : EMANON_PL;
+        const plChart = viewData.map(d => ({
           month: d.label.split("/")[1] + "月",
           全体報酬: d.revenue,
           支払合計: d.payment,
           粗利益: d.grossProfit,
           純利益: d.netProfit,
         }));
-        const totalRev = EMANON_PL.reduce((s, d) => s + d.revenue, 0);
-        const totalProfit = EMANON_PL.reduce((s, d) => s + d.netProfit, 0);
-        const totalGP = EMANON_PL.reduce((s, d) => s + d.grossProfit, 0);
-        const avgProfit = Math.round(totalProfit / EMANON_PL.length);
+        const totalRev = viewData.reduce((s, d) => s + d.revenue, 0);
+        const totalProfit = viewData.reduce((s, d) => s + d.netProfit, 0);
+        const totalGP = viewData.reduce((s, d) => s + d.grossProfit, 0);
+        const avgProfit = Math.round(totalProfit / viewData.length);
         return (
           <div>
-            <Section title="📈 EMANON 収支管理" color="#6366f1">
+            <Section title={`📈 EMANON 収支管理 — ${plcfMode === "pl" ? "P/L（発生主義）" : "C/F（現金主義）"}`} color="#6366f1">
+              <div style={{ display: "flex", gap: 6, marginBottom: 16 }}>
+                {[["pl","📊 P/L（発生主義）"],["cf","💰 C/F（現金主義）"]].map(([id, label]) => (
+                  <button key={id} onClick={() => setPlcfMode(id)} style={{ padding: "6px 14px", background: plcfMode === id ? "#6366f1" : "#f1f5f9", color: plcfMode === id ? "#fff" : "#64748b", border: "none", borderRadius: 20, cursor: "pointer", fontWeight: 600, fontSize: 13 }}>{label}</button>
+                ))}
+                <span style={{ fontSize: 11, color: "#94a3b8", alignSelf: "center", marginLeft: 8 }}>{plcfMode === "cf" ? "※ 売上月の翌月末に着金として表示" : "※ 売上発生月ベースで表示"}</span>
+              </div>
               <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 20 }}>
-                <div style={{ flex: 1, minWidth: 140, background: "linear-gradient(135deg, #6366f1, #818cf8)", borderRadius: 12, padding: 16, color: "#fff" }}>
-                  <div style={{ fontSize: 11, opacity: 0.8 }}>累計売上</div>
+                <div style={{ flex: 1, minWidth: 140, background: plcfMode === "pl" ? "linear-gradient(135deg, #6366f1, #818cf8)" : "linear-gradient(135deg, #0891b2, #22d3ee)", borderRadius: 12, padding: 16, color: "#fff" }}>
+                  <div style={{ fontSize: 11, opacity: 0.8 }}>{plcfMode === "pl" ? "累計売上" : "累計着金"}</div>
                   <div style={{ fontSize: 22, fontWeight: 800 }}>¥{(totalRev/10000).toFixed(0)}万</div>
                 </div>
                 <div style={{ flex: 1, minWidth: 140, background: "linear-gradient(135deg, #10b981, #34d399)", borderRadius: 12, padding: 16, color: "#fff" }}>
@@ -1971,32 +1984,33 @@ function Huppy({ data }) {
                 </div>
               </div>
 
-              <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 10, color: "#4f46e5" }}>月次収支推移</div>
+              <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 10, color: plcfMode === "pl" ? "#4f46e5" : "#0e7490" }}>月次収支推移{plcfMode === "cf" ? "（着金ベース）" : ""}</div>
               <ResponsiveContainer width="100%" height={260}>
                 <BarChart data={plChart}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
                   <XAxis dataKey="month" />
                   <YAxis tickFormatter={v => `${(v/10000).toFixed(0)}万`} />
                   <Tooltip formatter={v => `¥${v.toLocaleString()}`} />
-                  <Bar dataKey="全体報酬" fill="#818cf8" radius={[0,0,0,0]} stackId="b" />
+                  <Bar dataKey="全体報酬" fill={plcfMode === "pl" ? "#818cf8" : "#22d3ee"} radius={[0,0,0,0]} stackId="b" />
                   <Bar dataKey="純利益" fill="#34d399" radius={[4,4,0,0]} />
                 </BarChart>
               </ResponsiveContainer>
 
-              <div style={{ fontWeight: 700, fontSize: 15, marginTop: 24, marginBottom: 10, color: "#4f46e5" }}>月別収支詳細</div>
+              <div style={{ fontWeight: 700, fontSize: 15, marginTop: 24, marginBottom: 10, color: plcfMode === "pl" ? "#4f46e5" : "#0e7490" }}>月別収支詳細{plcfMode === "cf" ? "（着金ベース）" : ""}</div>
               <div style={{ overflowX: "auto" }}>
                 <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
                   <thead>
-                    <tr style={{ background: "#eef2ff" }}>
-                      {["月", "全体報酬", "支払合計", "経費", "粗利益", "人件費", "純利益", "利益率"].map(h => (
-                        <th key={h} style={{ padding: "8px 10px", textAlign: h === "月" ? "left" : "right", fontWeight: 700, color: "#4338ca", borderBottom: "2px solid #c7d2fe", whiteSpace: "nowrap" }}>{h}</th>
+                    <tr style={{ background: plcfMode === "pl" ? "#eef2ff" : "#ecfeff" }}>
+                      {[plcfMode === "cf" ? "着金月" : "月", plcfMode === "cf" ? "売上月" : null, "全体報酬", "支払合計", "経費", "粗利益", "人件費", "純利益", "利益率"].filter(Boolean).map(h => (
+                        <th key={h} style={{ padding: "8px 10px", textAlign: h === "着金月" || h === "月" || h === "売上月" ? "left" : "right", fontWeight: 700, color: plcfMode === "pl" ? "#4338ca" : "#0e7490", borderBottom: `2px solid ${plcfMode === "pl" ? "#c7d2fe" : "#a5f3fc"}`, whiteSpace: "nowrap" }}>{h}</th>
                       ))}
                     </tr>
                   </thead>
                   <tbody>
-                    {EMANON_PL.map((d, i) => (
+                    {viewData.map((d, i) => (
                       <tr key={d.month} style={{ background: i % 2 === 0 ? "#fff" : "#f8fafc" }}>
-                        <td style={{ padding: "7px 10px", fontWeight: 600, color: "#4f46e5" }}>{d.label}</td>
+                        <td style={{ padding: "7px 10px", fontWeight: 600, color: plcfMode === "pl" ? "#4f46e5" : "#0e7490" }}>{d.label}</td>
+                        {plcfMode === "cf" && <td style={{ padding: "7px 10px", fontSize: 11, color: "#94a3b8" }}>{d.origLabel}</td>}
                         <td style={{ padding: "7px 10px", textAlign: "right" }}>¥{d.revenue.toLocaleString()}</td>
                         <td style={{ padding: "7px 10px", textAlign: "right" }}>¥{d.payment.toLocaleString()}</td>
                         <td style={{ padding: "7px 10px", textAlign: "right" }}>¥{d.expenses.toLocaleString()}</td>
@@ -2006,13 +2020,14 @@ function Huppy({ data }) {
                         <td style={{ padding: "7px 10px", textAlign: "right", fontWeight: 600 }}>{d.revenue > 0 ? Math.round(d.netProfit/d.revenue*100) : 0}%</td>
                       </tr>
                     ))}
-                    <tr style={{ background: "#eef2ff", fontWeight: 700 }}>
-                      <td style={{ padding: "8px 10px", color: "#4338ca" }}>合計</td>
+                    <tr style={{ background: plcfMode === "pl" ? "#eef2ff" : "#ecfeff", fontWeight: 700 }}>
+                      <td style={{ padding: "8px 10px", color: plcfMode === "pl" ? "#4338ca" : "#0e7490" }}>合計</td>
+                      {plcfMode === "cf" && <td></td>}
                       <td style={{ padding: "8px 10px", textAlign: "right" }}>¥{totalRev.toLocaleString()}</td>
-                      <td style={{ padding: "8px 10px", textAlign: "right" }}>¥{EMANON_PL.reduce((s,d)=>s+d.payment,0).toLocaleString()}</td>
-                      <td style={{ padding: "8px 10px", textAlign: "right" }}>¥{EMANON_PL.reduce((s,d)=>s+d.expenses,0).toLocaleString()}</td>
+                      <td style={{ padding: "8px 10px", textAlign: "right" }}>¥{viewData.reduce((s,d)=>s+d.payment,0).toLocaleString()}</td>
+                      <td style={{ padding: "8px 10px", textAlign: "right" }}>¥{viewData.reduce((s,d)=>s+d.expenses,0).toLocaleString()}</td>
                       <td style={{ padding: "8px 10px", textAlign: "right", color: "#059669" }}>¥{totalGP.toLocaleString()}</td>
-                      <td style={{ padding: "8px 10px", textAlign: "right" }}>¥{EMANON_PL.reduce((s,d)=>s+d.laborCost,0).toLocaleString()}</td>
+                      <td style={{ padding: "8px 10px", textAlign: "right" }}>¥{viewData.reduce((s,d)=>s+d.laborCost,0).toLocaleString()}</td>
                       <td style={{ padding: "8px 10px", textAlign: "right", color: "#059669" }}>¥{totalProfit.toLocaleString()}</td>
                       <td style={{ padding: "8px 10px", textAlign: "right" }}>{totalRev > 0 ? Math.round(totalProfit/totalRev*100) : 0}%</td>
                     </tr>
