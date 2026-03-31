@@ -1090,8 +1090,12 @@ ${c.type ? `今回は「${c.type}」のご提案となっております。\n` :
     if (!error) { setContacts(prev => prev.map(c => selectedIds.has(c.id) ? {...c, status: bulkStatus} : c)); setSelectedIds(new Set()); setBulkStatus(""); }
   }
 
+  const kimeroNowMonth = new Date().toISOString().slice(0, 7);
+  const [kimeroMonth, setKimeroMonth] = useState("all");
+  const kimeroMonthOptions = [...new Set(contacts.map(c => (c.contact_date||c.created_at||"").slice(0,7)).filter(Boolean))].sort();
+  const monthContacts = kimeroMonth === "all" ? contacts : contacts.filter(c => (c.contact_date||c.created_at||"").startsWith(kimeroMonth));
   const statusCount = ["初回コンタクト","提案済","商談中","契約済"].map(s => ({
-    status: s, count: contacts.filter(c => c.status === s).length
+    status: s, count: monthContacts.filter(c => c.status === s).length
   }));
 
   const usedPrefs = [...new Set(contacts.map(c => c.prefecture).filter(Boolean))].sort();
@@ -1135,6 +1139,13 @@ ${c.type ? `今回は「${c.type}」のご提案となっております。\n` :
 
   return (
     <div>
+      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
+        <span style={{ fontSize: 13, fontWeight: 600, color: "#64748b" }}>📅 表示月:</span>
+        <select value={kimeroMonth} onChange={e => setKimeroMonth(e.target.value)} style={{ padding: "5px 10px", borderRadius: 6, border: "1px solid #e2e8f0", fontSize: 13, fontWeight: 600, color: "#1e293b" }}>
+          <option value="all">全期間</option>
+          {kimeroMonthOptions.map(m => <option key={m} value={m}>{m.replace("-","/")} {m === kimeroNowMonth ? "（今月）" : ""}</option>)}
+        </select>
+      </div>
       <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 20 }}>
         {statusCount.map(s => (
           <Card key={s.status} title={s.status} value={`${s.count}件`} color={STATUS_COLOR[s.status] || "#64748b"} icon="" />
@@ -1665,6 +1676,8 @@ ${c.type ? `今回は「${c.type}」のご提案となっております。\n` :
 // ── SMILE ──────────────────────────────────────────────────
 function Smile({ data, setData }) {
   const [form, setForm] = useState({ date: new Date().toISOString().split("T")[0], staff: "", shoku: "", cash: "", paypay: "" });
+  const smileNowMonth = new Date().toISOString().slice(0, 7);
+  const [smileMonth, setSmileMonth] = useState(smileNowMonth);
 
   function addSale() {
     if (!form.staff) return;
@@ -1673,14 +1686,22 @@ function Smile({ data, setData }) {
     setForm({ date: new Date().toISOString().split("T")[0], staff: "", shoku: "", cash: "", paypay: "" });
   }
 
-  const totalCash = data.smile.sales.reduce((s,d) => s+d.cash, 0);
-  const totalPP = data.smile.sales.reduce((s,d) => s+d.paypay, 0);
-  const totalShoku = data.smile.sales.reduce((s,d) => s+d.shoku, 0);
+  const smileMonthOptions = [...new Set([...data.smile.sales.map(s => (s.date||"").slice(0,7)).filter(Boolean), smileNowMonth])].sort();
+  const filteredSales = data.smile.sales.filter(s => (s.date||"").startsWith(smileMonth));
+  const totalCash = filteredSales.reduce((s,d) => s+d.cash, 0);
+  const totalPP = filteredSales.reduce((s,d) => s+d.paypay, 0);
+  const totalShoku = filteredSales.reduce((s,d) => s+d.shoku, 0);
 
   return (
     <div>
+      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
+        <span style={{ fontSize: 13, fontWeight: 600, color: "#64748b" }}>📅 表示月:</span>
+        <select value={smileMonth} onChange={e => setSmileMonth(e.target.value)} style={{ padding: "5px 10px", borderRadius: 6, border: "1px solid #e2e8f0", fontSize: 13, fontWeight: 600, color: "#1e293b" }}>
+          {smileMonthOptions.map(m => <option key={m} value={m}>{m.replace("-","/")} {m === smileNowMonth ? "（今月）" : ""}</option>)}
+        </select>
+      </div>
       <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 20 }}>
-        <Card title="今月合計売上" value={`¥${(totalCash+totalPP).toLocaleString()}`} color="#16a34a" icon="💴" />
+        <Card title={`合計売上（${smileMonth.replace("-","/")}）`} value={`¥${(totalCash+totalPP).toLocaleString()}`} color="#16a34a" icon="💴" />
         <Card title="現金合計" value={`¥${totalCash.toLocaleString()}`} color="#16a34a" icon="💵" />
         <Card title="PayPay合計" value={`¥${totalPP.toLocaleString()}`} color="#0ea5e9" icon="📱" />
         <Card title="合計食数" value={`${totalShoku}食`} color="#f59e0b" icon="🍱" />
@@ -1790,8 +1811,10 @@ function Huppy({ data }) {
   const [showAddLive, setShowAddLive] = useState(false);
   const [showAddSale, setShowAddSale] = useState(false);
   const [editLive, setEditLive] = useState(null);
-  const curMonth = new Date().toISOString().slice(0, 7);
-  const blankLive = { creator_name: "", tiktok_username: "", year_month: curMonth, diamonds: "", live_count: "", live_hours: "", reward_yen: "", notes: "" };
+  const nowMonth = new Date().toISOString().slice(0, 7);
+  const [selectedMonth, setSelectedMonth] = useState(nowMonth);
+  const curMonth = selectedMonth;
+  const blankLive = { creator_name: "", tiktok_username: "", year_month: nowMonth, diamonds: "", live_count: "", live_hours: "", reward_yen: "", notes: "" };
   const blankSale = { channel: "tiktok_shop", product_name: "", amount: "", quantity: "1", sale_date: new Date().toISOString().split("T")[0], notes: "" };
   const [nLive, setNLive] = useState(blankLive);
   const [nSale, setNSale] = useState(blankSale);
@@ -1841,8 +1864,7 @@ function Huppy({ data }) {
 
   const thisMonthLive = liveRecs.filter(r => r.year_month === curMonth);
   const liveRewardDB = thisMonthLive.reduce((s, r) => s + (r.reward_yen || 0), 0);
-  const emanonCurMonth = EMANON_PL.find(e => e.month === curMonth) || EMANON_PL[EMANON_PL.length - 1];
-  const emanonLabel = emanonCurMonth ? emanonCurMonth.label : "";
+  const emanonCurMonth = EMANON_PL.find(e => e.month === curMonth);
   const liveReward = liveRewardDB + (emanonCurMonth ? emanonCurMonth.revenue : 0);
   const liveDiamonds = thisMonthLive.reduce((s, r) => s + (r.diamonds || 0), 0);
   const tktMonthly = sales.filter(s => s.channel === "tiktok_shop" && (s.sale_date||"").startsWith(curMonth)).reduce((s, r) => s + (r.amount||0), 0);
@@ -1870,11 +1892,19 @@ function Huppy({ data }) {
   const hBtn = (color, active) => ({ padding: "6px 14px", background: active ? color : "#f1f5f9", color: active ? "#fff" : "#64748b", border: "none", borderRadius: 20, cursor: "pointer", fontWeight: 600, fontSize: 13 });
   const actBtn = (color) => ({ padding: "7px 16px", background: color, color: "#fff", border: "none", borderRadius: 6, cursor: "pointer", fontSize: 13, fontWeight: 600 });
 
+  const huppyMonthOptions = [...new Set([...allMonths, nowMonth])].sort();
+
   return (
     <div>
+      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
+        <span style={{ fontSize: 13, fontWeight: 600, color: "#64748b" }}>📅 表示月:</span>
+        <select value={selectedMonth} onChange={e => setSelectedMonth(e.target.value)} style={{ padding: "5px 10px", borderRadius: 6, border: "1px solid #e2e8f0", fontSize: 13, fontWeight: 600, color: "#1e293b" }}>
+          {huppyMonthOptions.map(m => <option key={m} value={m}>{m.replace("-","/")} {m === nowMonth ? "（今月）" : ""}</option>)}
+        </select>
+      </div>
       <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 20 }}>
-        <Card title={emanonCurMonth && emanonCurMonth.month !== curMonth ? `合計売上（${emanonLabel}）` : "今月合計売上"} value={`¥${(totalMonthly/10000).toFixed(1)}万`} color="#9333ea" icon="🎵" />
-        <Card title={emanonCurMonth && emanonCurMonth.month !== curMonth ? `🎁 LIVEギフト（${emanonLabel}）` : "🎁 LIVEギフト報酬"} value={`¥${(liveReward/10000).toFixed(1)}万`} sub={`${liveDiamonds.toLocaleString()}💎`} color="#a855f7" icon="💎" />
+        <Card title={`合計売上（${curMonth.replace("-","/")}）`} value={`¥${(totalMonthly/10000).toFixed(1)}万`} color="#9333ea" icon="🎵" />
+        <Card title={`🎁 LIVEギフト（${curMonth.replace("-","/")}）`} value={`¥${(liveReward/10000).toFixed(1)}万`} sub={`${liveDiamonds.toLocaleString()}💎`} color="#a855f7" icon="💎" />
         <Card title="🛒 TikTokショップ" value={`¥${(tktMonthly/10000).toFixed(1)}万`} color="#ff2d55" icon="🛒" />
         <Card title="📦 ECサイト" value={`¥${(ecMonthly/10000).toFixed(1)}万`} color="#f59e0b" icon="📦" />
         <Card title="🛍️ VITAMAX公式" value={`¥${(vitaMonthly/10000).toFixed(1)}万`} sub={vitaTarget > 0 ? `目標: ${Math.round(vitaMonthly/vitaTarget*100)}%` : ""} color="#16a34a" icon="🛍️" />
