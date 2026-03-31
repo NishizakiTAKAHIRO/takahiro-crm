@@ -688,38 +688,124 @@ const TABS = [
 
 // ── DASHBOARD ──────────────────────────────────────────────
 function Dashboard({ data }) {
-  const smileMonthly = data.smile.sales.reduce((s, d) => s + d.cash + d.paypay, 0);
-  const huppyCurrent = data.huppy.revenue[data.huppy.revenue.length - 1];
+  const nowMonth = new Date().toISOString().slice(0, 7);
+  const [dashMonth, setDashMonth] = useState(nowMonth);
+  const [dashPlcf, setDashPlcf] = useState("pl");
+  const [liveRecs, setLiveRecs] = useState([]);
+  const [foopySales, setFoopySales] = useState([]);
+
+  useEffect(() => {
+    Promise.all([
+      supabase.from("foopy_live_records").select("*"),
+      supabase.from("foopy_sales").select("*")
+    ]).then(([{ data: lr }, { data: sl }]) => {
+      if (lr) setLiveRecs(lr);
+      if (sl) setFoopySales(sl);
+    });
+  }, []);
+
+  const shiftM = (m) => { const d = new Date(m + "-01"); d.setMonth(d.getMonth() + 1); return d.toISOString().slice(0, 7); };
+  const emanonEntry = dashPlcf === "cf"
+    ? EMANON_PL.find(e => shiftM(e.month) === dashMonth)
+    : EMANON_PL.find(e => e.month === dashMonth);
+  const emanonRev = emanonEntry ? emanonEntry.revenue : 0;
+
+  const thisMonthLive = liveRecs.filter(r => r.year_month === dashMonth);
+  const liveRewardDB = thisMonthLive.reduce((s, r) => s + (r.reward_yen || 0), 0);
+  const huppyLive = liveRewardDB + emanonRev;
+  const huppyTkt = foopySales.filter(s => s.channel === "tiktok_shop" && (s.sale_date || "").startsWith(dashMonth)).reduce((s, r) => s + (r.amount || 0), 0);
+  const huppyVita = foopySales.filter(s => s.channel === "vitamax" && (s.sale_date || "").startsWith(dashMonth)).reduce((s, r) => s + (r.amount || 0), 0);
+  const huppyEc = foopySales.filter(s => s.channel !== "tiktok_shop" && s.channel !== "vitamax" && (s.sale_date || "").startsWith(dashMonth)).reduce((s, r) => s + (r.amount || 0), 0);
+  const huppyTotal = huppyLive + huppyTkt + huppyVita + huppyEc;
+
+  const smileMonthly = data.smile.sales.filter(s => (s.date || "").startsWith(dashMonth)).reduce((s, d) => s + d.cash + d.paypay, 0);
   const kimeroDeals = data.kimero.contacts.filter(c => c.status === "商談中").length;
   const taskDone = data.tasks.filter(t => t.done).length;
   const taskTotal = data.tasks.length;
-  const kpiAvg = Math.round(
+  const kpiAvg = data.kimero.kpi.length > 0 ? Math.round(
     data.kimero.kpi.reduce((s, k) => s + Math.min(100, k.target > 0 ? (k.actual / k.target) * 100 : 0), 0) / data.kimero.kpi.length
-  );
+  ) : 0;
+
+  const allMonths = [...new Set([...EMANON_PL.map(e => e.month), ...liveRecs.map(r => r.year_month), ...foopySales.map(s => (s.sale_date || "").slice(0, 7)), nowMonth].filter(Boolean))].sort();
+
+  const trendData = allMonths.map(m => {
+    const plEntry = EMANON_PL.find(e => e.month === m);
+    const cfEntry = EMANON_PL.find(e => shiftM(e.month) === m);
+    const liveDB = liveRecs.filter(r => r.year_month === m).reduce((s, r) => s + (r.reward_yen || 0), 0);
+    const emanon = dashPlcf === "cf" ? (cfEntry ? cfEntry.revenue : 0) : (plEntry ? plEntry.revenue : 0);
+    const tkt = foopySales.filter(s => s.channel === "tiktok_shop" && (s.sale_date || "").startsWith(m)).reduce((s, r) => s + (r.amount || 0), 0);
+    const vita = foopySales.filter(s => s.channel === "vitamax" && (s.sale_date || "").startsWith(m)).reduce((s, r) => s + (r.amount || 0), 0);
+    const ec = foopySales.filter(s => s.channel !== "tiktok_shop" && s.channel !== "vitamax" && (s.sale_date || "").startsWith(m)).reduce((s, r) => s + (r.amount || 0), 0);
+    return { month: m.slice(5) + "月", フーピー: liveDB + emanon + tkt + vita + ec };
+  });
+
   const bizData = [
-    { name: "フーピー", 売上: huppyCurrent.total, 個人報酬: huppyCurrent.personal },
-    { name: "スマイル", 売上: smileMonthly, 個人報酬: 0 },
-    { name: "キメロ", 売上: 0, 個人報酬: 0 },
+    { name: "フーピー", 売上: huppyTotal },
+    { name: "スマイル", 売上: smileMonthly },
+    { name: "キメロ", 売上: 0 },
   ];
   const goalData = [
-    { name: "フーピー", 現在: huppyCurrent.personal, 目標: 500000 },
+    { name: "フーピー", 現在: huppyTotal, 目標: 1500000 },
     { name: "キメロ", 現在: 0, 目標: 400000 },
-    { name: "スマイル", 現在: 0, 目標: 150000 },
+    { name: "スマイル", 現在: smileMonthly, 目標: 150000 },
   ];
 
   return (
     <div>
-      <div style={{ marginBottom: 28 }}>
+      <div style={{ marginBottom: 20 }}>
         <h2 style={{ margin: 0, fontSize: 22, fontWeight: 900, color: "#1e293b", letterSpacing: -0.5 }}>全社ダッシュボード</h2>
         <p style={{ margin: "6px 0 0", color: "#94a3b8", fontSize: 13, fontWeight: 500 }}>月収100万円達成ロードマップ</p>
       </div>
+      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16, flexWrap: "wrap" }}>
+        <span style={{ fontSize: 13, fontWeight: 600, color: "#64748b" }}>📅 表示月:</span>
+        <select value={dashMonth} onChange={e => setDashMonth(e.target.value)} style={{ padding: "5px 10px", borderRadius: 6, border: "1px solid #e2e8f0", fontSize: 13, fontWeight: 600, color: "#1e293b" }}>
+          {allMonths.map(m => <option key={m} value={m}>{m.replace("-", "/")} {m === nowMonth ? "（今月）" : ""}</option>)}
+        </select>
+        <span style={{ fontSize: 13, fontWeight: 600, color: "#64748b", marginLeft: 6 }}>📊 集計:</span>
+        {[["pl", "P/L（発生主義）"], ["cf", "C/F（現金主義）"]].map(([id, label]) => (
+          <button key={id} onClick={() => setDashPlcf(id)} style={{ padding: "5px 12px", background: dashPlcf === id ? "#6366f1" : "#f1f5f9", color: dashPlcf === id ? "#fff" : "#64748b", border: "none", borderRadius: 20, cursor: "pointer", fontWeight: 600, fontSize: 12 }}>{label}</button>
+        ))}
+        {dashPlcf === "cf" && <span style={{ fontSize: 11, color: "#94a3b8" }}>※ 売上月の翌月末着金ベース</span>}
+      </div>
       <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 24 }}>
-        <Card title="個人報酬合計（今月）" value={`${((huppyCurrent.personal)/10000).toFixed(0)}万円`} sub="目標：100万円" color="#2563eb" icon="💰" />
-        <Card title="フーピー売上" value={`${(huppyCurrent.total/10000).toFixed(0)}万円`} sub={`個人報酬 ${(huppyCurrent.personal/10000).toFixed(0)}万円`} color="#9333ea" icon="🎵" />
-        <Card title="キメロ 商談中" value={`${kimeroDeals}件`} sub="成約目標：月3件" color="#f59e0b" icon="👔" />
-        <Card title="スマイル今月売上" value={`${(smileMonthly/10000).toFixed(1)}万円`} sub={`${data.smile.sales.reduce((s,d)=>s+d.shoku,0)}食 / ${data.smile.sales.length}日`} color="#16a34a" icon="🍱" />
-        <Card title="キメロ KPI達成率" value={`${kpiAvg}%`} sub={`${data.kimero.kpi.length}KPI追跡中`} color={kpiAvg >= 80 ? "#22c55e" : kpiAvg >= 50 ? "#f59e0b" : "#ef4444"} icon="🎯" />
-        <Card title="今日のTASK達成" value={`${taskDone}/${taskTotal}`} sub={`${Math.round(taskDone/taskTotal*100)}%`} color="#ef4444" icon="🔥" />
+        <Card title={`🎵 フーピー${dashPlcf === "cf" ? "着金" : "売上"}（${dashMonth.replace("-", "/")}）`} value={`¥${(huppyTotal / 10000).toFixed(1)}万`} sub={`LIVE/EMANON ¥${(huppyLive / 10000).toFixed(1)}万`} color={dashPlcf === "cf" ? "#0891b2" : "#9333ea"} icon="🎵" />
+        <Card title={`🎁 LIVEギフト${dashPlcf === "cf" ? "（着金）" : "（売上）"}`} value={`¥${(huppyLive / 10000).toFixed(1)}万`} color={dashPlcf === "cf" ? "#0891b2" : "#a855f7"} icon="💎" />
+        <Card title="🛒 TikTokショップ" value={`¥${(huppyTkt / 10000).toFixed(1)}万`} color="#ff2d55" icon="🛒" />
+        <Card title="🛍️ VITAMAX公式" value={`¥${(huppyVita / 10000).toFixed(1)}万`} color="#16a34a" icon="🛍️" />
+        <Card title="🍱 スマイル売上" value={`¥${(smileMonthly / 10000).toFixed(1)}万`} color="#22c55e" icon="🍱" />
+        <Card title="👔 キメロ 商談中" value={`${kimeroDeals}件`} sub="成約目標：月3件" color="#f59e0b" icon="👔" />
+      </div>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 24 }}>
+        <div style={{ background: "rgba(255,255,255,0.7)", backdropFilter: "blur(12px)", borderRadius: 16, padding: 24, boxShadow: "0 4px 24px rgba(0,0,0,0.04)", border: "1px solid rgba(255,255,255,0.8)" }}>
+          <h4 style={{ margin: "0 0 16px", fontSize: 14, color: "#475569", fontWeight: 700 }}>{dashPlcf === "cf" ? "📈 フーピー月次推移（C/F）" : "📈 フーピー月次推移（P/L）"}</h4>
+          <ResponsiveContainer width="100%" height={180}>
+            <BarChart data={trendData}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+              <XAxis dataKey="month" tick={{ fontSize: 10 }} />
+              <YAxis tick={{ fontSize: 10 }} tickFormatter={v => `${(v / 10000).toFixed(0)}万`} />
+              <Tooltip formatter={v => `¥${v.toLocaleString()}`} />
+              <Bar dataKey="フーピー" fill={dashPlcf === "cf" ? "#0891b2" : "#9333ea"} radius={[4, 4, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+        <div style={{ background: "rgba(255,255,255,0.7)", backdropFilter: "blur(12px)", borderRadius: 16, padding: 24, boxShadow: "0 4px 24px rgba(0,0,0,0.04)", border: "1px solid rgba(255,255,255,0.8)" }}>
+          <h4 style={{ margin: "0 0 16px", fontSize: 14, color: "#475569", fontWeight: 700 }}>{dashMonth.replace("-", "/") + " 目標達成率"}</h4>
+          {goalData.map(g => {
+            const pct = g.目標 > 0 ? Math.min(100, Math.round(g.現在 / g.目標 * 100)) : 0;
+            return (
+              <div key={g.name} style={{ marginBottom: 14 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, marginBottom: 4 }}>
+                  <span style={{ fontWeight: 600 }}>{g.name}</span>
+                  <span style={{ color: "#64748b" }}>¥{g.現在.toLocaleString()} / ¥{g.目標.toLocaleString()}</span>
+                </div>
+                <div style={{ background: "#f1f5f9", borderRadius: 6, height: 10, overflow: "hidden" }}>
+                  <div style={{ width: `${pct}%`, height: "100%", background: BIZ_COLOR[g.name === "フーピー" ? "フーピー" : g.name === "キメロ" ? "キメロ" : "スマイル"] || "#2563eb", borderRadius: 6 }} />
+                </div>
+                <div style={{ fontSize: 11, color: "#94a3b8", marginTop: 2 }}>{pct}%</div>
+              </div>
+            );
+          })}
+        </div>
       </div>
       <div style={{ background: "rgba(255,255,255,0.7)", backdropFilter: "blur(12px)", borderRadius: 16, padding: 24, boxShadow: "0 4px 24px rgba(0,0,0,0.04)", border: "1px solid rgba(255,255,255,0.8)", marginBottom: 24 }}>
         <h4 style={{ margin: "0 0 16px", fontSize: 14, color: "#475569", fontWeight: 700 }}>👔 キメロコスメ KPI進捗（今月）</h4>
@@ -739,39 +825,6 @@ function Dashboard({ data }) {
                 <div style={{ fontSize: 11, color: "#94a3b8", marginTop: 4 }}>
                   {k.unit === "円" ? `¥${k.actual.toLocaleString()} / ¥${k.target.toLocaleString()}` : `${k.actual} / ${k.target}${k.unit}`}
                 </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 24 }}>
-        <div style={{ background: "rgba(255,255,255,0.7)", backdropFilter: "blur(12px)", borderRadius: 16, padding: 24, boxShadow: "0 4px 24px rgba(0,0,0,0.04)", border: "1px solid rgba(255,255,255,0.8)" }}>
-          <h4 style={{ margin: "0 0 16px", fontSize: 14, color: "#475569", fontWeight: 700 }}>事業別売上（今月）</h4>
-          <ResponsiveContainer width="100%" height={180}>
-            <BarChart data={bizData} barSize={28}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-              <XAxis dataKey="name" tick={{ fontSize: 12 }} />
-              <YAxis tick={{ fontSize: 11 }} tickFormatter={v => `${(v/10000).toFixed(0)}万`} />
-              <Tooltip formatter={v => `¥${v.toLocaleString()}`} />
-              <Bar dataKey="売上" fill="#2563eb" radius={[4,4,0,0]} />
-              <Bar dataKey="個人報酬" fill="#22c55e" radius={[4,4,0,0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-        <div style={{ background: "rgba(255,255,255,0.7)", backdropFilter: "blur(12px)", borderRadius: 16, padding: 24, boxShadow: "0 4px 24px rgba(0,0,0,0.04)", border: "1px solid rgba(255,255,255,0.8)" }}>
-          <h4 style={{ margin: "0 0 16px", fontSize: 14, color: "#475569", fontWeight: 700 }}>目標達成率</h4>
-          {goalData.map(g => {
-            const pct = Math.min(100, Math.round(g.現在 / g.目標 * 100));
-            return (
-              <div key={g.name} style={{ marginBottom: 14 }}>
-                <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, marginBottom: 4 }}>
-                  <span style={{ fontWeight: 600 }}>{g.name}</span>
-                  <span style={{ color: "#64748b" }}>¥{g.現在.toLocaleString()} / ¥{g.目標.toLocaleString()}</span>
-                </div>
-                <div style={{ background: "#f1f5f9", borderRadius: 6, height: 10, overflow: "hidden" }}>
-                  <div style={{ width: `${pct}%`, height: "100%", background: BIZ_COLOR[g.name === "フーピー" ? "フーピー" : g.name === "キメロ" ? "キメロ" : "スマイル"] || "#2563eb", borderRadius: 6 }} />
-                </div>
-                <div style={{ fontSize: 11, color: "#94a3b8", marginTop: 2 }}>{pct}%</div>
               </div>
             );
           })}
