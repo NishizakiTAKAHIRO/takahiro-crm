@@ -1840,7 +1840,9 @@ function Huppy({ data }) {
   }
 
   const thisMonthLive = liveRecs.filter(r => r.year_month === curMonth);
-  const liveReward = thisMonthLive.reduce((s, r) => s + (r.reward_yen || 0), 0);
+  const liveRewardDB = thisMonthLive.reduce((s, r) => s + (r.reward_yen || 0), 0);
+  const emanonCurMonth = EMANON_PL.find(e => e.month === curMonth);
+  const liveReward = liveRewardDB + (emanonCurMonth ? emanonCurMonth.revenue : 0);
   const liveDiamonds = thisMonthLive.reduce((s, r) => s + (r.diamonds || 0), 0);
   const tktMonthly = sales.filter(s => s.channel === "tiktok_shop" && (s.sale_date||"").startsWith(curMonth)).reduce((s, r) => s + (r.amount||0), 0);
   const vitaSales = sales.filter(s => s.channel === "vitamax");
@@ -1851,14 +1853,17 @@ function Huppy({ data }) {
   const CHANNELS = { tiktok_shop: "TikTokショップ", base: "BASE", shopify: "Shopify", stores: "STORES", rakuten: "楽天", amazon: "Amazon", vitamax: "VITAMAX公式", other: "その他" };
   const CHAN_COLOR = { tiktok_shop: "#ff2d55", base: "#e07a5f", shopify: "#96bf48", stores: "#00b4d8", rakuten: "#bf0000", amazon: "#ff9900", vitamax: "#16a34a", other: "#9333ea" };
 
-  const allMonths = [...new Set([...liveRecs.map(r => r.year_month), ...sales.map(s => (s.sale_date||"").slice(0,7))].filter(Boolean))].sort();
-  const monthlyChart = allMonths.map(m => ({
+  const allMonths = [...new Set([...liveRecs.map(r => r.year_month), ...sales.map(s => (s.sale_date||"").slice(0,7)), ...EMANON_PL.map(e => e.month)].filter(Boolean))].sort();
+  const monthlyChart = allMonths.map(m => {
+    const emanon = EMANON_PL.find(e => e.month === m);
+    return {
     month: m.slice(5) + "月",
-    LIVE: liveRecs.filter(r => r.year_month === m).reduce((s, r) => s + (r.reward_yen||0), 0),
+    LIVE: liveRecs.filter(r => r.year_month === m).reduce((s, r) => s + (r.reward_yen||0), 0) + (emanon ? emanon.revenue : 0),
     TikTok: sales.filter(s => s.channel === "tiktok_shop" && (s.sale_date||"").startsWith(m)).reduce((s, r) => s + (r.amount||0), 0),
     VITAMAX: sales.filter(s => s.channel === "vitamax" && (s.sale_date||"").startsWith(m)).reduce((s, r) => s + (r.amount||0), 0),
     EC: sales.filter(s => s.channel !== "tiktok_shop" && s.channel !== "vitamax" && (s.sale_date||"").startsWith(m)).reduce((s, r) => s + (r.amount||0), 0),
-  }));
+    };
+  });
 
   const inp = { padding: "6px 10px", border: "1px solid #e2e8f0", borderRadius: 6, fontSize: 13, width: "100%", boxSizing: "border-box" };
   const hBtn = (color, active) => ({ padding: "6px 14px", background: active ? color : "#f1f5f9", color: active ? "#fff" : "#64748b", border: "none", borderRadius: 20, cursor: "pointer", fontWeight: 600, fontSize: 13 });
