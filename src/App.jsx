@@ -102,7 +102,7 @@ function Card({ title, value, sub, color = "#6366f1", icon }) {
     <div style={{ background: "rgba(255,255,255,0.7)", backdropFilter: "blur(12px)", borderRadius: 16, padding: "20px 22px", boxShadow: "0 4px 24px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04)", border: "1px solid rgba(255,255,255,0.8)", flex: 1, minWidth: 140, transition: "transform 0.2s, box-shadow 0.2s" }}>
       <div style={{ fontSize: 24, marginBottom: 6 }}>{icon}</div>
       <div style={{ fontSize: 11, color: "#64748b", fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase" }}>{title}</div>
-      <div style={{ fontSize: 28, fontWeight: 800, background: `linear-gradient(135deg, ${color}, ${color}cc)`, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", lineHeight: 1.2, marginTop: 6 }}>{value}</div>
+      <div style={{ fontSize: 28, fontWeight: 800, color: color, lineHeight: 1.2, marginTop: 6 }}>{value}</div>
       {sub && <div style={{ fontSize: 11, color: "#94a3b8", marginTop: 6 }}>{sub}</div>}
     </div>
   );
