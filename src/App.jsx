@@ -1732,6 +1732,10 @@ function Smile({ data, setData }) {
 
 // ── EMANON 売上管理データ (Google Sheets連携) ──────────────
 const EMANON_PL = [
+  { month: "2025-01", label: "2025/1", revenue: 0, payment: 0, grossProfit: 0, laborCost: 0, netProfit: 0, expenses: 0 },
+  { month: "2025-02", label: "2025/2", revenue: 0, payment: 0, grossProfit: 0, laborCost: 0, netProfit: 0, expenses: 0 },
+  { month: "2025-03", label: "2025/3", revenue: 0, payment: 0, grossProfit: 0, laborCost: 0, netProfit: 0, expenses: 0 },
+  { month: "2025-04", label: "2025/4", revenue: 0, payment: 0, grossProfit: 0, laborCost: 0, netProfit: 0, expenses: 0 },
   { month: "2025-05", label: "2025/5", revenue: 722434, payment: 234000, grossProfit: 488434, laborCost: 234115, netProfit: 254319, expenses: 0 },
   { month: "2025-06", label: "2025/6", revenue: 839385, payment: 263499, grossProfit: 575886, laborCost: 241969, netProfit: 333917, expenses: 0 },
   { month: "2025-07", label: "2025/7", revenue: 695809, payment: 350427, grossProfit: 345382, laborCost: 234790, netProfit: 110591, expenses: 0 },
