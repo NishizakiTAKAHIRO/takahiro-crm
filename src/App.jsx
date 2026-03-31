@@ -688,8 +688,9 @@ const TABS = [
 
 // ── DASHBOARD ──────────────────────────────────────────────
 function Dashboard({ data }) {
-  const nowMonth = new Date().toISOString().slice(0, 7);
-  const [dashMonth, setDashMonth] = useState(nowMonth);
+  const nowMonth = new Date(Date.now() + 9*60*60*1000).toISOString().slice(0, 7);
+  const latestDataMonth = EMANON_PL[EMANON_PL.length - 1].month;
+  const [dashMonth, setDashMonth] = useState(latestDataMonth);
   const [dashPlcf, setDashPlcf] = useState("pl");
   const [liveRecs, setLiveRecs] = useState([]);
   const [foopySales, setFoopySales] = useState([]);
@@ -1868,8 +1869,9 @@ function Huppy({ data }) {
   const [showAddLive, setShowAddLive] = useState(false);
   const [showAddSale, setShowAddSale] = useState(false);
   const [editLive, setEditLive] = useState(null);
-  const nowMonth = new Date().toISOString().slice(0, 7);
-  const [selectedMonth, setSelectedMonth] = useState(nowMonth);
+  const nowMonth = new Date(Date.now() + 9*60*60*1000).toISOString().slice(0, 7);
+  const latestHuppyMonth = EMANON_PL[EMANON_PL.length - 1].month;
+  const [selectedMonth, setSelectedMonth] = useState(latestHuppyMonth);
   const curMonth = selectedMonth;
   const blankLive = { creator_name: "", tiktok_username: "", year_month: nowMonth, diamonds: "", live_count: "", live_hours: "", reward_yen: "", notes: "" };
   const blankSale = { channel: "tiktok_shop", product_name: "", amount: "", quantity: "1", sale_date: new Date().toISOString().split("T")[0], notes: "" };
