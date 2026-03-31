@@ -1045,7 +1045,7 @@ ${c.type ? `今回は「${c.type}」のご提案となっております。\n` :
       c.contact_date||"", c.next_action||"", (c.notes||"").replace(/"/g,'""')
     ]);
     const csv = [headers, ...rows].map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(",")).join("\n");
-    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8" });
+    const blob = new Blob(["﻿" + csv], { type: "text/csv;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a"); a.href = url;
     a.download = `contacts_${new Date().toISOString().split("T")[0]}.csv`; a.click();
@@ -1781,7 +1781,7 @@ function Huppy({ data }) {
 
   const allMonths = [...new Set([...liveRecs.map(r => r.year_month), ...sales.map(s => (s.sale_date||"").slice(0,7))].filter(Boolean))].sort();
   const monthlyChart = allMonths.map(m => ({
-    month: m.slice(5) + "\u6708",
+    month: m.slice(5) + "月",
     LIVE: liveRecs.filter(r => r.year_month === m).reduce((s, r) => s + (r.reward_yen||0), 0),
     TikTok: sales.filter(s => s.channel === "tiktok_shop" && (s.sale_date||"").startsWith(m)).reduce((s, r) => s + (r.amount||0), 0),
     VITAMAX: sales.filter(s => s.channel === "vitamax" && (s.sale_date||"").startsWith(m)).reduce((s, r) => s + (r.amount||0), 0),
@@ -1795,253 +1795,253 @@ function Huppy({ data }) {
   return (
     <div>
       <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 20 }}>
-        <Card title="\u4eca\u6708\u5408\u8a08\u58f2\u4e0a" value={`\u00a5${(totalMonthly/10000).toFixed(1)}\u4e07`} color="#9333ea" icon="🎵" />
-        <Card title="🎁 LIVE\u30ae\u30d5\u30c8\u5831\u916c" value={`\u00a5${(liveReward/10000).toFixed(1)}\u4e07`} sub={`${liveDiamonds.toLocaleString()}💎`} color="#a855f7" icon="💎" />
-        <Card title="🛒 TikTok\u30b7\u30e7\u30c3\u30d7" value={`\u00a5${(tktMonthly/10000).toFixed(1)}\u4e07`} color="#ff2d55" icon="🛒" />
-        <Card title="📦 EC\u30b5\u30a4\u30c8" value={`\u00a5${(ecMonthly/10000).toFixed(1)}\u4e07`} color="#f59e0b" icon="📦" />
-        <Card title="🛍\ufe0f VITAMAX\u516c\u5f0f" value={`\u00a5${(vitaMonthly/10000).toFixed(1)}\u4e07`} sub={vitaTarget > 0 ? `\u76ee\u6a19: ${Math.round(vitaMonthly/vitaTarget*100)}%` : ""} color="#16a34a" icon="🛍\ufe0f" />
+        <Card title="今月合計売上" value={`¥${(totalMonthly/10000).toFixed(1)}万`} color="#9333ea" icon="🎵" />
+        <Card title="🎁 LIVEギフト報酬" value={`¥${(liveReward/10000).toFixed(1)}万`} sub={`${liveDiamonds.toLocaleString()}💎`} color="#a855f7" icon="💎" />
+        <Card title="🛒 TikTokショップ" value={`¥${(tktMonthly/10000).toFixed(1)}万`} color="#ff2d55" icon="🛒" />
+        <Card title="📦 ECサイト" value={`¥${(ecMonthly/10000).toFixed(1)}万`} color="#f59e0b" icon="📦" />
+        <Card title="🛍️ VITAMAX公式" value={`¥${(vitaMonthly/10000).toFixed(1)}万`} sub={vitaTarget > 0 ? `目標: ${Math.round(vitaMonthly/vitaTarget*100)}%` : ""} color="#16a34a" icon="🛍️" />
       </div>
 
       <div style={{ display: "flex", gap: 6, marginBottom: 16, flexWrap: "wrap" }}>
-        {[["summary","📊 \u30b5\u30de\u30ea\u30fc"],["live","🎁 LIVE\u30ae\u30d5\u30c8"],["tkt","🛒 TikTok\u30b7\u30e7\u30c3\u30d7"],["ec","📦 EC\u30b5\u30a4\u30c8"],["vitamax","🛍\ufe0f VITAMAX"],["partner","🤝 \u30d1\u30fc\u30c8\u30ca\u30fc"]].map(([id, label]) => (
+        {[["summary","📊 サマリー"],["live","🎁 LIVEギフト"],["tkt","🛒 TikTokショップ"],["ec","📦 ECサイト"],["vitamax","🛍️ VITAMAX"],["partner","🤝 パートナー"]].map(([id, label]) => (
           <button key={id} onClick={() => setHTab(id)} style={hBtn(id==="vitamax" ? "#16a34a" : "#9333ea", hTab===id)}>{label}</button>
         ))}
       </div>
 
       {hTab === "summary" && (
-        <Section title="\u6708\u6b21\u63a8\u79fb\uff08\u58f2\u4e0a\u5185\u8a33\uff09" color="#9333ea">
+        <Section title="月次推移（売上内訳）" color="#9333ea">
           {monthlyChart.length > 0 ? (
             <ResponsiveContainer width="100%" height={220}>
               <BarChart data={monthlyChart}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
                 <XAxis dataKey="month" />
-                <YAxis tickFormatter={v => `${(v/10000).toFixed(0)}\u4e07`} />
-                <Tooltip formatter={v => `\u00a5${v.toLocaleString()}`} />
-                <Bar dataKey="LIVE" fill="#a855f7" radius={[0,0,0,0]} name="LIVE\u30ae\u30d5\u30c8" stackId="a" />
-                <Bar dataKey="TikTok" fill="#ff2d55" radius={[0,0,0,0]} name="TikTok\u30b7\u30e7\u30c3\u30d7" stackId="a" />
-                <Bar dataKey="VITAMAX" fill="#16a34a" radius={[0,0,0,0]} name="VITAMAX\u516c\u5f0f" stackId="a" />
-                <Bar dataKey="EC" fill="#f59e0b" radius={[4,4,0,0]} name="EC\u30b5\u30a4\u30c8" stackId="a" />
+                <YAxis tickFormatter={v => `${(v/10000).toFixed(0)}万`} />
+                <Tooltip formatter={v => `¥${v.toLocaleString()}`} />
+                <Bar dataKey="LIVE" fill="#a855f7" radius={[0,0,0,0]} name="LIVEギフト" stackId="a" />
+                <Bar dataKey="TikTok" fill="#ff2d55" radius={[0,0,0,0]} name="TikTokショップ" stackId="a" />
+                <Bar dataKey="VITAMAX" fill="#16a34a" radius={[0,0,0,0]} name="VITAMAX公式" stackId="a" />
+                <Bar dataKey="EC" fill="#f59e0b" radius={[4,4,0,0]} name="ECサイト" stackId="a" />
               </BarChart>
             </ResponsiveContainer>
           ) : (
-            <div style={{ textAlign: "center", color: "#94a3b8", padding: 40 }}>\u30c7\u30fc\u30bf\u3092\u5165\u529b\u3059\u308b\u3068\u6708\u6b21\u30b0\u30e9\u30d5\u304c\u8868\u793a\u3055\u308c\u307e\u3059</div>
+            <div style={{ textAlign: "center", color: "#94a3b8", padding: 40 }}>データを入力すると月次グラフが表示されます</div>
           )}
         </Section>
       )}
 
       {hTab === "live" && (
-        <Section title="🎁 LIVE\u30ae\u30d5\u30c8\u58f2\u4e0a\u7ba1\u7406" color="#a855f7">
+        <Section title="🎁 LIVEギフト売上管理" color="#a855f7">
           <div style={{ marginBottom: 12 }}>
-            <button onClick={() => { setEditLive(null); setNLive(blankLive); setShowAddLive(true); }} style={actBtn("#a855f7")}>+ \u30af\u30ea\u30a8\u30a4\u30bf\u30fc\u8ffd\u52a0</button>
+            <button onClick={() => { setEditLive(null); setNLive(blankLive); setShowAddLive(true); }} style={actBtn("#a855f7")}>+ クリエイター追加</button>
           </div>
           {showAddLive && (
             <div style={{ background: "#faf5ff", border: "1px solid #d8b4fe", borderRadius: 10, padding: 16, marginBottom: 16 }}>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 10 }}>
-                <div><div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>\u30af\u30ea\u30a8\u30a4\u30bf\u30fc\u540d *</div><input style={inp} value={nLive.creator_name} onChange={e => setNLive(p => ({...p, creator_name: e.target.value}))} placeholder="\u4f8b\uff1a\u307f\u3044" /></div>
+                <div><div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>クリエイター名 *</div><input style={inp} value={nLive.creator_name} onChange={e => setNLive(p => ({...p, creator_name: e.target.value}))} placeholder="例：みい" /></div>
                 <div><div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>TikTok ID</div><input style={inp} value={nLive.tiktok_username} onChange={e => setNLive(p => ({...p, tiktok_username: e.target.value}))} placeholder="@username" /></div>
-                <div><div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>\u5e74\u6708 *</div><input style={inp} type="month" value={nLive.year_month} onChange={e => setNLive(p => ({...p, year_month: e.target.value}))} /></div>
-                <div><div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>\u30c0\u30a4\u30e4\u30e2\u30f3\u30c9\u6570</div><input style={inp} type="number" value={nLive.diamonds} onChange={e => setNLive(p => ({...p, diamonds: e.target.value}))} placeholder="0" /></div>
-                <div><div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>LIVE\u56de\u6570</div><input style={inp} type="number" value={nLive.live_count} onChange={e => setNLive(p => ({...p, live_count: e.target.value}))} placeholder="0" /></div>
-                <div><div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>LIVE\u6642\u9593</div><input style={inp} type="number" step="0.1" value={nLive.live_hours} onChange={e => setNLive(p => ({...p, live_hours: e.target.value}))} placeholder="0.0" /></div>
-                <div><div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>\u5831\u916c\uff08\u5186\uff09*</div><input style={inp} type="number" value={nLive.reward_yen} onChange={e => setNLive(p => ({...p, reward_yen: e.target.value}))} placeholder="0" /></div>
-                <div><div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>\u30e1\u30e2</div><input style={inp} value={nLive.notes} onChange={e => setNLive(p => ({...p, notes: e.target.value}))} /></div>
+                <div><div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>年月 *</div><input style={inp} type="month" value={nLive.year_month} onChange={e => setNLive(p => ({...p, year_month: e.target.value}))} /></div>
+                <div><div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>ダイヤモンド数</div><input style={inp} type="number" value={nLive.diamonds} onChange={e => setNLive(p => ({...p, diamonds: e.target.value}))} placeholder="0" /></div>
+                <div><div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>LIVE回数</div><input style={inp} type="number" value={nLive.live_count} onChange={e => setNLive(p => ({...p, live_count: e.target.value}))} placeholder="0" /></div>
+                <div><div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>LIVE時間</div><input style={inp} type="number" step="0.1" value={nLive.live_hours} onChange={e => setNLive(p => ({...p, live_hours: e.target.value}))} placeholder="0.0" /></div>
+                <div><div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>報酬（円）*</div><input style={inp} type="number" value={nLive.reward_yen} onChange={e => setNLive(p => ({...p, reward_yen: e.target.value}))} placeholder="0" /></div>
+                <div><div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>メモ</div><input style={inp} value={nLive.notes} onChange={e => setNLive(p => ({...p, notes: e.target.value}))} /></div>
               </div>
               <div style={{ display: "flex", gap: 8 }}>
-                <button onClick={saveLive} style={actBtn("#a855f7")}>{editLive ? "\u66f4\u65b0" : "\u4fdd\u5b58"}</button>
-                <button onClick={() => { setShowAddLive(false); setEditLive(null); }} style={actBtn("#94a3b8")}>\u30ad\u30e3\u30f3\u30bb\u30eb</button>
+                <button onClick={saveLive} style={actBtn("#a855f7")}>{editLive ? "更新" : "保存"}</button>
+                <button onClick={() => { setShowAddLive(false); setEditLive(null); }} style={actBtn("#94a3b8")}>キャンセル</button>
               </div>
             </div>
           )}
-          {loading ? <div style={{ color: "#94a3b8", padding: 20 }}>\u8aad\u307f\u8fbc\u307f\u4e2d...</div> : (
+          {loading ? <div style={{ color: "#94a3b8", padding: 20 }}>読み込み中...</div> : (
             <Table
-              headers={["\u5e74\u6708", "\u30af\u30ea\u30a8\u30a4\u30bf\u30fc", "TikTok ID", "💎 \u30c0\u30a4\u30e4", "LIVE\u56de\u6570", "LIVE\u6642\u9593", "\u5831\u916c\uff08\u5186\uff09", "\u30e1\u30e2", "\u64cd\u4f5c"]}
+              headers={["年月", "クリエイター", "TikTok ID", "💎 ダイヤ", "LIVE回数", "LIVE時間", "報酬（円）", "メモ", "操作"]}
               rows={liveRecs.map(r => [
                 <span style={{ fontWeight: 600, color: "#7c3aed" }}>{r.year_month}</span>,
                 r.creator_name,
-                r.tiktok_username || "\u2014",
+                r.tiktok_username || "—",
                 (r.diamonds||0).toLocaleString(),
                 r.live_count || 0,
                 r.live_hours || 0,
-                <span style={{ color: "#7c3aed", fontWeight: 600 }}>\u00a5{(r.reward_yen||0).toLocaleString()}</span>,
-                r.notes || "\u2014",
+                <span style={{ color: "#7c3aed", fontWeight: 600 }}>¥{(r.reward_yen||0).toLocaleString()}</span>,
+                r.notes || "—",
                 <div style={{ display: "flex", gap: 4 }}>
-                  <button onClick={() => { setEditLive(r); setNLive({...r, diamonds: String(r.diamonds||""), live_count: String(r.live_count||""), live_hours: String(r.live_hours||""), reward_yen: String(r.reward_yen||"")}); setShowAddLive(true); }} style={{ padding: "2px 8px", background: "#f3e8ff", color: "#7c3aed", border: "none", borderRadius: 4, cursor: "pointer", fontSize: 12 }}>\u270f\ufe0f</button>
+                  <button onClick={() => { setEditLive(r); setNLive({...r, diamonds: String(r.diamonds||""), live_count: String(r.live_count||""), live_hours: String(r.live_hours||""), reward_yen: String(r.reward_yen||"")}); setShowAddLive(true); }} style={{ padding: "2px 8px", background: "#f3e8ff", color: "#7c3aed", border: "none", borderRadius: 4, cursor: "pointer", fontSize: 12 }}>✏️</button>
                   <button onClick={() => deleteLive(r.id)} style={{ padding: "2px 8px", background: "#fee2e2", color: "#dc2626", border: "none", borderRadius: 4, cursor: "pointer", fontSize: 12 }}>{"🗑"}</button>
                 </div>
               ])}
             />
           )}
-          {liveRecs.length === 0 && !loading && <div style={{ textAlign: "center", color: "#94a3b8", padding: 30 }}>\u30c7\u30fc\u30bf\u304c\u3042\u308a\u307e\u305b\u3093\u3002\u300c\u30af\u30ea\u30a8\u30a4\u30bf\u30fc\u8ffd\u52a0\u300d\u304b\u3089\u5165\u529b\u3057\u3066\u304f\u3060\u3055\u3044</div>}
+          {liveRecs.length === 0 && !loading && <div style={{ textAlign: "center", color: "#94a3b8", padding: 30 }}>データがありません。「クリエイター追加」から入力してください</div>}
         </Section>
       )}
 
       {hTab === "tkt" && (
-        <Section title="🛒 TikTok\u30b7\u30e7\u30c3\u30d7\u58f2\u4e0a" color="#ff2d55">
+        <Section title="🛒 TikTokショップ売上" color="#ff2d55">
           <div style={{ marginBottom: 12 }}>
-            <button onClick={() => { setNSale({ channel: "tiktok_shop", product_name: "", amount: "", quantity: "1", sale_date: new Date().toISOString().split("T")[0], notes: "" }); setShowAddSale(true); }} style={actBtn("#ff2d55")}>+ \u58f2\u4e0a\u8ffd\u52a0</button>
+            <button onClick={() => { setNSale({ channel: "tiktok_shop", product_name: "", amount: "", quantity: "1", sale_date: new Date().toISOString().split("T")[0], notes: "" }); setShowAddSale(true); }} style={actBtn("#ff2d55")}>+ 売上追加</button>
           </div>
           {showAddSale && hTab === "tkt" && (
             <div style={{ background: "#fff1f2", border: "1px solid #fecdd3", borderRadius: 10, padding: 16, marginBottom: 16 }}>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 10 }}>
-                <div><div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>\u5546\u54c1\u540d</div><input style={inp} value={nSale.product_name} onChange={e => setNSale(p => ({...p, product_name: e.target.value}))} placeholder="\u5546\u54c1\u540d" /></div>
-                <div><div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>\u58f2\u4e0a\u91d1\u984d\uff08\u5186\uff09*</div><input style={inp} type="number" value={nSale.amount} onChange={e => setNSale(p => ({...p, amount: e.target.value}))} placeholder="0" /></div>
-                <div><div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>\u6570\u91cf</div><input style={inp} type="number" value={nSale.quantity} onChange={e => setNSale(p => ({...p, quantity: e.target.value}))} /></div>
-                <div><div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>\u65e5\u4ed8 *</div><input style={inp} type="date" value={nSale.sale_date} onChange={e => setNSale(p => ({...p, sale_date: e.target.value}))} /></div>
-                <div style={{ gridColumn: "span 2" }}><div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>\u30e1\u30e2</div><input style={inp} value={nSale.notes} onChange={e => setNSale(p => ({...p, notes: e.target.value}))} /></div>
+                <div><div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>商品名</div><input style={inp} value={nSale.product_name} onChange={e => setNSale(p => ({...p, product_name: e.target.value}))} placeholder="商品名" /></div>
+                <div><div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>売上金額（円）*</div><input style={inp} type="number" value={nSale.amount} onChange={e => setNSale(p => ({...p, amount: e.target.value}))} placeholder="0" /></div>
+                <div><div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>数量</div><input style={inp} type="number" value={nSale.quantity} onChange={e => setNSale(p => ({...p, quantity: e.target.value}))} /></div>
+                <div><div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>日付 *</div><input style={inp} type="date" value={nSale.sale_date} onChange={e => setNSale(p => ({...p, sale_date: e.target.value}))} /></div>
+                <div style={{ gridColumn: "span 2" }}><div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>メモ</div><input style={inp} value={nSale.notes} onChange={e => setNSale(p => ({...p, notes: e.target.value}))} /></div>
               </div>
               <div style={{ display: "flex", gap: 8 }}>
-                <button onClick={saveSale} style={actBtn("#ff2d55")}>\u4fdd\u5b58</button>
-                <button onClick={() => setShowAddSale(false)} style={actBtn("#94a3b8")}>\u30ad\u30e3\u30f3\u30bb\u30eb</button>
+                <button onClick={saveSale} style={actBtn("#ff2d55")}>保存</button>
+                <button onClick={() => setShowAddSale(false)} style={actBtn("#94a3b8")}>キャンセル</button>
               </div>
             </div>
           )}
-          {loading ? <div style={{ color: "#94a3b8", padding: 20 }}>\u8aad\u307f\u8fbc\u307f\u4e2d...</div> : (
+          {loading ? <div style={{ color: "#94a3b8", padding: 20 }}>読み込み中...</div> : (
             <Table
-              headers={["\u65e5\u4ed8", "\u5546\u54c1\u540d", "\u58f2\u4e0a\u91d1\u984d", "\u6570\u91cf", "\u30e1\u30e2", "\u64cd\u4f5c"]}
+              headers={["日付", "商品名", "売上金額", "数量", "メモ", "操作"]}
               rows={sales.filter(s => s.channel === "tiktok_shop").map(s => [
                 s.sale_date,
-                s.product_name || "\u2014",
-                <span style={{ color: "#e11d48", fontWeight: 600 }}>\u00a5{(s.amount||0).toLocaleString()}</span>,
+                s.product_name || "—",
+                <span style={{ color: "#e11d48", fontWeight: 600 }}>¥{(s.amount||0).toLocaleString()}</span>,
                 s.quantity,
-                s.notes || "\u2014",
+                s.notes || "—",
                 <button onClick={() => deleteSale(s.id)} style={{ padding: "2px 8px", background: "#fee2e2", color: "#dc2626", border: "none", borderRadius: 4, cursor: "pointer", fontSize: 12 }}>{"🗑"}</button>
               ])}
             />
           )}
-          {sales.filter(s => s.channel === "tiktok_shop").length === 0 && !loading && <div style={{ textAlign: "center", color: "#94a3b8", padding: 30 }}>TikTok\u30b7\u30e7\u30c3\u30d7\u306e\u58f2\u4e0a\u30c7\u30fc\u30bf\u304c\u3042\u308a\u307e\u305b\u3093</div>}
+          {sales.filter(s => s.channel === "tiktok_shop").length === 0 && !loading && <div style={{ textAlign: "center", color: "#94a3b8", padding: 30 }}>TikTokショップの売上データがありません</div>}
         </Section>
       )}
 
       {hTab === "ec" && (
-        <Section title="📦 EC\u30b5\u30a4\u30c8\u58f2\u4e0a" color="#f59e0b">
+        <Section title="📦 ECサイト売上" color="#f59e0b">
           <div style={{ marginBottom: 12 }}>
-            <button onClick={() => { setNSale({ channel: "base", product_name: "", amount: "", quantity: "1", sale_date: new Date().toISOString().split("T")[0], notes: "" }); setShowAddSale(true); }} style={actBtn("#f59e0b")}>+ \u58f2\u4e0a\u8ffd\u52a0</button>
+            <button onClick={() => { setNSale({ channel: "base", product_name: "", amount: "", quantity: "1", sale_date: new Date().toISOString().split("T")[0], notes: "" }); setShowAddSale(true); }} style={actBtn("#f59e0b")}>+ 売上追加</button>
           </div>
           {showAddSale && hTab === "ec" && (
             <div style={{ background: "#fffbeb", border: "1px solid #fde68a", borderRadius: 10, padding: 16, marginBottom: 16 }}>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 10 }}>
-                <div><div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>\u30c1\u30e3\u30cd\u30eb *</div>
+                <div><div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>チャネル *</div>
                   <select style={inp} value={nSale.channel} onChange={e => setNSale(p => ({...p, channel: e.target.value}))}>
-                    <option value="base">BASE</option><option value="shopify">Shopify</option><option value="stores">STORES</option><option value="rakuten">\u697d\u5929</option><option value="amazon">Amazon</option><option value="other">\u305d\u306e\u4ed6</option>
+                    <option value="base">BASE</option><option value="shopify">Shopify</option><option value="stores">STORES</option><option value="rakuten">楽天</option><option value="amazon">Amazon</option><option value="other">その他</option>
                   </select>
                 </div>
-                <div><div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>\u5546\u54c1\u540d</div><input style={inp} value={nSale.product_name} onChange={e => setNSale(p => ({...p, product_name: e.target.value}))} placeholder="\u5546\u54c1\u540d" /></div>
-                <div><div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>\u58f2\u4e0a\u91d1\u984d\uff08\u5186\uff09*</div><input style={inp} type="number" value={nSale.amount} onChange={e => setNSale(p => ({...p, amount: e.target.value}))} placeholder="0" /></div>
-                <div><div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>\u65e5\u4ed8 *</div><input style={inp} type="date" value={nSale.sale_date} onChange={e => setNSale(p => ({...p, sale_date: e.target.value}))} /></div>
-                <div style={{ gridColumn: "span 2" }}><div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>\u30e1\u30e2</div><input style={inp} value={nSale.notes} onChange={e => setNSale(p => ({...p, notes: e.target.value}))} /></div>
+                <div><div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>商品名</div><input style={inp} value={nSale.product_name} onChange={e => setNSale(p => ({...p, product_name: e.target.value}))} placeholder="商品名" /></div>
+                <div><div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>売上金額（円）*</div><input style={inp} type="number" value={nSale.amount} onChange={e => setNSale(p => ({...p, amount: e.target.value}))} placeholder="0" /></div>
+                <div><div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>日付 *</div><input style={inp} type="date" value={nSale.sale_date} onChange={e => setNSale(p => ({...p, sale_date: e.target.value}))} /></div>
+                <div style={{ gridColumn: "span 2" }}><div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>メモ</div><input style={inp} value={nSale.notes} onChange={e => setNSale(p => ({...p, notes: e.target.value}))} /></div>
               </div>
               <div style={{ display: "flex", gap: 8 }}>
-                <button onClick={saveSale} style={actBtn("#f59e0b")}>\u4fdd\u5b58</button>
-                <button onClick={() => setShowAddSale(false)} style={actBtn("#94a3b8")}>\u30ad\u30e3\u30f3\u30bb\u30eb</button>
+                <button onClick={saveSale} style={actBtn("#f59e0b")}>保存</button>
+                <button onClick={() => setShowAddSale(false)} style={actBtn("#94a3b8")}>キャンセル</button>
               </div>
             </div>
           )}
-          {loading ? <div style={{ color: "#94a3b8", padding: 20 }}>\u8aad\u307f\u8fbc\u307f\u4e2d...</div> : (
+          {loading ? <div style={{ color: "#94a3b8", padding: 20 }}>読み込み中...</div> : (
             <Table
-              headers={["\u65e5\u4ed8", "\u30c1\u30e3\u30cd\u30eb", "\u5546\u54c1\u540d", "\u58f2\u4e0a\u91d1\u984d", "\u30e1\u30e2", "\u64cd\u4f5c"]}
+              headers={["日付", "チャネル", "商品名", "売上金額", "メモ", "操作"]}
               rows={sales.filter(s => s.channel !== "tiktok_shop" && s.channel !== "vitamax").map(s => [
                 s.sale_date,
                 <Badge label={CHANNELS[s.channel] || s.channel} color={CHAN_COLOR[s.channel] || "#9333ea"} />,
-                s.product_name || "\u2014",
-                <span style={{ color: "#d97706", fontWeight: 600 }}>\u00a5{(s.amount||0).toLocaleString()}</span>,
-                s.notes || "\u2014",
+                s.product_name || "—",
+                <span style={{ color: "#d97706", fontWeight: 600 }}>¥{(s.amount||0).toLocaleString()}</span>,
+                s.notes || "—",
                 <button onClick={() => deleteSale(s.id)} style={{ padding: "2px 8px", background: "#fee2e2", color: "#dc2626", border: "none", borderRadius: 4, cursor: "pointer", fontSize: 12 }}>{"🗑"}</button>
               ])}
             />
           )}
-          {sales.filter(s => s.channel !== "tiktok_shop" && s.channel !== "vitamax").length === 0 && !loading && <div style={{ textAlign: "center", color: "#94a3b8", padding: 30 }}>EC\u30b5\u30a4\u30c8\u306e\u58f2\u4e0a\u30c7\u30fc\u30bf\u304c\u3042\u308a\u307e\u305b\u3093</div>}
+          {sales.filter(s => s.channel !== "tiktok_shop" && s.channel !== "vitamax").length === 0 && !loading && <div style={{ textAlign: "center", color: "#94a3b8", padding: 30 }}>ECサイトの売上データがありません</div>}
         </Section>
       )}
 
       {hTab === "vitamax" && (
-        <Section title="🛍\ufe0f VITAMAX\u516c\u5f0f\u30b5\u30a4\u30c8\u7ba1\u7406" color="#16a34a">
+        <Section title="🛍️ VITAMAX公式サイト管理" color="#16a34a">
           {/* クイックリンク */}
           <div style={{ display: "flex", gap: 8, marginBottom: 20, flexWrap: "wrap" }}>
-            <a href="https://vitamax-asia.com/wp-admin/admin.php?page=wc-reports" target="_blank" rel="noopener noreferrer" style={{ padding: "8px 16px", background: "#16a34a", color: "#fff", borderRadius: 8, fontWeight: 600, fontSize: 13, textDecoration: "none" }}>📊 WC\u6ce8\u6587\u78ba\u8a8d</a>
-            <a href="https://vitamax-asia.com/wp-admin/post-new.php?post_type=product" target="_blank" rel="noopener noreferrer" style={{ padding: "8px 16px", background: "#15803d", color: "#fff", borderRadius: 8, fontWeight: 600, fontSize: 13, textDecoration: "none" }}>+ \u5546\u54c1\u767b\u9332</a>
-            <a href="https://vitamax-asia.com" target="_blank" rel="noopener noreferrer" style={{ padding: "8px 16px", background: "#dcfce7", color: "#16a34a", border: "1px solid #86efac", borderRadius: 8, fontWeight: 600, fontSize: 13, textDecoration: "none" }}>🌐 \u30b5\u30a4\u30c8\u78ba\u8a8d</a>
-            <a href="https://vitamax-asia.com/wp-admin/" target="_blank" rel="noopener noreferrer" style={{ padding: "8px 16px", background: "#f0fdf4", color: "#16a34a", border: "1px solid #86efac", borderRadius: 8, fontWeight: 600, fontSize: 13, textDecoration: "none" }}>WP\u7ba1\u7406\u753b\u9762</a>
+            <a href="https://vitamax-asia.com/wp-admin/admin.php?page=wc-reports" target="_blank" rel="noopener noreferrer" style={{ padding: "8px 16px", background: "#16a34a", color: "#fff", borderRadius: 8, fontWeight: 600, fontSize: 13, textDecoration: "none" }}>📊 WC注文確認</a>
+            <a href="https://vitamax-asia.com/wp-admin/post-new.php?post_type=product" target="_blank" rel="noopener noreferrer" style={{ padding: "8px 16px", background: "#15803d", color: "#fff", borderRadius: 8, fontWeight: 600, fontSize: 13, textDecoration: "none" }}>+ 商品登録</a>
+            <a href="https://vitamax-asia.com" target="_blank" rel="noopener noreferrer" style={{ padding: "8px 16px", background: "#dcfce7", color: "#16a34a", border: "1px solid #86efac", borderRadius: 8, fontWeight: 600, fontSize: 13, textDecoration: "none" }}>🌐 サイト確認</a>
+            <a href="https://vitamax-asia.com/wp-admin/" target="_blank" rel="noopener noreferrer" style={{ padding: "8px 16px", background: "#f0fdf4", color: "#16a34a", border: "1px solid #86efac", borderRadius: 8, fontWeight: 600, fontSize: 13, textDecoration: "none" }}>WP管理画面</a>
           </div>
           {/* 月次目標トラッカー */}
           <div style={{ background: "#f0fdf4", border: "1px solid #86efac", borderRadius: 12, padding: 16, marginBottom: 20 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10, flexWrap: "wrap", gap: 8 }}>
-              <span style={{ fontWeight: 700, fontSize: 15 }}>🎯 \u4eca\u6708\u76ee\u6a19 vs \u5b9f\u7e3e</span>
+              <span style={{ fontWeight: 700, fontSize: 15 }}>🎯 今月目標 vs 実績</span>
               <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                <span style={{ fontSize: 12, color: "#64748b" }}>\u6708\u6b21\u76ee\u6a19:</span>
+                <span style={{ fontSize: 12, color: "#64748b" }}>月次目標:</span>
                 <input type="number" value={vitaTarget} onChange={e => setVitaTarget(parseInt(e.target.value)||0)} style={{ width: 120, padding: "4px 8px", border: "1px solid #86efac", borderRadius: 6, fontSize: 13 }} step="10000" />
-                <span style={{ fontSize: 12 }}>\u5186</span>
+                <span style={{ fontSize: 12 }}>円</span>
               </div>
             </div>
             <div style={{ background: "#d1fae5", borderRadius: 8, height: 18, overflow: "hidden", marginBottom: 8 }}>
               <div style={{ width: `${Math.min(100, vitaTarget > 0 ? vitaMonthly/vitaTarget*100 : 0)}%`, height: "100%", background: vitaMonthly >= vitaTarget ? "#15803d" : "#16a34a", borderRadius: 8, transition: "width 0.5s" }} />
             </div>
             <div style={{ display: "flex", justifyContent: "space-between", fontSize: 14 }}>
-              <span style={{ fontWeight: 700, color: "#16a34a" }}>\u00a5{vitaMonthly.toLocaleString()}</span>
-              <span style={{ color: "#64748b" }}>/ \u00a5{vitaTarget.toLocaleString()} ({vitaTarget > 0 ? Math.round(vitaMonthly/vitaTarget*100) : 0}%){vitaMonthly >= vitaTarget ? " 🎉\u76ee\u6a19\u9054\u6210\uff01" : ""}</span>
+              <span style={{ fontWeight: 700, color: "#16a34a" }}>¥{vitaMonthly.toLocaleString()}</span>
+              <span style={{ color: "#64748b" }}>/ ¥{vitaTarget.toLocaleString()} ({vitaTarget > 0 ? Math.round(vitaMonthly/vitaTarget*100) : 0}%){vitaMonthly >= vitaTarget ? " 🎉目標達成！" : ""}</span>
             </div>
           </div>
           {/* 売上追加 */}
           <div style={{ marginBottom: 12 }}>
-            <button onClick={() => { setNSale({ channel: "vitamax", product_name: "", amount: "", quantity: "1", sale_date: new Date().toISOString().split("T")[0], notes: "" }); setShowAddSale(true); }} style={{ padding: "7px 16px", background: "#16a34a", color: "#fff", border: "none", borderRadius: 6, cursor: "pointer", fontSize: 13, fontWeight: 600 }}>+ \u58f2\u4e0a\u8ffd\u52a0</button>
+            <button onClick={() => { setNSale({ channel: "vitamax", product_name: "", amount: "", quantity: "1", sale_date: new Date().toISOString().split("T")[0], notes: "" }); setShowAddSale(true); }} style={{ padding: "7px 16px", background: "#16a34a", color: "#fff", border: "none", borderRadius: 6, cursor: "pointer", fontSize: 13, fontWeight: 600 }}>+ 売上追加</button>
           </div>
           {showAddSale && hTab === "vitamax" && (
             <div style={{ background: "#f0fdf4", border: "1px solid #86efac", borderRadius: 10, padding: 16, marginBottom: 16 }}>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 10 }}>
                 <div style={{ gridColumn: "span 2" }}>
-                  <div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>\u5546\u54c1\u540d</div>
-                  <input style={{ padding: "6px 10px", border: "1px solid #e2e8f0", borderRadius: 6, fontSize: 13, width: "100%", boxSizing: "border-box" }} list="vita-products" value={nSale.product_name} onChange={e => setNSale(p => ({...p, product_name: e.target.value}))} placeholder="\u5546\u54c1\u3092\u9078\u629e\u307e\u305f\u306f\u76f4\u63a5\u5165\u529b" />
+                  <div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>商品名</div>
+                  <input style={{ padding: "6px 10px", border: "1px solid #e2e8f0", borderRadius: 6, fontSize: 13, width: "100%", boxSizing: "border-box" }} list="vita-products" value={nSale.product_name} onChange={e => setNSale(p => ({...p, product_name: e.target.value}))} placeholder="商品を選択または直接入力" />
                   <datalist id="vita-products">{VITA_PRODUCTS.map(p => <option key={p} value={p} />)}</datalist>
                 </div>
-                <div><div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>\u58f2\u4e0a\u91d1\u984d\uff08\u5186\uff09*</div><input style={{ padding: "6px 10px", border: "1px solid #e2e8f0", borderRadius: 6, fontSize: 13, width: "100%", boxSizing: "border-box" }} type="number" value={nSale.amount} onChange={e => setNSale(p => ({...p, amount: e.target.value}))} placeholder="0" /></div>
-                <div><div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>\u6570\u91cf</div><input style={{ padding: "6px 10px", border: "1px solid #e2e8f0", borderRadius: 6, fontSize: 13, width: "100%", boxSizing: "border-box" }} type="number" value={nSale.quantity} onChange={e => setNSale(p => ({...p, quantity: e.target.value}))} /></div>
-                <div><div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>\u65e5\u4ed8 *</div><input style={{ padding: "6px 10px", border: "1px solid #e2e8f0", borderRadius: 6, fontSize: 13, width: "100%", boxSizing: "border-box" }} type="date" value={nSale.sale_date} onChange={e => setNSale(p => ({...p, sale_date: e.target.value}))} /></div>
-                <div style={{ gridColumn: "span 2" }}><div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>\u30e1\u30e2</div><input style={{ padding: "6px 10px", border: "1px solid #e2e8f0", borderRadius: 6, fontSize: 13, width: "100%", boxSizing: "border-box" }} value={nSale.notes} onChange={e => setNSale(p => ({...p, notes: e.target.value}))} /></div>
+                <div><div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>売上金額（円）*</div><input style={{ padding: "6px 10px", border: "1px solid #e2e8f0", borderRadius: 6, fontSize: 13, width: "100%", boxSizing: "border-box" }} type="number" value={nSale.amount} onChange={e => setNSale(p => ({...p, amount: e.target.value}))} placeholder="0" /></div>
+                <div><div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>数量</div><input style={{ padding: "6px 10px", border: "1px solid #e2e8f0", borderRadius: 6, fontSize: 13, width: "100%", boxSizing: "border-box" }} type="number" value={nSale.quantity} onChange={e => setNSale(p => ({...p, quantity: e.target.value}))} /></div>
+                <div><div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>日付 *</div><input style={{ padding: "6px 10px", border: "1px solid #e2e8f0", borderRadius: 6, fontSize: 13, width: "100%", boxSizing: "border-box" }} type="date" value={nSale.sale_date} onChange={e => setNSale(p => ({...p, sale_date: e.target.value}))} /></div>
+                <div style={{ gridColumn: "span 2" }}><div style={{ fontSize: 12, marginBottom: 4, color: "#64748b" }}>メモ</div><input style={{ padding: "6px 10px", border: "1px solid #e2e8f0", borderRadius: 6, fontSize: 13, width: "100%", boxSizing: "border-box" }} value={nSale.notes} onChange={e => setNSale(p => ({...p, notes: e.target.value}))} /></div>
               </div>
               <div style={{ display: "flex", gap: 8 }}>
-                <button onClick={saveSale} style={{ padding: "7px 16px", background: "#16a34a", color: "#fff", border: "none", borderRadius: 6, cursor: "pointer", fontSize: 13, fontWeight: 600 }}>\u4fdd\u5b58</button>
-                <button onClick={() => setShowAddSale(false)} style={{ padding: "7px 16px", background: "#94a3b8", color: "#fff", border: "none", borderRadius: 6, cursor: "pointer", fontSize: 13, fontWeight: 600 }}>\u30ad\u30e3\u30f3\u30bb\u30eb</button>
+                <button onClick={saveSale} style={{ padding: "7px 16px", background: "#16a34a", color: "#fff", border: "none", borderRadius: 6, cursor: "pointer", fontSize: 13, fontWeight: 600 }}>保存</button>
+                <button onClick={() => setShowAddSale(false)} style={{ padding: "7px 16px", background: "#94a3b8", color: "#fff", border: "none", borderRadius: 6, cursor: "pointer", fontSize: 13, fontWeight: 600 }}>キャンセル</button>
               </div>
             </div>
           )}
           {/* 商品別実績 */}
           {vitaSales.length > 0 && (() => {
             const prodMap = {};
-            vitaSales.forEach(s => { const k = s.product_name || "\u305d\u306e\u4ed6"; prodMap[k] = (prodMap[k]||0) + (s.amount||0); });
+            vitaSales.forEach(s => { const k = s.product_name || "その他"; prodMap[k] = (prodMap[k]||0) + (s.amount||0); });
             const sorted = Object.entries(prodMap).sort((a,b) => b[1]-a[1]);
             return (
               <div style={{ marginBottom: 16 }}>
-                <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 8, color: "#15803d" }}>📦 \u5546\u54c1\u5225\u58f2\u4e0a\u5b9f\u7e3e</div>
+                <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 8, color: "#15803d" }}>📦 商品別売上実績</div>
                 {sorted.map(([name, total]) => (
                   <div key={name} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "7px 12px", background: "#f0fdf4", border: "1px solid #dcfce7", borderRadius: 8, marginBottom: 6 }}>
                     <span style={{ fontSize: 13 }}>{name}</span>
-                    <span style={{ fontWeight: 700, color: "#16a34a" }}>\u00a5{total.toLocaleString()}</span>
+                    <span style={{ fontWeight: 700, color: "#16a34a" }}>¥{total.toLocaleString()}</span>
                   </div>
                 ))}
               </div>
             );
           })()}
           {/* 売上一覧 */}
-          {loading ? <div style={{ color: "#94a3b8", padding: 20 }}>\u8aad\u307f\u8fbc\u307f\u4e2d...</div> : (
+          {loading ? <div style={{ color: "#94a3b8", padding: 20 }}>読み込み中...</div> : (
             <Table
-              headers={["\u65e5\u4ed8", "\u5546\u54c1\u540d", "\u58f2\u4e0a\u91d1\u984d", "\u6570\u91cf", "\u30e1\u30e2", "\u64cd\u4f5c"]}
+              headers={["日付", "商品名", "売上金額", "数量", "メモ", "操作"]}
               rows={vitaSales.map(s => [
                 s.sale_date,
-                s.product_name || "\u2014",
-                <span style={{ color: "#16a34a", fontWeight: 600 }}>\u00a5{(s.amount||0).toLocaleString()}</span>,
+                s.product_name || "—",
+                <span style={{ color: "#16a34a", fontWeight: 600 }}>¥{(s.amount||0).toLocaleString()}</span>,
                 s.quantity,
-                s.notes || "\u2014",
+                s.notes || "—",
                 <button onClick={() => deleteSale(s.id)} style={{ padding: "2px 8px", background: "#fee2e2", color: "#dc2626", border: "none", borderRadius: 4, cursor: "pointer", fontSize: 12 }}>{"🗑"}</button>
               ])}
             />
           )}
-          {vitaSales.length === 0 && !loading && <div style={{ textAlign: "center", color: "#94a3b8", padding: 30 }}>VITAMAX\u516c\u5f0f\u306e\u58f2\u4e0a\u30c7\u30fc\u30bf\u304c\u3042\u308a\u307e\u305b\u3093\u3002\u300c\u58f2\u4e0a\u8ffd\u52a0\u300d\u304b\u3089\u5165\u529b\u3057\u3066\u304f\u3060\u3055\u3044</div>}
+          {vitaSales.length === 0 && !loading && <div style={{ textAlign: "center", color: "#94a3b8", padding: 30 }}>VITAMAX公式の売上データがありません。「売上追加」から入力してください</div>}
         </Section>
       )}
 
       {hTab === "partner" && (
-        <Section title="🤝 \u30d1\u30fc\u30c8\u30ca\u30fc\u30fb\u6848\u4ef6\u7ba1\u7406" color="#9333ea">
+        <Section title="🤝 パートナー・案件管理" color="#9333ea">
           <Table
-            headers={["\u30d1\u30fc\u30c8\u30ca\u30fc\u540d", "\u7a2e\u5225", "\u30b9\u30c6\u30fc\u30bf\u30b9", "\u60f3\u5b9a\u91d1\u984d", "\u30e1\u30e2"]}
+            headers={["パートナー名", "種別", "ステータス", "想定金額", "メモ"]}
             rows={data.huppy.partners.map(p => [
               <span style={{ fontWeight: 600 }}>{p.name}</span>,
               p.type,
