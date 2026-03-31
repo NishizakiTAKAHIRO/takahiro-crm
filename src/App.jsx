@@ -1875,7 +1875,7 @@ function Huppy({ data }) {
       </div>
 
       <div style={{ display: "flex", gap: 6, marginBottom: 16, flexWrap: "wrap" }}>
-        {[["summary","📊 サマリー"],["pl","📈 収支管理"],["live","🎁 LIVEギフト"],["tkt","🛒 TikTokショップ"],["ec","📦 ECサイト"],["vitamax","🛍️ VITAMAX"],["partner","🤝 パートナー"]].map(([id, label]) => (
+        {[["summary","📊 サマリー"],["live","🎁 LIVEギフト"],["tkt","🛒 TikTokショップ"],["ec","📦 ECサイト"],["vitamax","🛍️ VITAMAX"],["partner","🤝 パートナー"]].map(([id, label]) => (
           <button key={id} onClick={() => setHTab(id)} style={hBtn(id==="vitamax" ? "#16a34a" : "#9333ea", hTab===id)}>{label}</button>
         ))}
       </div>
@@ -1901,7 +1901,7 @@ function Huppy({ data }) {
         </Section>
       )}
 
-      {hTab === "pl" && (() => {
+      {hTab === "live" && (() => {
         const plChart = EMANON_PL.map(d => ({
           month: d.label.split("/")[1] + "月",
           全体報酬: d.revenue,
