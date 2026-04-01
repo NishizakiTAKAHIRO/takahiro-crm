@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+// JST対応 v2026
 import { createClient } from "@supabase/supabase-js";
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts";
 import { SeekerManagement, JobPostingManagement } from "./SeekerJobManager";
